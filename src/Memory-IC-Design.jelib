@@ -180,7 +180,7 @@ EVDD||D5G2;|pin@7||P
 X
 
 # Cell Sense_amp;1{sch}
-CSense_amp;1{sch}||schematic|1792494131125|1792495898053|
+CSense_amp;1{sch}||schematic|1792494131125|1792514061417|
 Ngeneric:Facet-Center|art@0||0|0||||AV
 NTransistor|nmos@0||-25|-14|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
 NTransistor|nmos@1||-30|-7|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
@@ -201,7 +201,6 @@ NWire_Pin|pin@15||-40|-14||||
 NWire_Pin|pin@16||-40|13||||
 NWire_Pin|pin@17||-47|13||||
 NWire_Pin|pin@18||-33|-18||||
-NWire_Pin|pin@19||-14|-18||||
 NWire_Pin|pin@20||-33|-2||||
 NWire_Pin|pin@21||-19|-2||||
 NWire_Pin|pin@22||-14|-3||||
@@ -232,7 +231,6 @@ Awire|net@27|||2700|pin@15||-40|-14|pin@16||-40|13
 Awire|net@28|||1800|pmos@0|g|-36|13|pmos@1|g|-17|13
 Awire|net@29|||0|pmos@1|g|-17|13|pin@16||-40|13
 Awire|net@31|||900|pin@1||-33|-7|pin@18||-33|-18
-Awire|net@32|||900|pin@3||-14|-7|pin@19||-14|-18
 Awire|net@34|||0|pin@16||-40|13|pin@17||-47|13
 Awire|net@35|||900|pin@8||-19|7|pmos@3|d|-19|4
 Awire|net@36|||900|pin@0||-33|2|pin@20||-33|-2
@@ -250,7 +248,6 @@ EBITB||D5G2;|pin@13||I
 EGND||D5G2;Y-1;|pin@6||G
 EREAD_EN||D5G2;Y-1;|pin@17||I
 ESENSE||D5G2;Y-1;|pin@18||O
-ESENSEB||D5G2;Y-1;|pin@19||O
 EVDD||D5G2;|pin@11||P
 X
 

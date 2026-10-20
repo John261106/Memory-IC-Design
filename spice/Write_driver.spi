@@ -1,0 +1,17 @@
+*** SPICE deck for cell Write_driver{sch} from library Memory-IC-Design
+*** Created on Tue Oct 20, 2026 17:49:48
+*** Last revised on Tue Oct 20, 2026 18:15:01
+*** Written on Tue Oct 20, 2026 18:15:11 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: Write_driver{sch}
+Mnmos@0 BIT WRITE_EN net@6 gnd CMOSN L=0.18U W=0.18U
+Mnmos@4 net@6 net@3 gnd gnd CMOSN L=0.18U W=0.18U
+Mnmos@5 BITB WRITE_EN net@12 gnd CMOSN L=0.18U W=0.18U
+Mnmos@6 net@12 DATA gnd gnd CMOSN L=0.18U W=0.18U
+Mnmos@7 net@3 DATA gnd gnd CMOSN L=0.18U W=0.18U
+Mpmos@2 vdd DATA net@3 vdd P L=0.18U W=0.18U
+.END

@@ -1,0 +1,19 @@
+*** SPICE deck for cell Precharge_ckt{sch} from library Memory-IC-Design
+*** Created on Tue Oct 20, 2026 10:46:34
+*** Last revised on Tue Oct 20, 2026 11:37:20
+*** Written on Tue Oct 20, 2026 11:44:48 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: Precharge_ckt{sch}
+Mpmos@0 vdd PCB BIT vdd CMOSP L=0.18U W=0.18U
+Mpmos@1 vdd PCB BITB vdd CMOSP L=0.18U W=0.18U
+Mpmos@2 BITB PCB BIT vdd CMOSP L=0.18U W=0.18U
+
+* Spice Code nodes in cell cell 'Precharge_ckt{sch}'
+VVDD VDD 0 DC 1.8
+VPCB PCB 0 PULSE(0 1.8 2u 1n 1n 2u 4u)
+.tran 1n 8u
+.END

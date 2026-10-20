@@ -1,18 +1,18 @@
 *** SPICE deck for cell 6T_cell{sch} from library Memory-IC-Design
 *** Created on Mon Oct 19, 2026 22:46:02
-*** Last revised on Mon Oct 19, 2026 23:56:27
-*** Written on Tue Oct 20, 2026 00:17:35 by Electric VLSI Design System, version 9.08
+*** Last revised on Tue Oct 20, 2026 10:36:27
+*** Written on Tue Oct 20, 2026 10:36:42 by Electric VLSI Design System, version 9.08
 *** Layout tech: mocmos, foundry MOSIS
 *** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
 * Model cards described in this file:
 .include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
 
 *** TOP LEVEL CELL: 6T_cell{sch}
-Mnmos@0 nmos@0_d net@13 gnd gnd CMOSN L=0.18U W=0.18U
+Mnmos@0 Q QB gnd gnd CMOSN L=0.18U W=0.18U
 Mnmos@1 QB Q gnd gnd CMOSN L=0.18U W=0.18U
 Mnmos@2 Q WL BIT gnd CMOSN L=0.18U W=0.18U
-Mnmos@3 BITB WL Q gnd CMOSN L=0.18U W=0.18U
-Mpmos@0 vdd net@13 Q vdd CMOSP L=0.18U W=0.18U
+Mnmos@3 BITB WL QB gnd CMOSN L=0.18U W=0.18U
+Mpmos@0 vdd QB Q vdd CMOSP L=0.18U W=0.18U
 Mpmos@1 vdd Q QB vdd CMOSP L=0.18U W=0.18U
 
 * Spice Code nodes in cell cell '6T_cell{sch}'

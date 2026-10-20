@@ -114,8 +114,31 @@ EVDD||D5G2;|pin@3||P
 EWL||D5G2;|pin@24||I
 X
 
+# Cell Precharge_ckt;1{ic}
+CPrecharge_ckt;1{ic}||artwork|1792512857608|1792513660720|E
+Ngeneric:Facet-Center|art@0||0|0||||AV
+NOpened-Thicker-Polygon|art@1||0|0|14|10|||SCHEM_function(D5G2;)SPrecharge_ckt|trace()V[-7/-5,-7/5,7/5,7/-5,-7/-5]
+Nschematic:Bus_Pin|pin@0||-9|0|||RR|
+Nschematic:Wire_Pin|pin@1||-7|0|||RR|
+Nschematic:Bus_Pin|pin@2||9|0||||
+Nschematic:Wire_Pin|pin@3||7|0||||
+Nschematic:Bus_Pin|pin@4||-3|7|||RRR|
+Nschematic:Wire_Pin|pin@5||-3|5|||RRR|
+Nschematic:Bus_Pin|pin@6||3|7|||RR|
+Nschematic:Wire_Pin|pin@7||3|5|||RR|
+Aschematic:wire|net@0|||0|pin@1||-7|0|pin@0||-9|0
+Aschematic:wire|net@1|||1800|pin@3||7|0|pin@2||9|0
+Aschematic:wire|net@2|||2700|pin@5||-3|5|pin@4||-3|7
+Aschematic:wire|net@3|||2700|pin@7||3|5|pin@6||3|7
+EBIT||D5G2;X2;|pin@0||B
+EBITB||D5G2;X3;|pin@2||B
+EPCB||D5G2;|pin@4||I
+EVDD||D5G2;|pin@6||P
+X
+
 # Cell Precharge_ckt;1{sch}
-CPrecharge_ckt;1{sch}||schematic|1792473394342|1792476440786|
+CPrecharge_ckt;1{sch}||schematic|1792473394342|1792513660720|
+IPrecharge_ckt;1{ic}|Precharg@0||-6|23|||D5G4;
 Ngeneric:Facet-Center|art@0||0|0||||AV
 NWire_Pin|pin@0||-27|13||||
 NWire_Pin|pin@1||-12|13||||
@@ -150,8 +173,8 @@ Awire|net@17|||900|pin@10||-20|9|pin@8||-20|5
 Awire|net@18|||0|pin@8||-20|5|pin@11||-30|5
 Awire|net@19|||0|pin@11||-30|5|pin@9||-32|5
 Awire|net@20|||900|pmos@0|g|-30|9|pin@11||-30|5
-EBIT||D5G2;|pin@2||O
-EBITB||D5G2;|pin@3||O
+EBIT||D5G2;|pin@2||B
+EBITB||D5G2;|pin@3||B
 EPCB||D5G2;X-2;|pin@9||I
 EVDD||D5G2;|pin@7||P
 X

@@ -1,0 +1,25 @@
+*** SPICE deck for cell Sense_amp{sch} from library Memory-IC-Design
+*** Created on Tue Oct 20, 2026 16:32:11
+*** Last revised on Tue Oct 20, 2026 17:01:38
+*** Written on Tue Oct 20, 2026 17:02:31 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: Sense_amp{sch}
+Mnmos@0 net@9 READ_EN gnd gnd CMOSN L=0.18U W=0.18U
+Mnmos@1 SENSEB SENSE net@9 gnd CMOSN L=0.18U W=0.18U
+Mnmos@2 SENSE SENSEB net@9 gnd CMOSN L=0.18U W=0.18U
+Mpmos@0 BIT READ_EN SENSE vdd CMOSP L=0.18U W=0.18U
+Mpmos@1 BITB READ_EN SENSEB vdd CMOSP L=0.18U W=0.18U
+Mpmos@2 vdd SENSE SENSEB vdd CMOSP L=0.18U W=0.18U
+Mpmos@3 vdd SENSEB SENSE vdd CMOSP L=0.18U W=0.18U
+
+* Spice Code nodes in cell cell 'Sense_amp{sch}'
+VDD1 VDD 0 DC 1.8
+VBIT  BIT  0 DC 1.5
+VBITB BITB 0 DC 1.8
+VREAD READ_EN 0 PULSE(0 1.8 5n 0.1n 0.1n 20n 40n)
+.tran 0.05n 40n
+.END

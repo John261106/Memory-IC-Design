@@ -9,7 +9,7 @@ Vschematic|sch
 Tmocmos|ScaleFORmocmos()D90.0
 
 # Cell 1Bit_SRAM;1{sch}
-C1Bit_SRAM;1{sch}||schematic|1792519877275|1792521067422|
+C1Bit_SRAM;1{sch}||schematic|1792519877275|1792604376374|
 I6T_cell;3{ic}|6T_cell@1||-11|19|||D5G4;
 IPrecharge_ckt;1{ic}|Precharg@1||-11|40|||D5G4;
 ISense_amp;1{ic}|Sense_am@1||-11|-28|||D5G4;
@@ -30,6 +30,8 @@ NWire_Pin|pin@13||17|-11||||
 NWire_Pin|pin@14||17|-35||||
 NWire_Pin|pin@16||22|-35||||
 NWire_Pin|pin@17||-38|-35||||
+NWire_Pin|pin@18||-41|-28||||
+Ngeneric:Invisible-Pin|pin@19||-74|14|||||SIM_spice_card(D5G1;)S[VDDsrc VDD 0 DC 1.8,VGND   GND 0 DC 0,VPCB PCB 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 35n 0 35.01n 1.8 45n 1.8 45.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 70n 0),VWL WL 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 35n 0 35.01n 1.8 45n 1.8 45.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 70n 0),VWRITE WRITE_EN 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 34.99n 0 35n 1.8 45n 1.8 45.01n 0 70n 0),VDATA DATA 0 PWL(0n 1.8 30n 1.8 30.01n 0 70n 0),VREAD READ_EN 0 PWL(0n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 70n 0),CBIT  BIT   GND 5f,CBITB BITB  GND 5f,CSENSE SENSE GND 2f,.TRAN 10p 70n]
 Awire|net@0|||900|Precharg@1|BIT|-20|40|6T_cell@1|BIT|-20|19
 Awire|net@1|||900|Precharg@1|BITB|-2|40|6T_cell@1|BITB|-2|19
 Awire|net@2|||900|6T_cell@1|BIT|-20|19|Write_dr@1|BIT|-20|-4
@@ -56,6 +58,8 @@ Awire|net@25|||2700|pin@14||17|-35|pin@13||17|-11
 Awire|net@28|||1800|pin@14||17|-35|pin@16||22|-35
 Awire|net@29|||0|Sense_am@1|SENSE|-14|-35|pin@17||-38|-35
 Awire|net@30|||2700|pin@13||17|-11|pin@12||17|12
+Awire|net@31|||0|Sense_am@1|BIT|-20|-28|pin@18||-41|-28
+EBIT||D5G2;|pin@18||O
 EDATA||D5G2;|pin@5||I
 EGND||D5G2;|pin@16||I
 EPCB||D5G2;|pin@3||I
@@ -93,12 +97,12 @@ EWL||D5G2;|pin@8||I
 X
 
 # Cell 6T_cell;1{sch}
-C6T_cell;1{sch}||schematic|1792430162834|1792520267123|
+C6T_cell;1{sch}||schematic|1792430162834|1792604639942|
 Ngeneric:Facet-Center|art@0||0|0||||AV
-NTransistor|nmos@0||-32|-1|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@1||-18|-1|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@2||-40|4|||||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@3||-7|4|||||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@0||-32|-1|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@1||-18|-1|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@2||-40|4|||||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D3.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@3||-7|4|||||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D3.0|SIM_spice_model(D5G1;)SCMOSN
 NWire_Pin|pin@0||-30|14||||
 NWire_Pin|pin@1||-16|14||||
 NWire_Pin|pin@2||-23|14||||
@@ -117,7 +121,6 @@ NWire_Pin|pin@18||-45|2||||
 NWire_Pin|pin@19||-1|2||||
 NWire_Pin|pin@23||-24|20||||
 NWire_Pin|pin@24||-24|24||||
-Ngeneric:Invisible-Pin|pin@26||-48|-4|||||SIM_spice_card(D5G1;)S[VVDD VDD 0 DC 1.8,VGND GND 0 DC 0,VWL WL 0 PULSE(0 1.8 0 100p 100p 10n 20n),VBIT BIT 0 PULSE(0 1.8 0 100p 100p 20n 40n),VBITB BITB 0 PULSE(1.8 0 0 100p 100p 20n 40n),.TRAN 10p 100n,.END]
 NWire_Pin|pin@27||-33|5||||
 NWire_Pin|pin@31||-16|2||||
 NTransistor|pmos@0||-32|9|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
@@ -183,7 +186,7 @@ EVDD||D5G2;|pin@6||P
 X
 
 # Cell Precharge_ckt;1{sch}
-CPrecharge_ckt;1{sch}||schematic|1792473394342|1792513660720|
+CPrecharge_ckt;1{sch}||schematic|1792473394342|1792604645328|
 IPrecharge_ckt;1{ic}|Precharg@0||-6|23|||D5G4;
 Ngeneric:Facet-Center|art@0||0|0||||AV
 NWire_Pin|pin@0||-27|13||||
@@ -198,9 +201,8 @@ NWire_Pin|pin@8||-20|5||||
 NWire_Pin|pin@9||-32|5||||
 NWire_Pin|pin@10||-20|9||||
 NWire_Pin|pin@11||-30|5||||
-Ngeneric:Invisible-Pin|pin@13||-46|7|||||SIM_spice_card(D5G1;)S[VVDD VDD 0 DC 1.8,VPCB PCB 0 PULSE(0 1.8 2u 1n 1n 2u 4u),.tran 1n 8u]
-NTransistor|pmos@0||-29|9|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
-NTransistor|pmos@1||-14|9|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
+NTransistor|pmos@0||-29|9|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSP
+NTransistor|pmos@1||-14|9|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSP
 NTransistor|pmos@2||-20|2||||2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
 Awire|net@0|||2700|pmos@0|d|-27|11|pin@0||-27|13
 Awire|net@2|||900|pin@1||-12|13|pmos@1|d|-12|11
@@ -256,12 +258,12 @@ EVDD||D5G2;Y-1;|pin@10||P
 X
 
 # Cell Sense_amp;1{sch}
-CSense_amp;1{sch}||schematic|1792494131125|1792514105268|
+CSense_amp;1{sch}||schematic|1792494131125|1792604648439|
 ISense_amp;1{ic}|Sense_am@0||-9|33|||D5G4;
 Ngeneric:Facet-Center|art@0||0|0||||AV
-NTransistor|nmos@0||-25|-14|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@1||-30|-7|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@2||-17|-7|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@0||-25|-14|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@1||-30|-7|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@2||-17|-7|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
 NWire_Pin|pin@0||-33|2||||
 NWire_Pin|pin@1||-33|-7||||
 NWire_Pin|pin@2||-14|2||||
@@ -282,9 +284,8 @@ NWire_Pin|pin@20||-33|-2||||
 NWire_Pin|pin@21||-19|-2||||
 NWire_Pin|pin@22||-14|-3||||
 NWire_Pin|pin@23||-28|-3||||
-Ngeneric:Invisible-Pin|pin@24||-59|-4|||||SIM_spice_card(D5G1;)S[VDD1 VDD 0 DC 1.8,VBIT  BIT  0 DC 1.5,VBITB BITB 0 DC 1.8,VREAD READ_EN 0 PULSE(0 1.8 5n 0.1n 0.1n 20n 40n),.tran 0.05n 40n]
-NTransistor|pmos@0||-35|13|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
-NTransistor|pmos@1||-16|13|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
+NTransistor|pmos@0||-35|13|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D3.0|SIM_spice_model(D5G1;)SCMOSP
+NTransistor|pmos@1||-16|13|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D3.0|SIM_spice_model(D5G1;)SCMOSP
 NTransistor|pmos@2||-30|2|||R|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
 NTransistor|pmos@3||-17|2|||XR|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSP
 Awire|net@0|||0|pmos@2|g|-31|2|pin@0||-33|2
@@ -359,13 +360,13 @@ EWRITE_EN||D5G2;X-1;|pin@10||I
 X
 
 # Cell Write_driver;1{sch}
-CWrite_driver;1{sch}||schematic|1792498788657|1792519398565|
+CWrite_driver;1{sch}||schematic|1792498788657|1792604784444|
 IWrite_driver;1{ic}|Write_dr@0||21|30|||D5G4;
 Ngeneric:Facet-Center|art@0||0|0||||AV
-NTransistor|nmos@0||-10|13|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@4||-10|-2|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@5||10|13|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
-NTransistor|nmos@6||10|-2|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@0||-10|13|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@4||-10|-2|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@5||10|13|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
+NTransistor|nmos@6||10|-2|||R||ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSN
 NTransistor|nmos@7||2|-7|||XR||ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2|SIM_spice_model(D5G1;)SCMOSN
 NWire_Pin|pin@1||0|-2||||
 NWire_Pin|pin@2||-12|-10||||
@@ -385,7 +386,7 @@ NWire_Pin|pin@18||6|20||||
 NWire_Pin|pin@19||3|-1||||
 NWire_Pin|pin@20||-7|13||||
 NWire_Pin|pin@21||-7|22||||
-NTransistor|pmos@2||2|5|||XR|2|ATTR_length(D5G0.5;X-0.5;Y-1;)S2|ATTR_width(D5G1;X0.5;Y-1;)S2
+NTransistor|pmos@2||2|5|||XR|2|ATTR_length(D5G0.5;X-0.5;Y-1;)D2.0|ATTR_width(D5G1;X0.5;Y-1;)D4.0|SIM_spice_model(D5G1;)SCMOSP
 Awire|net@3|||900|pin@1||0|-2|nmos@7|d|0|-5
 Awire|net@5|||1800|nmos@4|g|-9|-2|pin@1||0|-2
 Awire|net@6|||900|nmos@0|s|-12|11|nmos@4|d|-12|0

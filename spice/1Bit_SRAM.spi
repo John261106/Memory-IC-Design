@@ -1,0 +1,66 @@
+*** SPICE deck for cell 1Bit_SRAM{sch} from library Memory-IC-Design
+*** Created on Tue Oct 20, 2026 23:41:17
+*** Last revised on Wed Oct 21, 2026 23:09:36
+*** Written on Wed Oct 21, 2026 23:16:47 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** SUBCIRCUIT Memory-IC-Design__6T_cell FROM CELL 6T_cell{sch}
+.SUBCKT Memory-IC-Design__6T_cell BIT BITB gnd vdd WL
+Mnmos@0 net@15 net@21 gnd gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 net@21 net@15 gnd gnd CMOSN L=0.18U W=0.36U
+Mnmos@2 net@15 WL BIT gnd CMOSN L=0.18U W=0.27U
+Mnmos@3 BITB WL net@21 gnd CMOSN L=0.18U W=0.27U
+Mpmos@0 vdd net@21 net@15 vdd CMOSP L=0.18U W=0.18U
+Mpmos@1 vdd net@15 net@21 vdd CMOSP L=0.18U W=0.18U
+.ENDS Memory-IC-Design__6T_cell
+
+*** SUBCIRCUIT Memory-IC-Design__Precharge_ckt FROM CELL Precharge_ckt{sch}
+.SUBCKT Memory-IC-Design__Precharge_ckt BIT BITB PCB vdd
+Mpmos@0 vdd PCB BIT vdd CMOSP L=0.18U W=0.36U
+Mpmos@1 vdd PCB BITB vdd CMOSP L=0.18U W=0.36U
+Mpmos@2 BITB PCB BIT vdd CMOSP L=0.18U W=0.18U
+.ENDS Memory-IC-Design__Precharge_ckt
+
+*** SUBCIRCUIT Memory-IC-Design__Sense_amp FROM CELL Sense_amp{sch}
+.SUBCKT Memory-IC-Design__Sense_amp BIT BITB gnd READ_EN SENSE vdd
+Mnmos@0 net@9 READ_EN gnd gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 net@3 SENSE net@9 gnd CMOSN L=0.18U W=0.36U
+Mnmos@2 SENSE net@3 net@9 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 BIT READ_EN SENSE vdd CMOSP L=0.18U W=0.27U
+Mpmos@1 BITB READ_EN net@3 vdd CMOSP L=0.18U W=0.27U
+Mpmos@2 vdd SENSE net@3 vdd CMOSP L=0.18U W=0.18U
+Mpmos@3 vdd net@3 SENSE vdd CMOSP L=0.18U W=0.18U
+.ENDS Memory-IC-Design__Sense_amp
+
+*** SUBCIRCUIT Memory-IC-Design__Write_driver FROM CELL Write_driver{sch}
+.SUBCKT Memory-IC-Design__Write_driver BIT BITB DATA gnd vdd WRITE_EN
+Mnmos@0 BIT WRITE_EN net@6 gnd CMOSN L=0.18U W=0.36U
+Mnmos@4 net@6 net@3 gnd gnd CMOSN L=0.18U W=0.36U
+Mnmos@5 BITB WRITE_EN net@12 gnd CMOSN L=0.18U W=0.36U
+Mnmos@6 net@12 DATA gnd gnd CMOSN L=0.18U W=0.36U
+Mnmos@7 net@3 DATA gnd gnd CMOSN L=0.18U W=0.18U
+Mpmos@2 vdd DATA net@3 vdd CMOSP L=0.18U W=0.36U
+.ENDS Memory-IC-Design__Write_driver
+
+*** TOP LEVEL CELL: 1Bit_SRAM{sch}
+X_6T_cell@1 BIT net@1 GND VDD WL Memory-IC-Design__6T_cell
+XPrecharg@1 BIT net@1 PCB VDD Memory-IC-Design__Precharge_ckt
+XSense_am@1 BIT net@1 GND READ_EN SENSE VDD Memory-IC-Design__Sense_amp
+XWrite_dr@1 BIT net@1 DATA GND VDD WRITE_EN Memory-IC-Design__Write_driver
+
+* Spice Code nodes in cell cell '1Bit_SRAM{sch}'
+VDDsrc VDD 0 DC 1.8
+VGND   GND 0 DC 0
+VPCB PCB 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 35n 0 35.01n 1.8 45n 1.8 45.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 70n 0)
+VWL WL 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 35n 0 35.01n 1.8 45n 1.8 45.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 70n 0)
+VWRITE WRITE_EN 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 34.99n 0 35n 1.8 45n 1.8 45.01n 0 70n 0)
+VDATA DATA 0 PWL(0n 1.8 30n 1.8 30.01n 0 70n 0)
+VREAD READ_EN 0 PWL(0n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 70n 0)
+CBIT  BIT   GND 5f
+CBITB BITB  GND 5f
+CSENSE SENSE GND 2f
+.TRAN 10p 70n
+.END

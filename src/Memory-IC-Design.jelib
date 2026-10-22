@@ -166,6 +166,27 @@ EVDD||D5G2;|pin@3||P
 EWL||D5G2;|pin@24||I
 X
 
+# Cell 16bit_array;1{sch}
+C16bit_array;1{sch}||schematic|1792681181306|1792682004175|
+I6T_cell;3{ic}|6T_cell@0||-30|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@1||-10|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@2||10|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@3||30|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@4||50|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@5||70|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@6||90|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@7||110|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@8||130|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@9||150|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@10||170|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@11||190|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@12||210|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@13||230|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@14||250|7|||D5G4;
+I6T_cell;3{ic}|6T_cell@15||270|7|||D5G4;
+Ngeneric:Facet-Center|art@0||0|0||||AV
+X
+
 # Cell Precharge_ckt;1{ic}
 CPrecharge_ckt;1{ic}||artwork|1792512857608|1792513660720|E
 Ngeneric:Facet-Center|art@0||0|0||||AV

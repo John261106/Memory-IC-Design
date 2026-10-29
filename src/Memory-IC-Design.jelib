@@ -9,7 +9,7 @@ Vschematic|sch
 Tmocmos|ScaleFORmocmos()D90.0
 
 # Cell 1Bit_SRAM;1{sch}
-C1Bit_SRAM;1{sch}||schematic|1792519877275|1792679498909|
+C1Bit_SRAM;1{sch}||schematic|1792519877275|1792986153091|
 I6T_cell;3{ic}|6T_cell@1||-11|19|||D5G4;
 IPrecharge_ckt;1{ic}|Precharg@1||-11|40|||D5G4;
 ISense_amp;1{ic}|Sense_am@1||-11|-28|||D5G4;
@@ -31,7 +31,7 @@ NWire_Pin|pin@14||17|-35||||
 NWire_Pin|pin@16||22|-35||||
 NWire_Pin|pin@17||-38|-35||||
 NWire_Pin|pin@18||-41|-28||||
-Ngeneric:Invisible-Pin|pin@19||-74|14|||||SIM_spice_card(D5G1;)S[VDDsrc VDD 0 DC 1.8,VGND GND 0 DC 0,VPCB PCB 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 35n 0 35.01n 1.8 45n 1.8 45.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 1.8 70n 1.8),VWL WL 0 PWL(0n 0 5.01n 0 5.02n 1.8 15n 1.8 15.01n 0 20.01n 0 20.02n 1.8 30n 1.8 30.01n 0 35.01n 0 35.02n 1.8 45n 1.8 45.01n 0 50.01n 0 50.02n 1.8 60n 1.8 60.01n 0 70n 0),VWRITE WRITE_EN 0 PWL(0n 0 5.02n 0 5.03n 1.8 15n 1.8 15.01n 0 35.02n 0 35.03n 1.8 45n 1.8 45.01n 0 70n 0),VDATA DATA 0 PWL(0n 0 30n 0 30.01n 1.8 70n 1.8),VREAD READ_EN 0 PWL(0n 0 20.02n 0 20.03n 1.8 30n 1.8 30.01n 0 50.02n 0 50.03n 1.8 60n 1.8 60.01n 0 70n 0),CBIT BIT GND 5f,CBITB BITB GND 5f,CSENSE SENSE GND 2f,.TRAN 10p 70n]
+Ngeneric:Invisible-Pin|pin@19||-74|14|||||SIM_spice_card(D5G1;)S[VDDsrc VDD 0 DC 1.8,VGND GND 0 DC 0,VPCB PCB 0 PWL(0n 0 5n 0 5.01n 1.8 15n 1.8 15.01n 0 20n 0 20.01n 1.8 30n 1.8 30.01n 0 35n 0 35.01n 1.8 45n 1.8 45.01n 0 50n 0 50.01n 1.8 60n 1.8 60.01n 0 65n 0 65.01n 1.8 75n 1.8 75.01n 0 80n 0 80.01n 1.8 90n 1.8 90.01n 1.8 100n 1.8),VWL WL 0 PWL(0n 0 5.01n 0 5.02n 1.8 15n 1.8 15.01n 0 20.01n 0 20.02n 1.8 30n 1.8 30.01n 0 35.01n 0 35.02n 1.8 45n 1.8 45.01n 0 50.01n 0 50.02n 1.8 60n 1.8 60.01n 0 65.01n 0 65.02n 1.8 75n 1.8 75.01n 0 80.01n 0 80.02n 1.8 90n 1.8 90.01n 0 100n 0),VWRITE WRITE_EN 0 PWL(0n 0 5.02n 0 5.03n 1.8 15n 1.8 15.01n 0 65.02n 0 65.03n 1.8 75n 1.8 75.01n 0 100n 0),VDATA DATA 0 PWL(0n 1.8 35n 1.8 35.01n 0 100n 0),VREAD READ_EN 0 PWL(0n 0 20.02n 0 20.03n 1.8 30n 1.8 30.01n 0 50.02n 0 50.03n 1.8 60n 1.8 60.01n 0 80.02n 0 80.03n 1.8 90n 1.8 90.01n 0 100n 0),CBIT BIT GND 5f,CBITB BITB GND 5f,CSENSE SENSE GND 2f,.TRAN 10p 100n]
 NWire_Pin|pin@20||21|-28||||
 Awire|net@0|||900|Precharg@1|BIT|-20|40|6T_cell@1|BIT|-20|19
 Awire|net@1|||900|Precharg@1|BITB|-2|40|6T_cell@1|BITB|-2|19
@@ -422,7 +422,7 @@ EWL||D5G2;|pin@1||I
 X
 
 # Cell 256bit_SRAM;1{sch}
-C256bit_SRAM;1{sch}||schematic|1792739587224|1792741570313|
+C256bit_SRAM;1{sch}||schematic|1792739587224|1792767125043|
 I6T_cell;3{ic}|6T_cell@0||-31|10|||D5G4;
 I6T_cell;3{ic}|6T_cell@1||19|10|||D5G4;
 I6T_cell;3{ic}|6T_cell@2||69|10|||D5G4;
@@ -2449,7 +2449,7 @@ EWL15||D5G2;|pin@82||I
 X
 
 # Cell 256bit_array;1{sch}
-C256bit_array;1{sch}||schematic|1792689307406|1792691821409|
+C256bit_array;1{sch}||schematic|1792689307406|1792993606890|
 I6T_cell;3{ic}|6T_cell@517||-640|242|||D5G4;
 I6T_cell;3{ic}|6T_cell@518||-590|242|||D5G4;
 I6T_cell;3{ic}|6T_cell@519||-540|242|||D5G4;

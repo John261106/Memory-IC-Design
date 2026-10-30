@@ -1,0 +1,17 @@
+*** SPICE deck for cell TG{sch} from library Memory-IC-Design
+*** Created on Thu Oct 29, 2026 19:21:19
+*** Last revised on Fri Oct 30, 2026 21:47:26
+*** Written on Fri Oct 30, 2026 21:50:55 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: TG{sch}
+Mnmos@0 BIT_U EN BIT_D gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 BITB_U EN BITB_D gnd CMOSN L=0.18U W=0.36U
+Mnmos@2 net@25 EN gnd gnd CMOSN L=0.18U W=0.18U
+Mpmos@0 BIT_D net@25 BIT_U vdd CMOSP L=0.18U W=0.72U
+Mpmos@1 BITB_D net@25 BITB_U vdd CMOSP L=0.18U W=0.72U
+Mpmos@3 vdd EN net@25 vdd CMOSP L=0.18U W=0.27U
+.END

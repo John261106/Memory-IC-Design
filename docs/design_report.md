@@ -118,6 +118,18 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 7: Column CMOS Transmission Gate Sizing in Scalable Lambda Rules
+- **Date:** October 2026
+- **Context:** Sizing the CMOS transmission gates (`TG`) that multiplex column bitlines onto the global data lines (`DL`, `DLB`), and the integrated local inverter.
+- **Alternatives Considered:**
+  1. *Equal NMOS & PMOS Sizing ($W_{\text{N}} = W_{\text{P}} = 4\lambda$):* Results in an asymmetric resistance profile where PMOS $R_{\text{on,P}}$ is $> 2.2\times$ higher than NMOS due to low hole mobility, slowing down read differential transfer.
+  2. *Mobility-Matched Sizing ($W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$):* Compensates for $\mu_n / \mu_p \approx 2.2$, yielding a flat, low equivalent ON-resistance ($R_{\text{on,eq}} \approx 1.2\text{--}1.6\ \text{k}\Omega$) across the entire $0\text{ V} \to 1.8\text{ V}$ range.
+  3. *Local Inverter Sizing ($W_{\text{N}} = 2\lambda = 0.18\ \mu\text{m}, W_{\text{P}} = 3\lambda = 0.27\ \mu\text{m}$):* Keeps input gate capacitance minimal while switching in $< 30\text{ ps}$ to ensure simultaneous NMOS/PMOS enable.
+- **Decision:** Adopted **NMOS $W = 4\lambda = 0.36\ \mu\text{m}$, PMOS $W = 8\lambda = 0.72\ \mu\text{m}$**, and **Local Inverter $W_{\text{N}} = 2\lambda = 0.18\ \mu\text{m}, W_{\text{P}} = 3\lambda = 0.27\ \mu\text{m}$** (all $L = 2\lambda = 0.18\ \mu\text{m}$).
+- **Rationale:** Ensures fast read differential transfer ($t_{\text{prop,read}} < 100\text{ ps}$) with zero attenuation and fast write zero pull-down ($t_{\text{prop,write}} < 150\text{ ps}$).
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -148,7 +160,12 @@ This section records every major design decision, the alternatives evaluated, an
   - Pull-Up PMOS ($M_{\text{PU\_BIT}}, M_{\text{PU\_BITB}}$): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
   - Equalization PMOS ($M_{\text{EQ}}$): $W = 3\lambda = 0.27\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
   - Target Performance: Recovery time $t_{\text{precharge}} < 1.0\text{ ns}$ to $98\% V_{\text{DD}}$ into $C_{\text{BL}} = 35\text{ fF}$; residual differential $\Delta V_{\text{residual}} < 5\text{ mV}$.
-- **Column Select:** CMOS transmission gate multiplexing selected bitlines onto global data lines `DL` / `DLB`.
+- **Column Select (CMOS Transmission Gate + Local Inverter):**
+  - Scalable rules: $\lambda = 90\text{ nm}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - NMOS Pass Gates (`Mnmos@0`, `Mnmos@1`): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - PMOS Pass Gates (`Mpmos@0`, `Mpmos@1`): $W = 8\lambda = 0.72\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Local Inverter: NMOS $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS $W = 3\lambda = 0.27\ \mu\text{m}$.
+  - Target Performance: $R_{\text{on,eq}} < 2\ \text{k}\Omega$, read transfer delay $t_{\text{prop,read}} < 100\text{ ps}$, zero threshold voltage drop.
 - **Sense Amplifier:** Differential latch amplifier triggered by `SENSE_EN` pulse, converting small $\Delta V \approx 100\text{--}200\text{ mV}$ into full 0–1.8 V CMOS rail.
 
 ### 4.4 Write Path: Write Driver

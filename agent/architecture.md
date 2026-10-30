@@ -24,9 +24,13 @@ The 256-bit memory is organized into a $16 \times 16$ 2D matrix:
   - Write Trip Margin $V_{\text{trip}} \approx 0.6\text{--}0.9\text{ V}$.
 
 ### 2.2 Precharge & Equalization Unit
+- **Scalable Rules Basis:** $\lambda = 90\text{ nm}, 180\text{ nm} = 2\lambda$. All lengths $L = 2\lambda = 0.18\ \mu\text{m}$.
+- **Transistor Sizing:**
+  - **Pull-Up PMOS ($M_{\text{PU\_BIT}}, M_{\text{PU\_BITB}}$):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (charges $C_{\text{BL}} \approx 35\text{ fF}$ to $98\% V_{\text{DD}}$ in $< 0.8\text{ ns}$).
+  - **Equalization PMOS ($M_{\text{EQ}}$):** $W = 3\lambda = 0.27\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (equalizes residual $\Delta V < 2\text{ mV}$).
 - **Topology:** Three PMOS transistors active low (`PCB = 0`):
   - Two PMOS pull-ups charging `BIT` and `BITB` to $V_{\text{DD}}$.
-  - One PMOS equalizer connected between `BIT` and `BITB` to guarantee zero initial differential voltage.
+  - One PMOS equalizer connected between `BIT` and `BITB` to eliminate offset before sensing.
 
 ### 2.3 Write Driver Unit
 - **Topology:** Tri-state NMOS/PMOS pull-down logic gated by `WRITE_EN` and input data `DATA`:

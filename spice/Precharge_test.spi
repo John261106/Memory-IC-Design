@@ -1,0 +1,56 @@
+*** SPICE deck for Bitline Precharge Circuit Characterization
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+*** Pull-Up PMOS: W = 4*lambda (0.36u), L = 2*lambda (0.18u)
+*** Equalization PMOS: W = 3*lambda (0.27u), L = 2*lambda (0.18u)
+
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** 1. Power Supplies ***
+VDDsrc vdd 0 DC 1.8
+VGND gnd 0 DC 0
+
+*** 2. Precharge Circuit Transistors ***
+* Pull-up PMOS for BIT
+Mpu_bit  vdd  PCB BIT  vdd CMOSP L=0.18U W=0.36U
+* Pull-up PMOS for BITB
+Mpu_bitb vdd  PCB BITB vdd CMOSP L=0.18U W=0.36U
+* Equalization PMOS between BIT and BITB
+Meq      BITB PCB BIT  vdd CMOSP L=0.18U W=0.27U
+
+*** 3. Column Bitline Parasitic Capacitances ***
+* Models 16 6T SRAM cell access transistor diffusions + wire parasitics (35fF)
+CBL  BIT  gnd 35f
+CBLB BITB gnd 35f
+
+*** 4. Initial Condition: Worst-Case Post-Write State (BIT = 0V, BITB = 1.8V) ***
+.IC V(BIT)=0 V(BITB)=1.8
+
+*** 5. Precharge Bar (PCB) Control Strobe ***
+* PCB starts HIGH (1.8V, disabled) for 2ns
+* Pulses LOW (0V, active precharge) from 2ns to 5ns (pulse width = 3ns)
+* Returns HIGH at 5ns
+VPCB PCB 0 PWL(0n 1.8  1.95n 1.8  2.0n 0  5.0n 0  5.05n 1.8  8.0n 1.8)
+
+*** 6. Automated Performance Measurements for Report ***
+* Precharge Time: Time from PCB falling (0.9V) at 2ns until BIT reaches 98% of VDD (1.764V)
+.MEAS TRAN t_precharge TRIG V(PCB) VAL=0.9 FALL=1 TARG V(BIT) VAL=1.764 RISE=1
+
+* Final Bitline Voltage on BIT at end of precharge window (t = 4.9ns)
+.MEAS TRAN V_bit_final FIND V(BIT) AT=4.9n
+
+* Final Bitline Voltage on BITB at end of precharge window (t = 4.9ns)
+.MEAS TRAN V_bitb_final FIND V(BITB) AT=4.9n
+
+* Final Residual Differential Voltage (Offset) between BIT and BITB (must be < 5mV)
+.MEAS TRAN V_diff_residual PARAM = abs(V_bit_final - V_bitb_final)
+
+* Peak Current drawn from VDD during precharge
+.MEAS TRAN I_peak_precharge MAX -I(VDDsrc) FROM=2n TO=5n
+
+* Total Energy consumed during one precharge cycle
+.MEAS TRAN E_precharge INTEG (-I(VDDsrc)*V(vdd)) FROM=2n TO=5n
+
+*** 7. Transient Simulation ***
+.TRAN 10p 8n
+.END

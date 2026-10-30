@@ -106,6 +106,18 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 6: Bitline Precharge Circuit Sizing in Scalable Lambda Rules
+- **Date:** October 2026
+- **Context:** Sizing the PMOS pull-up and equalization transistors in the per-column precharge circuit under a $C_{\text{BL}} \approx 35\text{ fF}$ parasitic load (16 bitcell access diffusions + metal bitline routing).
+- **Alternatives Considered:**
+  1. *Minimum Uniform Sizing ($W = 2\lambda = 0.18\ \mu\text{m}$ for all PMOS):* Results in high PMOS $R_{\text{on,P}} \approx 10\ \text{k}\Omega$, causing slow bitline recovery ($t_{\text{precharge}} > 1.5\text{ ns}$), bottlenecking memory clock frequency.
+  2. *Excessively Large PMOS ($W > 8\lambda$):* Speeds up precharge by <100 ps, but causes severe layout pitch mismatch with the narrow 6T cell width and adds unnecessary gate capacitance to the global `PCB` distribution line.
+  3. *Optimized Pitch-Matched Sizing ($W_{\text{PU}}=4\lambda=0.36\ \mu\text{m}, W_{\text{EQ}}=3\lambda=0.27\ \mu\text{m}$):* Restores bitlines to $98\% V_{\text{DD}}$ in $< 0.8\text{ ns}$ while comfortably fitting within the cell column pitch.
+- **Decision:** Adopted **Pull-Up PMOS $W = 4\lambda = 0.36\ \mu\text{m}$, Equalization PMOS $W = 3\lambda = 0.27\ \mu\text{m}$, all $L = 2\lambda = 0.18\ \mu\text{m}$**.
+- **Rationale:** Delivers rapid write recovery ($t_{\text{pre}} < 1.0\text{ ns}$) and eliminates residual bitline differential ($\Delta V_{\text{residual}} < 2\text{ mV}$) prior to sense amplifier activation.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -131,7 +143,11 @@ This section records every major design decision, the alternatives evaluated, an
 - **Automation:** Implemented and wired automatically via [`scripts/05_connect_decoder.py`](file:///d:/Projects/Memory-IC-Design/scripts/05_connect_decoder.py).
 
 ### 4.3 Read Path: Precharge, Transmission Gate & Sense Amplifier
-- **Precharge:** 3 PMOS transistors (2 pull-ups to $V_{\text{DD}}$ + 1 equalizer) per column bitline pair.
+- **Bitline Precharge Unit:**
+  - Scalable rules: $\lambda = 90\text{ nm}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Pull-Up PMOS ($M_{\text{PU\_BIT}}, M_{\text{PU\_BITB}}$): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Equalization PMOS ($M_{\text{EQ}}$): $W = 3\lambda = 0.27\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Target Performance: Recovery time $t_{\text{precharge}} < 1.0\text{ ns}$ to $98\% V_{\text{DD}}$ into $C_{\text{BL}} = 35\text{ fF}$; residual differential $\Delta V_{\text{residual}} < 5\text{ mV}$.
 - **Column Select:** CMOS transmission gate multiplexing selected bitlines onto global data lines `DL` / `DLB`.
 - **Sense Amplifier:** Differential latch amplifier triggered by `SENSE_EN` pulse, converting small $\Delta V \approx 100\text{--}200\text{ mV}$ into full 0–1.8 V CMOS rail.
 

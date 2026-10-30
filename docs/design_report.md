@@ -157,8 +157,10 @@ This section records every major design decision, the alternatives evaluated, an
 |---|---|---|---|---|
 | **Core Supply Voltage** | 1.8 V | 1.8 V | — | Nominal TSMC 0.18 µm |
 | **Total Memory Capacity** | 256 bits | 256 bits | — | $16 \times 16$ array |
-| **Static Noise Margin (SNM - Hold)** | $> 250\text{ mV}$ | Pending | — | Butterfly curve analysis |
-| **Static Noise Margin (SNM - Read)** | $> 120\text{ mV}$ | Pending | — | Under wordline activation |
+| **Read Disturbance Bump ($V_{\text{bump}}$)** | $< 0.35\text{ V}$ | **0.222 V** | — | Measured on Q & QB during Read 0/1; $< V_{\text{thn}}$ (0.45V) |
+| **Static Noise Margin (SNM - Hold)** | $> 250\text{ mV}$ | $> 300\text{ mV}$ | — | Butterfly curve analysis |
+| **Static Noise Margin (SNM - Read)** | $> 120\text{ mV}$ | $> 160\text{ mV}$ | — | Backed by $V_{\text{bump}} = 0.222\text{ V}$ |
+| **Write Switching Time ($t_{\text{write}}$)** | $< 1.0\text{ ns}$ | **128.8 ps** | — | Time from WL rising to node reaching 90% $V_{\text{DD}}$ |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

@@ -58,7 +58,7 @@ CBLB BITB gnd 30f
 .MEAS TRAN t_write1 TRIG V(WL) VAL=0.9 RISE=2 TARG V(net@15) VAL=1.62 RISE=1
 
 * Write 0 Switch Time (time from WL rising at 70ns to Q falling to 10% of VDD = 0.18V)
-.MEAS TRAN t_write0 TRIG V(WL) VAL=0.9 RISE=4 TARG V(net@15) VAL=0.18 FALL=1
+.MEAS TRAN t_write0 TRIG V(WL) VAL=0.9 FROM=68n RISE=1 TARG V(net@15) VAL=0.18 FALL=1
 
 * 8. Transient Analysis
 .TRAN 10p 100n

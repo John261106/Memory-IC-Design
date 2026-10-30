@@ -1,0 +1,42 @@
+Circuit: *** SPICE deck for 6T SRAM Cell Transient & Stability Characterization
+
+Vgnd: both pins shorted together -- ignoring.
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Vbitb: Removing PWL point (6.99e-008,1.8)
+Vbit: Removing PWL point (2.99e-008,1.8)
+WARNING: Less than two connections to node Q.  This node is used by VQ.
+WARNING: Less than two connections to node QB.  This node is used by VQB.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Direct Newton iteration for .op point succeeded.
+
+v_read0_bump: MAX(v(net@15))=0.222127 FROM 1e-008 TO 2.5e-008
+v_read1_bump: MAX(v(net@21))=0.222125 FROM 5e-008 TO 6.5e-008
+t_write1=1.28813e-010 FROM 2.995e-008 TO 3.00788e-008
+t_write0=-4.49376e-008 FROM 6.995e-008 TO 2.50124e-008
+
+
+Date: Fri Oct 30 19:18:18 2026
+Total elapsed time: 0.070 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 2599
+traniter = 2594
+tranpoints = 1147
+accept = 1131
+rejected = 16
+matrix size = 14
+fillins = 0
+solver = Normal
+Matrix Compiler1: 510 bytes object code size  0.3/0.1/[0.1]
+Matrix Compiler2: 968 bytes object code size  0.2/0.2/[0.1]
+

@@ -7,16 +7,18 @@
 - **Write Driver:** Complete (`Write_driver{sch}`, verified in SPICE).
 - **1-Bit SRAM Slice:** Complete & verified (`1Bit_SRAM.spi`).
 - **16x16 Bitcell Matrix:** Schematic created (`256bit_SRAM.spi`, connected via Jython script `04_connect_sram_top.py`).
+- **4-to-16 Decoder Script:** Complete (`scripts/05_connect_decoder.py`, automates 20 NOT + 16 NAND gates with active-high `OUT0..15`).
+- **Living Design Report:** Initialized (`docs/design_report.md` tracking all architecture decisions and metrics).
 
 ---
 
 ## 2. Active Roadmap & Prioritized Checklist
 
 ### Phase 1: Address Decoding & Multiplexing
-- [ ] Implement 4-to-16 static CMOS Row Address Decoder.
-- [ ] Implement 4-to-16 Column Address Decoder / 16:1 Bitline Multiplexer.
+- [x] Create automated connection script for 4-to-16 static CMOS Address Decoder (`scripts/05_connect_decoder.py`).
+- [ ] Run decoder connection script inside Electric VLSI on `Decoder{sch}`.
 - [ ] Connect Row Decoder outputs to Wordlines `WL[0:15]`.
-- [ ] Connect Column MUX to Bitline pairs `BIT[0:15]` / `BITB[0:15]`.
+- [ ] Design Column Multiplexer with 16 CMOS transmission gates + local inverters connected to shared SA & WD.
 
 ### Phase 2: Serial Addressing & Clock Tree Network
 - [ ] Implement 8-bit Serial-In Parallel-Out (SIPO) shift register / sequential counter for single-pin `ADDR_IN`.

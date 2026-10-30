@@ -11,6 +11,7 @@ This folder contains token-optimized reference documentation for AI agents worki
 
 | File | Focus / Information Covered | When to Read |
 |---|---|---|
+| [`agent/rules.md`](file:///d:/Projects/Memory-IC-Design/agent/rules.md) | **MANDATORY RULES:** Autonomous protocol to continuously update `docs/design_report.md` on every design choice | MUST read before making or recording any design change |
 | [`agent/specs.md`](file:///d:/Projects/Memory-IC-Design/agent/specs.md) | Condensed technical specifications, pin list, operating constraints, target metrics | Starting any new task or checking electrical constraints |
 | [`agent/architecture.md`](file:///d:/Projects/Memory-IC-Design/agent/architecture.md) | Transistor-level block breakdown, subcell schematics, decoders, sense amp, write driver, clock tree, bond wire/pad model, top-metal grid | Modifying or designing schematics / layout |
 | [`agent/pinout_and_interface.md`](file:///d:/Projects/Memory-IC-Design/agent/pinout_and_interface.md) | 5-pin external interface, serial addressing protocol, read/write timing diagrams | Designing I/O pads, testbenches, or addressing circuits |

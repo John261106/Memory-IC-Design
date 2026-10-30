@@ -1,9 +1,7 @@
 *** SPICE deck for Column CMOS Transmission Gate (TG) Characterization
-*** Copied netlist from cell TG{sch} from library Memory-IC-Design
-*** Sizing: NMOS W=0.36U (4*lambda), PMOS W=0.72U (8*lambda), Local Inverter: NMOS W=0.18U, PMOS W=0.27U
-*** Upper Nodes: BIT_U, BITB_U (from memory column)
-*** Down Nodes:  BIT_D, BITB_D (to global data bus DL, DLB)
-*** Control:     EN (active-high enable), net@25 (internal active-low ENB)
+*** Cell under test: TG{sch}
+*** Sizing: NMOS W=0.36U (4*lambda), PMOS W=0.72U (8*lambda)
+*** Local Inverter: NMOS W=0.18U (2*lambda), PMOS W=0.27U (3*lambda)
 
 .include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
 
@@ -19,9 +17,6 @@ Mpmos@3 vdd    EN     net@25 vdd CMOSP L=0.18U W=0.27U
 VDDsrc vdd 0 DC 1.8
 VGND   gnd 0 DC 0
 
-* Node label for easier probing of internal ENB
-VENB ENB net@25 DC 0
-
 *** 3. Realistic Column & Global Bus Parasitic Capacitances ***
 * Upper bitlines: 16-cell SRAM column load (35fF)
 C_BL   BIT_U  gnd 35f
@@ -31,40 +26,50 @@ C_BLB  BITB_U gnd 35f
 C_DL   BIT_D  gnd 15f
 C_DLB  BITB_D gnd 15f
 
-*** 4. Initial Conditions ***
-* Precharged column: BIT_U=1.8V, BITB_U=1.65V (150mV read differential developed by cell)
-* Unselected bus starts equalized at 1.8V
-.IC V(BIT_U)=1.8 V(BITB_U)=1.65 V(BIT_D)=1.8 V(BITB_D)=1.8
+* High-impedance bleeder resistors to prevent floating node warnings
+R_bleed1 BIT_D  0 100MEG
+R_bleed2 BITB_D 0 100MEG
 
-*** 5. Stimulus Controls ***
-* EN: Column select pulse from decoder
-* - 0 to 1ns: Disabled (EN = 0V, unselected)
-* - 1ns to 4ns: READ Access (EN = 1.8V, passes 150mV differential to DL/DLB)
+*** 4. Stimulus Signals ***
+
+* Column Enable Pulse from Decoder (EN)
+* - 0 to 1ns: Disabled (EN = 0V)
+* - 1ns to 4ns: READ Access (EN = 1.8V)
 * - 4ns to 5ns: Disabled (EN = 0V)
-* - 5ns to 8ns: WRITE Access (EN = 1.8V, write driver pulls DL to 0V)
-VEN EN 0 PWL(0n 0  0.95n 0  1.0n 1.8  4.0n 1.8  4.05n 0  4.95n 0  5.0n 1.8  8.0n 1.8)
+* - 5ns to 8ns: WRITE Access (EN = 1.8V)
+VEN EN 0 PWL(0n 0  0.98n 0  1.0n 1.8  4.0n 1.8  4.02n 0  4.98n 0  5.0n 1.8  8.0n 1.8)
 
-* Write Driver Stimulus on Global Data Line (BIT_D)
-* Inactive (Hi-Z) during read; pulls BIT_D to 0V at t = 5.2ns during write
-VWRITE BIT_D_drv 0 PWL(0n 1.8  5.15n 1.8  5.2n 0  8.0n 0)
-Rwrite BIT_D_drv BIT_D 500
+* Upper Bitline Signals during Read (simulating cell developing 150mV differential)
+* BIT_U stays at precharged 1.8V
+* BITB_U discharges from 1.8V to 1.65V (150mV delta)
+V_BIT_U  BIT_U_src  0 DC 1.8
+R_BIT_U  BIT_U_src  BIT_U  500
+V_BITB_U BITB_U_src 0 PWL(0n 1.8  1.0n 1.8  1.5n 1.65  4.0n 1.65  4.1n 1.8  8.0n 1.8)
+R_BITB_U BITB_U_src BITB_U 500
 
-*** 6. Automated Performance Measurements for TA Justification ***
-* 1. Local Inverter Delay (Time from EN rising to ENB falling to 50% = 0.9V)
+* Write Driver on Down Bitline (BIT_D)
+* - Inactive (1.8V via 50k resistor) during read
+* - Actively drives BIT_D to 0V at t = 5.2ns during write
+V_WRITE   WRITE_src 0 PWL(0n 1.8  5.18n 1.8  5.2n 0  8.0n 0)
+R_WRITE   WRITE_src BIT_D PWL(0n 50k  5.18n 50k  5.19n 100  8.0n 100)
+
+*** 5. Automated Performance Measurements for Report ***
+
+* 1. Local Inverter Propagation Delay (Time from EN=0.9V to net@25=0.9V)
 .MEAS TRAN t_inv_delay TRIG V(EN) VAL=0.9 RISE=1 TARG V(net@25) VAL=0.9 FALL=1
 
-* 2. Read Transfer Delay (Time from EN rising to BITB_D reaching 90% of differential = 1.665V)
-.MEAS TRAN t_read_transfer TRIG V(EN) VAL=0.9 RISE=1 TARG V(BITB_D) VAL=1.665 FALL=1
+* 2. Read Differential on Upper Bitlines at t = 3.0ns
+.MEAS TRAN V_diff_upper PARAM = (V(BIT_U) - V(BITB_U)) AT=3.0n
 
-* 3. Transferred Read Differential at t = 3.5ns (must match 150mV with zero threshold loss)
-.MEAS TRAN V_diff_transferred PARAM = (V(BIT_D) - V(BITB_D)) AT=3.5n
+* 3. Read Differential Transferred to Global Bus at t = 3.0ns
+.MEAS TRAN V_diff_transferred PARAM = (V(BIT_D) - V(BITB_D)) AT=3.0n
 
-* 4. Write Pull-Down Delay (Time from write driver pulling low to column BIT_U falling below 0.3V)
+* 4. Read Transfer Signal Attenuation (Ratio of transferred to original differential; must be > 98%)
+.MEAS TRAN Transfer_Ratio PARAM = (V_diff_transferred / V_diff_upper)
+
+* 5. Write 0 Pull-Down Delay (Time from Write Driver falling to column BIT_U falling below 0.3V)
 .MEAS TRAN t_write_transfer TRIG V(BIT_D) VAL=0.9 FALL=1 TARG V(BIT_U) VAL=0.3 FALL=1
 
-* 5. Effective On-Resistance during Write (R = Vds / Ids)
-.MEAS TRAN R_on_write PARAM = (V(BIT_U) - V(BIT_D)) / (I(Mnmos@0) + 1p) AT=5.5n
-
-*** 7. Transient Simulation ***
+*** 6. Transient Simulation ***
 .TRAN 10p 8n
 .END

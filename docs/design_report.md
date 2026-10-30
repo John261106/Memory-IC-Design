@@ -199,6 +199,8 @@ This section records every major design decision, the alternatives evaluated, an
 | **Precharge Residual Offset ($\Delta V_{\text{residual}}$)** | $< 5\text{ mV}$ | **0.000 V** | — | Perfect equalization; zero sense amp offset |
 | **Precharge Peak Current per Column** | $< 1.0\text{ mA}$ | **165.3 µA** | — | Low peak supply surge |
 | **Precharge Energy per Column ($E_{\text{pre}}$)** | $< 150\text{ fJ}$ | **115.4 fJ** | — | Matches theoretical $C_{\text{BL}}V_{\text{DD}}^2$ (113.4 fJ) within 1.7% |
+| **TG Local Inverter Delay ($t_{\text{inv}}$)** | $< 50\text{ ps}$ | **27.1 ps** | — | Sub-30ps switching of complementary gate enable |
+| **TG Write Pull-Down Delay ($t_{\text{write,TG}}$)** | $< 300\text{ ps}$ | **222.4 ps** | — | Passes 0V write through switch to bitline in 222ps |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

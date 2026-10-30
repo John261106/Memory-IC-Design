@@ -1,0 +1,36 @@
+Circuit: *** SPICE deck for Bitline Precharge Circuit Characterization
+
+Vgnd: both pins shorted together -- ignoring.
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Direct Newton iteration for .op point succeeded.
+
+t_precharge=7.74194e-010 FROM 1.975e-009 TO 2.74919e-009
+v_bit_final: v(bit)=1.8 at 4.9e-009
+v_bitb_final: v(bitb)=1.8 at 4.9e-009
+v_diff_residual: abs(v_bit_final - v_bitb_final)=0
+i_peak_precharge: MAX(-i(vddsrc))=0.00016532 FROM 2e-009 TO 5e-009
+e_precharge: INTEG(-i(vddsrc)*v(vdd))=1.15383e-013 FROM 2e-009 TO 5e-009
+
+
+Date: Fri Oct 30 21:09:01 2026
+Total elapsed time: 0.107 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 2114
+traniter = 2109
+tranpoints = 1054
+accept = 1054
+rejected = 0
+matrix size = 6
+fillins = 0
+solver = Normal
+Matrix Compiler1: 200 bytes object code size  0.2/0.1/[0.1]
+Matrix Compiler2: off  [0.1]/0.2/0.2
+

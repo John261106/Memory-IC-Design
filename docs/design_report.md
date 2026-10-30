@@ -177,6 +177,11 @@ This section records every major design decision, the alternatives evaluated, an
 | **Static Noise Margin (SNM - Hold)** | $> 250\text{ mV}$ | $> 300\text{ mV}$ | — | Butterfly curve analysis |
 | **Static Noise Margin (SNM - Read)** | $> 120\text{ mV}$ | $> 160\text{ mV}$ | — | Backed by $V_{\text{bump}} = 0.222\text{ V}$ |
 | **Write Switching Time ($t_{\text{write}}$)** | $< 1.0\text{ ns}$ | **128.8 ps** | — | Time from WL rising to node reaching 90% $V_{\text{DD}}$ |
+| **Precharge Recovery Time ($t_{\text{precharge}}$)** | $< 1.0\text{ ns}$ | **774.2 ps** | — | Time to restore discharged bitline from 0V to 98% $V_{\text{DD}}$ |
+| **Precharge Restored Voltage** | $\ge 1.764\text{ V}$ (98%) | **1.800 V** (100%) | — | Full rail restoration from 0V write state |
+| **Precharge Residual Offset ($\Delta V_{\text{residual}}$)** | $< 5\text{ mV}$ | **0.000 V** | — | Perfect equalization; zero sense amp offset |
+| **Precharge Peak Current per Column** | $< 1.0\text{ mA}$ | **165.3 µA** | — | Low peak supply surge |
+| **Precharge Energy per Column ($E_{\text{pre}}$)** | $< 150\text{ fJ}$ | **115.4 fJ** | — | Matches theoretical $C_{\text{BL}}V_{\text{DD}}^2$ (113.4 fJ) within 1.7% |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

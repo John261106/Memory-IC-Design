@@ -1,0 +1,20 @@
+Circuit: *** SPICE deck for Column CMOS Transmission Gate (TG) Characterization
+
+Vgnd: both pins shorted together -- ignoring.
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Error on line 47 : r_write write_src bit_d pwl(0n 50k 5.18n 50k 5.19n 100 8.0n 100)
+	 Unable to find definition of model "pwl"
+	
+	*  Unknown parameter "50k"
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Fatal Error: R_write: Resistance must not be zero.

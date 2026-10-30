@@ -1,0 +1,95 @@
+*** SPICE deck for cell Decoder{sch} from library Memory-IC-Design
+*** Created on Fri Oct 30, 2026 11:09:18
+*** Last revised on Fri Oct 30, 2026 17:35:24
+*** Written on Fri Oct 30, 2026 17:35:36 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** SUBCIRCUIT Memory-IC-Design__Nand FROM CELL Nand{sch}
+.SUBCKT Memory-IC-Design__Nand A B C D gnd OUT vdd
+Mnmos@0 OUT A net@1 gnd CMOSN L=0.18U W=0.18U
+Mnmos@1 net@1 B net@2 gnd CMOSN L=0.18U W=0.18U
+Mnmos@2 net@2 C net@16 gnd CMOSN L=0.18U W=0.18U
+Mnmos@3 net@16 D gnd gnd CMOSN L=0.18U W=0.18U
+Mpmos@0 vdd A OUT vdd CMOSP L=0.18U W=0.18U
+Mpmos@1 vdd B OUT vdd CMOSP L=0.18U W=0.18U
+Mpmos@2 vdd C OUT vdd CMOSP L=0.18U W=0.18U
+Mpmos@3 vdd D OUT vdd CMOSP L=0.18U W=0.18U
+.ENDS Memory-IC-Design__Nand
+
+*** SUBCIRCUIT Memory-IC-Design__Not FROM CELL Not{sch}
+.SUBCKT Memory-IC-Design__Not gnd IN OUT vdd
+Mnmos@0 OUT IN gnd gnd CMOSN L=0.18U W=0.18U
+Mpmos@0 vdd IN OUT vdd CMOSP L=0.18U W=0.18U
+.ENDS Memory-IC-Design__Not
+
+*** TOP LEVEL CELL: Decoder{sch}
+XNand@0 net@0 net@1 net@2 net@3 gnd net@64 vdd Memory-IC-Design__Nand
+XNand@1 net@0 net@1 net@2 A0 gnd net@65 vdd Memory-IC-Design__Nand
+XNand@2 net@0 net@1 A1 net@3 gnd net@66 vdd Memory-IC-Design__Nand
+XNand@3 net@0 net@1 A1 A0 gnd net@67 vdd Memory-IC-Design__Nand
+XNand@4 net@0 A2 net@2 net@3 gnd net@68 vdd Memory-IC-Design__Nand
+XNand@5 net@0 A2 net@2 A0 gnd net@69 vdd Memory-IC-Design__Nand
+XNand@6 net@0 A2 A1 net@3 gnd net@70 vdd Memory-IC-Design__Nand
+XNand@7 net@0 A2 A1 A0 gnd net@71 vdd Memory-IC-Design__Nand
+XNand@8 A3 net@1 net@2 net@3 gnd net@72 vdd Memory-IC-Design__Nand
+XNand@9 A3 net@1 net@2 A0 gnd net@73 vdd Memory-IC-Design__Nand
+XNand@10 A3 net@1 A1 net@3 gnd net@74 vdd Memory-IC-Design__Nand
+XNand@11 A3 net@1 A1 A0 gnd net@75 vdd Memory-IC-Design__Nand
+XNand@12 A3 A2 net@2 net@3 gnd net@76 vdd Memory-IC-Design__Nand
+XNand@13 A3 A2 net@2 A0 gnd net@77 vdd Memory-IC-Design__Nand
+XNand@14 A3 A2 A1 net@3 gnd net@78 vdd Memory-IC-Design__Nand
+XNand@15 A3 A2 A1 A0 gnd net@79 vdd Memory-IC-Design__Nand
+XNot@0 gnd A0 net@3 vdd Memory-IC-Design__Not
+XNot@1 gnd A1 net@2 vdd Memory-IC-Design__Not
+XNot@2 gnd A2 net@1 vdd Memory-IC-Design__Not
+XNot@3 gnd A3 net@0 vdd Memory-IC-Design__Not
+XNot@4 gnd net@64 OUT0 vdd Memory-IC-Design__Not
+XNot@5 gnd net@65 OUT1 vdd Memory-IC-Design__Not
+XNot@6 gnd net@66 OUT2 vdd Memory-IC-Design__Not
+XNot@7 gnd net@67 OUT3 vdd Memory-IC-Design__Not
+XNot@8 gnd net@68 OUT4 vdd Memory-IC-Design__Not
+XNot@9 gnd net@69 OUT5 vdd Memory-IC-Design__Not
+XNot@10 gnd net@70 OUT6 vdd Memory-IC-Design__Not
+XNot@11 gnd net@71 OUT7 vdd Memory-IC-Design__Not
+XNot@12 gnd net@72 OUT8 vdd Memory-IC-Design__Not
+XNot@13 gnd net@73 OUT9 vdd Memory-IC-Design__Not
+XNot@14 gnd net@74 OUT10 vdd Memory-IC-Design__Not
+XNot@15 gnd net@75 OUT11 vdd Memory-IC-Design__Not
+XNot@16 gnd net@76 OUT12 vdd Memory-IC-Design__Not
+XNot@17 gnd net@77 OUT13 vdd Memory-IC-Design__Not
+XNot@18 gnd net@78 OUT14 vdd Memory-IC-Design__Not
+XNot@19 gnd net@79 OUT15 vdd Memory-IC-Design__Not
+
+* Spice Code nodes in cell cell 'Decoder{sch}'
+* --- Power & Ground Supplies ---
+VDDsrc VDD 0 DC 1.8
+VGND GND 0 DC 0
+* --- 4-Bit Address Inputs (A0=LSB, A3=MSB) ---
+* Format: PULSE(Vlow Vhigh Tdelay Trise Tfall Ton Tperiod)
+VA0 A0 GND PULSE(0 1.8 10n 0.1n 0.1n 9.9n 20n)
+VA1 A1 GND PULSE(0 1.8 20n 0.1n 0.1n 19.9n 40n)
+VA2 A2 GND PULSE(0 1.8 40n 0.1n 0.1n 39.9n 80n)
+VA3 A3 GND PULSE(0 1.8 80n 0.1n 0.1n 79.9n 160n)
+* --- Small Realistic Load Capacitances on Outputs (5fF each) ---
+COUT0  OUT0  GND 5f
+COUT1  OUT1  GND 5f
+COUT2  OUT2  GND 5f
+COUT3  OUT3  GND 5f
+COUT4  OUT4  GND 5f
+COUT5  OUT5  GND 5f
+COUT6  OUT6  GND 5f
+COUT7  OUT7  GND 5f
+COUT8  OUT8  GND 5f
+COUT9  OUT9  GND 5f
+COUT10 OUT10 GND 5f
+COUT11 OUT11 GND 5f
+COUT12 OUT12 GND 5f
+COUT13 OUT13 GND 5f
+COUT14 OUT14 GND 5f
+COUT15 OUT15 GND 5f
+* --- Transient Simulation: Step 10ps, Stop 165ns ---
+.TRAN 10p 165n
+.END

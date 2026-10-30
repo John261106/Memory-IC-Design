@@ -1,0 +1,65 @@
+*** SPICE deck for 6T SRAM Cell Transient & Stability Characterization
+*** Copied netlist from cell 6T_cell{sch} from library Memory-IC-Design
+*** Sizing: W_PD=7*lambda (0.63u), W_AX=4*lambda (0.36u), W_PU=3*lambda (0.27u), L=2*lambda (0.18u)
+*** Internal nodes: net@15 = Q, net@21 = QB
+
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** 6T SRAM CELL TRANSISTORS (from 6T_cell.spi) ***
+Mnmos@0 net@15 net@21 gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@1 net@21 net@15 gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@2 net@15 WL BIT gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 BITB WL net@21 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd net@21 net@15 vdd CMOSP L=0.18U W=0.27U
+Mpmos@1 vdd net@15 net@21 vdd CMOSP L=0.18U W=0.27U
+
+*** TESTBENCH STIMULUS & INPUT CONTROLS ***
+
+* 1. DC Power Supplies
+VDDsrc vdd 0 DC 1.8
+VGND gnd 0 DC 0
+
+* 2. Storage Node Labels (0V source for easy waveform plotting of Q and QB)
+VQ  Q  net@15 DC 0
+VQB QB net@21 DC 0
+
+* 3. Initial Condition: Cell initialized storing '0' (Q=0V, QB=1.8V)
+.IC V(net@15)=0 V(net@21)=1.8
+
+* 4. Word Line (WL) Control Strobe
+* - Hold 0: 0 to 10ns (WL=0V)
+* - Read 0: 10ns to 25ns (WL=1.8V)
+* - Write 1: 30ns to 45ns (WL=1.8V)
+* - Read 1: 50ns to 65ns (WL=1.8V)
+* - Write 0: 70ns to 85ns (WL=1.8V)
+* - Final Hold: 85ns to 100ns (WL=0V)
+VWL WL 0 PWL(0n 0  9.9n 0  10n 1.8  25n 1.8  25.1n 0  29.9n 0  30n 1.8  45n 1.8  45.1n 0  49.9n 0  50n 1.8  65n 1.8  65.1n 0  69.9n 0  70n 1.8  85n 1.8  85.1n 0  100n 0)
+
+* 5. Complementary Bitlines (BIT and BITB)
+* - Read 0 (10-25ns): BIT=1.8V, BITB=1.8V (precharged)
+* - Write 1 (30-45ns): BIT=1.8V, BITB=0V
+* - Read 1 (50-65ns): BIT=1.8V, BITB=1.8V (precharged)
+* - Write 0 (70-85ns): BIT=0V, BITB=1.8V
+VBIT  BIT  0 PWL(0n 1.8  29.9n 1.8  30n 1.8  45n 1.8  45.1n 1.8  69.9n 1.8  70n 0    85n 0    85.1n 1.8  100n 1.8)
+VBITB BITB 0 PWL(0n 1.8  29.9n 1.8  30n 0    45n 0    45.1n 1.8  69.9n 1.8  70n 1.8  85n 1.8  85.1n 1.8  100n 1.8)
+
+* 6. Bitline Column Parasitic Capacitance (lumped column load: 30fF)
+CBL  BIT  gnd 30f
+CBLB BITB gnd 30f
+
+* 7. Automated Performance Measurements for TA Justification
+* Read Bump on node Q during Read '0' (CR stability metric: must be < 0.3V)
+.MEAS TRAN V_read0_bump MAX V(net@15) FROM=10n TO=25n
+
+* Read Bump on node QB during Read '1' (must be < 0.3V)
+.MEAS TRAN V_read1_bump MAX V(net@21) FROM=50n TO=65n
+
+* Write 1 Switch Time (time from WL rising at 30ns to Q reaching 90% of VDD = 1.62V)
+.MEAS TRAN t_write1 TRIG V(WL) VAL=0.9 RISE=2 TARG V(net@15) VAL=1.62 RISE=1
+
+* Write 0 Switch Time (time from WL rising at 70ns to Q falling to 10% of VDD = 0.18V)
+.MEAS TRAN t_write0 TRIG V(WL) VAL=0.9 RISE=4 TARG V(net@15) VAL=0.18 FALL=1
+
+* 8. Transient Analysis
+.TRAN 10p 100n
+.END

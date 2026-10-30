@@ -1,26 +1,17 @@
 *** SPICE deck for cell 6T_cell{sch} from library Memory-IC-Design
 *** Created on Mon Oct 19, 2026 22:46:02
-*** Last revised on Tue Oct 20, 2026 10:36:27
-*** Written on Tue Oct 20, 2026 10:36:42 by Electric VLSI Design System, version 9.08
+*** Last revised on Fri Oct 30, 2026 19:05:44
+*** Written on Fri Oct 30, 2026 19:13:06 by Electric VLSI Design System, version 9.08
 *** Layout tech: mocmos, foundry MOSIS
 *** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
 * Model cards described in this file:
 .include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
 
 *** TOP LEVEL CELL: 6T_cell{sch}
-Mnmos@0 Q QB gnd gnd CMOSN L=0.18U W=0.18U
-Mnmos@1 QB Q gnd gnd CMOSN L=0.18U W=0.18U
-Mnmos@2 Q WL BIT gnd CMOSN L=0.18U W=0.18U
-Mnmos@3 BITB WL QB gnd CMOSN L=0.18U W=0.18U
-Mpmos@0 vdd QB Q vdd CMOSP L=0.18U W=0.18U
-Mpmos@1 vdd Q QB vdd CMOSP L=0.18U W=0.18U
-
-* Spice Code nodes in cell cell '6T_cell{sch}'
-VVDD VDD 0 DC 1.8
-VGND GND 0 DC 0
-VWL WL 0 PULSE(0 1.8 0 100p 100p 10n 20n)
-VBIT BIT 0 PULSE(0 1.8 0 100p 100p 20n 40n)
-VBITB BITB 0 PULSE(1.8 0 0 100p 100p 20n 40n)
-.TRAN 10p 100n
-.END
+Mnmos@0 net@15 net@21 gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@1 net@21 net@15 gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@2 net@15 WL BIT gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 BITB WL net@21 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd net@21 net@15 vdd CMOSP L=0.18U W=0.27U
+Mpmos@1 vdd net@15 net@21 vdd CMOSP L=0.18U W=0.27U
 .END

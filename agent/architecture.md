@@ -13,11 +13,15 @@ The 256-bit memory is organized into a $16 \times 16$ 2D matrix:
 ## 2. Transistor-Level Circuit Topologies
 
 ### 2.1 6T SRAM Cell
-- **Topology:** Two cross-coupled CMOS inverters ($M_{\text{PU1}}, M_{\text{PD1}}$ and $M_{\text{PU2}}, M_{\text{PD2}}$) with two NMOS access transistors ($M_{\text{AX1}}, M_{\text{AX2}}$).
-- **Nodes:** `Q` (true), `QB` (complement), `WL` (gate control), `BIT`, `BITB`.
-- **Transistor Sizing Rules (Stability & Writeability):**
-  - **Cell Ratio (CR):** $\beta_{\text{PD}} / \beta_{\text{AX}} \ge 1.5 - 2.0$ (prevents read disturbance where internal 0 flips).
-  - **Pull-Up Ratio (PR):** $\beta_{\text{AX}} / \beta_{\text{PU}} \ge 1.0 - 1.2$ (ensures write driver can pull node `Q` below inverter threshold).
+- **Scalable Rules Basis:** $\lambda = 90\text{ nm}$, $180\text{ nm} = 2\lambda$. All lengths $L = 2\lambda = 0.18\ \mu\text{m}$.
+- **Sizing Ratios & Dimensions:**
+  - **Pull-Up PMOS ($M_{\text{PU}}$):** $W = 3\lambda = 0.27\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (weakest, enables easy overwrite).
+  - **Access NMOS ($M_{\text{AX}}$):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ ($\text{PR} = 4\lambda/3\lambda = 1.33$).
+  - **Pull-Down NMOS ($M_{\text{PD}}$):** $W = 7\lambda = 0.63\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ ($\text{CR} = 7\lambda/4\lambda = 1.75$).
+- **Performance Criteria:**
+  - Hold SNM $> 300\text{ mV}$ (butterfly curve at $WL = 0\text{ V}$).
+  - Read SNM $> 150\text{ mV}$ (butterfly curve at $WL = 1.8\text{ V}, BIT=BITB=1.8\text{ V}$).
+  - Write Trip Margin $V_{\text{trip}} \approx 0.6\text{--}0.9\text{ V}$.
 
 ### 2.2 Precharge & Equalization Unit
 - **Topology:** Three PMOS transistors active low (`PCB = 0`):

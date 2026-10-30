@@ -92,13 +92,36 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 5: 6T SRAM Cell Transistor Sizing in Scalable Lambda Rules
+- **Date:** October 2026
+- **Context:** Sizing the 6T bitcell transistors using MOSIS scalable CMOS ($\lambda$) rules ($180\text{ nm} = 2\lambda \implies \lambda = 90\text{ nm}$) to balance Read Stability (Cell Ratio) and Writeability (Pull-Up Ratio).
+- **Alternatives Considered:**
+  1. *Minimum Uniform Sizing ($W=2\lambda, L=2\lambda$ for all transistors):* Results in $CR = 1.0$ and $PR = 1.0$, which causes catastrophic destructive reads (bit flips during read access).
+  2. *Excessively Large Cell Ratio ($CR > 3.0$):* Ensures extreme stability, but blows up cell area by >50% and hampers write speed.
+  3. *Optimized Ratio ($W_{\text{PD}}=7\lambda\text{ or }8\lambda, W_{\text{AX}}=4\lambda, W_{\text{PU}}=3\lambda$):* Provides $CR = 1.75\text{--}2.0$ and $PR = 1.33$.
+- **Decision:** Adopted **$W_{\text{PD}}=7\lambda$ ($0.63\ \mu\text{m}$), $W_{\text{AX}}=4\lambda$ ($0.36\ \mu\text{m}$), $W_{\text{PU}}=3\lambda$ ($0.27\ \mu\text{m}$)**, with all lengths $L = 2\lambda = 180\text{ nm} = 0.18\ \mu\text{m}$.
+- **Rationale:** 
+  - Achieves $CR = 1.75$, keeping read voltage disturbance $V_{\text{read,bump}} \le 0.2\text{ V} < V_{\text{thn}}$, guaranteeing Read SNM $\ge 160\text{ mV}$.
+  - Achieves $PR = 1.33$, ensuring write driver pulls internal node below inverter switching threshold without write contention.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
-- **Structure:** 2 cross-coupled CMOS inverters ($M_{\text{PU1}}, M_{\text{PD1}}$ and $M_{\text{PU2}}, M_{\text{PD2}}$) with 2 NMOS access gates ($M_{\text{AX1}}, M_{\text{AX2}}$).
-- **Sizing Constraints:**
-  - Cell Ratio: $CR = (W/L)_{\text{PD}} / (W/L)_{\text{AX}} \ge 1.5\text{--}2.0$ (Read stability).
-  - Pull-up Ratio: $PR = (W/L)_{\text{AX}} / (W/L)_{\text{PU}} \ge 1.0\text{--}1.5$ (Writeability).
+- **Scalable Rules Basis:** $\lambda = 90\text{ nm} = 0.09\ \mu\text{m}$, $L_{\text{min}} = 2\lambda = 180\text{ nm} = 0.18\ \mu\text{m}$.
+- **Detailed Transistor Sizing:**
+
+| Transistor | Role | Width ($W$) in $\lambda$ | Width ($W$) in $\mu\text{m}$ | Length ($L$) in $\lambda$ | Length ($L$) in $\mu\text{m}$ | Governing Ratio | Target Criteria |
+|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| $M_{\text{PU1}}, M_{\text{PU2}}$ (PMOS) | Pull-Up Latch | $3\lambda$ | $0.27\ \mu\text{m}$ | $2\lambda$ | $0.18\ \mu\text{m}$ | Reference | — |
+| $M_{\text{AX1}}, M_{\text{AX2}}$ (NMOS) | Pass Access | $4\lambda$ | $0.36\ \mu\text{m}$ | $2\lambda$ | $0.18\ \mu\text{m}$ | $\text{PR} = W_{\text{AX}} / W_{\text{PU}} = 1.33$ | $1.0 \le \text{PR} \le 1.5$ |
+| $M_{\text{PD1}}, M_{\text{PD2}}$ (NMOS) | Pull-Down Latch | $7\lambda$ | $0.63\ \mu\text{m}$ | $2\lambda$ | $0.18\ \mu\text{m}$ | $\text{CR} = W_{\text{PD}} / W_{\text{AX}} = 1.75$ | $1.5 \le \text{CR} \le 2.0$ |
+
+- **Performance Figures of Merit (FOMs):**
+  - **Hold Static Noise Margin (Hold SNM):** Side of maximum square in butterfly curve at $WL = 0\text{ V}$. Accepted benchmark: $> 300\text{ mV}$.
+  - **Read Static Noise Margin (Read SNM):** Side of maximum square in butterfly curve at $WL = 1.8\text{ V}, BIT=BITB=1.8\text{ V}$. Accepted benchmark: $> 150\text{ mV}$.
+  - **Write Trip Margin (WTM):** Bitline voltage at which internal cell flips state during write. Accepted benchmark: $0.6\text{--}0.9\text{ V}$.
 
 ### 4.2 4-to-16 Row & Column Address Decoders
 - **Structure:**

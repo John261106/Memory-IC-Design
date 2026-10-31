@@ -233,6 +233,9 @@ This section records every major design decision, the alternatives evaluated, an
 | **Precharge Residual Offset ($\Delta V_{\text{residual}}$)** | $< 5\text{ mV}$ | **0.000 V** | — | Perfect equalization; zero sense amp offset |
 | **Precharge Peak Current per Column** | $< 1.0\text{ mA}$ | **165.3 µA** | — | Low peak supply surge |
 | **Precharge Energy per Column ($E_{\text{pre}}$)** | $< 150\text{ fJ}$ | **115.4 fJ** | — | Matches theoretical $C_{\text{BL}}V_{\text{DD}}^2$ (113.4 fJ) within 1.7% |
+| **Write Bitline Pull-Down Delay ($t_{\text{pulldown}}$)** | $< 500\text{ ps}$ | **430.8 ps** | — | Pulls 50fF bitline down to $< 10\% V_{\text{DD}}$ in 431ps |
+| **Write Pull-Down Symmetry ($\Delta t_{\text{W0-W1}}$)** | $< 10\text{ ps}$ | **0.06 ps** | — | 430.795ps vs 430.739ps; matched rise/fall inverter |
+| **Write Output Low Voltage ($V_{\text{OL}}$)** | $< 50\text{ mV}$ | **$< 1\ \mu\text{V}$** | — | Pulls bitline completely to ground ($0.8\ \mu\text{V}$) |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

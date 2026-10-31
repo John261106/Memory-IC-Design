@@ -1,77 +1,78 @@
-*** SPICE deck for Differential Decoupled Latch Sense Amplifier Characterization
+*** SPICE deck for Current-Mirror Differential Sense Amplifier Characterization
 *** Cell under test: Sense_amp{sch}
-*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
-*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
-*** Sizing:
-*** - Tail Strobe NMOS (Mnmos@0): W = 6*lambda (0.54u), L = 2*lambda (0.18u)
-*** - Cross-Coupled NMOS (Mnmos@1, Mnmos@2): W = 4*lambda (0.36u), L = 2*lambda (0.18u)
-*** - Cross-Coupled PMOS (Mpmos@2, Mpmos@3): W = 4*lambda (0.36u), L = 2*lambda (0.18u)
-*** - Bitline Isolation PMOS (Mpmos@0, Mpmos@1): W = 4*lambda (0.36u), L = 2*lambda (0.18u)
+*** Architecture: 2-Stage OTA (Differential Input + Current Mirror Load + Inverter Buffer)
+*** Nodes:
+*** - Inputs: BIT, BITB (connected to gates of differential pair)
+*** - Control: READ_EN (gate of tail current NMOS)
+*** - Output: SENSE (output of second-stage inverter)
+*** - Internal: net@38 (tail node), net@76 (mirror reference), net@66 (first stage output)
 
 .include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
 
-*** 1. SENSE AMPLIFIER TRANSISTORS ***
-* Tail NMOS strobe transistor
-Mnmos@0 net@9 READ_EN gnd gnd CMOSN L=0.18U W=0.54U
+*** 1. SENSE AMPLIFIER NETLIST (from Sense_amp.spi) ***
+* First Stage: Differential Pair with Current Mirror Load
+Mnmos@5 net@38   READ_EN gnd    gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 net@38   BIT     net@76 gnd CMOSN L=0.18U W=0.36U
+Mnmos@4 net@66   BITB    net@38 gnd CMOSN L=0.18U W=0.36U
+Mpmos@4 net@76   net@76  vdd    vdd CMOSP L=0.18U W=0.36U
+Mpmos@5 vdd      net@76  net@66 vdd CMOSP L=0.18U W=0.36U
 
-* Cross-coupled NMOS latch pair
-Mnmos@1 SENSEB SENSE net@9 gnd CMOSN L=0.18U W=0.36U
-Mnmos@2 SENSE SENSEB net@9 gnd CMOSN L=0.18U W=0.36U
-
-* Bitline Isolation PMOS pass gates (disconnect heavy bitlines during latching)
-Mpmos@0 BIT  READ_EN SENSE  vdd CMOSP L=0.18U W=0.36U
-Mpmos@1 BITB READ_EN SENSEB vdd CMOSP L=0.18U W=0.36U
-
-* Cross-coupled PMOS latch pair
-Mpmos@2 vdd SENSE  SENSEB vdd CMOSP L=0.18U W=0.36U
-Mpmos@3 vdd SENSEB SENSE  vdd CMOSP L=0.18U W=0.36U
+* Second Stage: Output Inverter Buffer
+Mnmos@6 SENSE    net@66  gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd      net@66  SENSE  vdd CMOSP L=0.18U W=0.36U
 
 *** 2. Power Supplies ***
 VDDsrc vdd 0 DC 1.8
 VGND   gnd 0 DC 0
 
-*** 3. Realistic Bitline & Output Load Capacitances ***
-* Bitlines: 35fF column capacitance
+*** 3. Realistic Bitline & Output Capacitances ***
+* Bitline parasitic column load (35fF)
 CBL  BIT  gnd 35f
 CBLB BITB gnd 35f
 
-* Sense outputs: driving 1-bit DOUT output buffer / pad (10fF)
-CLOAD_S  SENSE  gnd 10f
-CLOAD_SB SENSEB gnd 10f
+* Output load (representing output latch / pad input: 15fF)
+CLOAD SENSE gnd 15f
 
 *** 4. Test Stimulus ***
-* Simulating Read '0' with a standard 100mV differential:
-* BIT discharges to 1.70V (100mV below precharge 1.8V)
-* BITB remains at 1.80V
-VBIT  BIT  0 PWL(0n 1.8  1.0n 1.8  2.0n 1.70  6.0n 1.70)
-VBITB BITB 0 DC 1.8
 
-* READ_EN Strobe Pulse:
-* - 0 to 2.5ns: READ_EN = 0V (Isolation PMOS ON, precharging SENSE/SENSEB to bitline voltages)
-* - 2.5ns to 5.0ns: READ_EN = 1.8V (Isolation PMOS turn OFF, Tail NMOS turns ON -> regenerative latching)
-* - 5.0ns to 6.0ns: READ_EN = 0V (Reset)
-VREAD READ_EN 0 PWL(0n 0  2.45n 0  2.5n 1.8  5.0n 1.8  5.05n 0  6.0n 0)
+* Case 1: Read '0' (0 to 5ns)
+* BIT discharges from 1.8V to 1.70V (100mV differential)
+* BITB stays at 1.80V
+* READ_EN strobes at t = 2.0ns
+VBIT  BIT  0 PWL(0n 1.8  0.5n 1.8  1.5n 1.70  5.0n 1.70  5.5n 1.8  6.5n 1.80  10.0n 1.80)
+VBITB BITB 0 PWL(0n 1.8  5.0n 1.8  5.5n 1.8   6.5n 1.70  10.0n 1.70)
+
+* READ_EN Strobe Pulses:
+* - Strobe 1 (Read 0): 2.0ns to 4.5ns
+* - Strobe 2 (Read 1): 7.0ns to 9.5ns
+VREAD READ_EN 0 PWL(0n 0  1.98n 0  2.0n 1.8  4.5n 1.8  4.52n 0  6.98n 0  7.0n 1.8  9.5n 1.8  9.52n 0  10.0n 0)
 
 *** 5. Automated Performance Measurements for Report ***
-* 1. Pre-sensing Differential sampled onto latch at t = 2.4ns (before strobe)
-.MEAS TRAN V_diff_sampled PARAM = (V(BITB) - V(BIT)) AT=2.4n
 
-* 2. Sensing Delay to 90% full rail (Time from READ_EN rising at 2.5ns to SENSE falling below 0.18V)
-.MEAS TRAN t_sense_delay TRIG V(READ_EN) VAL=0.9 RISE=1 TARG V(SENSE) VAL=0.18 FALL=1
+* 1. Read '0' Differential at t = 2.0ns (must be 100mV)
+.MEAS TRAN V_diff_read0 PARAM = (V(BITB) - V(BIT)) AT=2.0n
 
-* 3. Final Output Rail Voltages after sensing (at t = 4.5ns)
-.MEAS TRAN V_SENSE_final  FIND V(SENSE)  AT=4.5n
-.MEAS TRAN V_SENSEB_final FIND V(SENSEB) AT=4.5n
+* 2. Sensing Delay for Read '0' (Time from READ_EN rising at 2.0ns to SENSE rising to 90% = 1.62V)
+.MEAS TRAN t_sense_read0 TRIG V(READ_EN) VAL=0.9 RISE=1 TARG V(SENSE) VAL=1.62 RISE=1
 
-* 4. Full Rail Output Differential (must be ~1.8V)
-.MEAS TRAN V_out_differential PARAM = abs(V_SENSEB_final - V_SENSE_final)
+* 3. Final SENSE Output Voltage for Read '0' at t = 4.0ns
+.MEAS TRAN V_SENSE_read0 FIND V(SENSE) AT=4.0n
 
-* 5. Peak Strobe Current drawn from VDD during regeneration
-.MEAS TRAN I_peak_sense MAX -I(VDDsrc) FROM=2.5n TO=5.0n
+* 4. Read '1' Differential at t = 7.0ns (must be 100mV)
+.MEAS TRAN V_diff_read1 PARAM = (V(BIT) - V(BITB)) AT=7.0n
 
-* 6. Energy consumed per Sense Amp strobe operation
-.MEAS TRAN E_sense_op INTEG (-I(VDDsrc)*V(vdd)) FROM=2.5n TO=5.0n
+* 5. Sensing Delay for Read '1' (Time from READ_EN rising at 7.0ns to SENSE falling to 10% = 0.18V)
+.MEAS TRAN t_sense_read1 TRIG V(READ_EN) VAL=0.9 RISE=2 TARG V(SENSE) VAL=0.18 FALL=1
+
+* 6. Final SENSE Output Voltage for Read '1' at t = 9.0ns
+.MEAS TRAN V_SENSE_read1 FIND V(SENSE) AT=9.0n
+
+* 7. Peak Power/Current drawn from VDD during sensing
+.MEAS TRAN I_peak_sense MAX -I(VDDsrc) FROM=2.0n TO=4.5n
+
+* 8. Energy consumed during one sensing operation
+.MEAS TRAN E_sense_op INTEG (-I(VDDsrc)*V(vdd)) FROM=2.0n TO=4.5n
 
 *** 6. Transient Simulation ***
-.TRAN 5p 6n
+.TRAN 10p 10n
 .END

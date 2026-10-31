@@ -41,12 +41,12 @@ The 256-bit memory is organized into a $16 \times 16$ 2D matrix:
 ### 2.4 Sense Amplifier Unit
 - **Scalable Rules Basis:** $\lambda = 90\text{ nm}, 180\text{ nm} = 2\lambda$. All lengths $L = 2\lambda = 0.18\ \mu\text{m}$.
 - **Transistor Sizing:**
-  - **Tail Strobe NMOS (`Mnmos@0`):** $W = 6\lambda = 0.54\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (low resistance ground path).
-  - **Cross-Coupled NMOS Pair (`Mnmos@1`, `Mnmos@2`):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (high $g_m$ regeneration).
-  - **Cross-Coupled PMOS Pair (`Mpmos@2`, `Mpmos@3`):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (active pull-up).
-  - **Bitline Isolation PMOS Gates (`Mpmos@0`, `Mpmos@1`):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (isolates $C_{\text{BL}} \approx 35\text{ fF}$ during strobe).
-- **Topology:** Decoupled differential voltage latch sense amplifier clocked by `READ_EN`.
-- **Performance:** Senses down to $\Delta V_{\text{min}} \le 50\text{--}100\text{ mV}$ with latching delay $t_{\text{sense}} < 250\text{ ps}$ and energy $< 30\text{ fJ}$/strobe.
+  - **Tail Strobe NMOS (`Mnmos@5`):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (biases diff pair).
+  - **Differential Input NMOS Pair (`Mnmos@3`, `Mnmos@4`):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (high $g_m$, zero DC bitline load).
+  - **Active PMOS Current Mirror (`Mpmos@4`, `Mpmos@5`):** $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (high output impedance active load).
+  - **Output Inverter Stage:** NMOS (`Mnmos@6`) $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS (`Mpmos@6`) $W = 4\lambda = 0.36\ \mu\text{m}$ (full-rail digital output).
+- **Topology:** 2-Stage Current-Mirror Operational Transconductance Amplifier (OTA) with inverter output buffer.
+- **Performance:** Senses down to $\Delta V_{\text{min}} \le 50\text{--}100\text{ mV}$ with high CMRR, sensing delay $t_{\text{sense}} < 300\text{ ps}$, and zero DC bitline loading.
 
 ### 2.5 4-to-16 Row & Column Decoders
 - **Row Decoder:** 4 address bits ($A[7:4]$) $\to$ 16 Wordline drivers (`WL[0:15]`). Static CMOS NAND/NOR structure with driving inverters/buffers sized to charge the parasitic gate capacitance of 16 bitcell access transistors.

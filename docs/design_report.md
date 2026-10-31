@@ -130,6 +130,18 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 8: Decoupled Differential Latch Sense Amplifier Sizing in Lambda Rules
+- **Date:** October 2026
+- **Context:** Sizing the differential voltage latch sense amplifier (`Sense_amp`), featuring bitline isolation PMOS pass gates and a clocked tail NMOS strobe transistor.
+- **Alternatives Considered:**
+  1. *Uniform Minimum Sizing ($W = 2\lambda = 0.18\ \mu\text{m}$ for all transistors):* Causes high tail node resistance ($R_{\text{tail}}$), resulting in ground bounce on internal node `net@9` and slow latch regeneration delay ($t_{\text{sense}} > 500\text{ ps}$).
+  2. *Excessively Large Strobe ($W > 12\lambda$):* Draws high peak surge current without meaningful delay improvement, and adds heavy clock capacitive loading on `READ_EN`.
+  3. *Optimized Decoupled Sizing ($W_{\text{tail}}=6\lambda=0.54\ \mu\text{m}, W_{\text{latch}}=4\lambda=0.36\ \mu\text{m}, W_{\text{iso}}=4\lambda=0.36\ \mu\text{m}$):* Maximizes regenerative transconductance $g_m$, achieves sensing delay $t_{\text{sense}} < 250\text{ ps}$ for $\Delta V = 100\text{ mV}$, and isolates the latch from heavy bitline capacitance ($35\text{ fF}$) during latching.
+- **Decision:** Adopted **Tail NMOS $W = 6\lambda = 0.54\ \mu\text{m}$, Cross-coupled NMOS & PMOS $W = 4\lambda = 0.36\ \mu\text{m}$, Isolation PMOS $W = 4\lambda = 0.36\ \mu\text{m}$** (all $L = 2\lambda = 0.18\ \mu\text{m}$).
+- **Rationale:** Ensures reliable differential amplification down to $\Delta V_{\text{min}} \le 50\text{ mV}$ with $< 250\text{ ps}$ latching delay and $< 30\text{ fJ}$ energy per sense strobe.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -166,7 +178,13 @@ This section records every major design decision, the alternatives evaluated, an
   - PMOS Pass Gates (`Mpmos@0`, `Mpmos@1`): $W = 8\lambda = 0.72\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
   - Local Inverter: NMOS $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS $W = 3\lambda = 0.27\ \mu\text{m}$.
   - Target Performance: $R_{\text{on,eq}} < 2\ \text{k}\Omega$, read transfer delay $t_{\text{prop,read}} < 100\text{ ps}$, zero threshold voltage drop.
-- **Sense Amplifier:** Differential latch amplifier triggered by `SENSE_EN` pulse, converting small $\Delta V \approx 100\text{--}200\text{ mV}$ into full 0–1.8 V CMOS rail.
+- **Sense Amplifier (Decoupled Latch Architecture):**
+  - Scalable rules: $\lambda = 90\text{ nm}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Tail NMOS Strobe (`Mnmos@0`): $W = 6\lambda = 0.54\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Cross-Coupled NMOS Pair (`Mnmos@1`, `Mnmos@2`): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Cross-Coupled PMOS Pair (`Mpmos@2`, `Mpmos@3`): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Bitline Isolation PMOS Gates (`Mpmos@0`, `Mpmos@1`): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Target Performance: Sensitivity $\Delta V_{\text{min}} \le 50\text{--}100\text{ mV}$, sensing delay $t_{\text{sense}} < 250\text{ ps}$, energy per sense $< 30\text{ fJ}$.
 
 ### 4.4 Write Path: Write Driver
 - Tri-state pull-down driver controlled by `WRITE_EN` and `DIN`, driving `DL` / `DLB` strongly to $0\text{ V}$ during write cycles.

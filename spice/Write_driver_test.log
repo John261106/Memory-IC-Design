@@ -1,0 +1,19 @@
+Circuit: *** SPICE deck for Tri-State Differential Write Driver Characterization
+
+Vgnd: both pins shorted together -- ignoring.
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Ignoring BSIM parameter XL
+Ignoring BSIM parameter XW
+Error on line 44 : r_pre_bitb bitb_pre bitb pwl(0n 100meg 3.98n 100meg 4.0n 500 5.8n 500 5.82n 100meg 10n 100meg)
+	 Unable to find definition of model "pwl"
+	
+	*  Unknown parameter "100meg"
+Vpre_bitb: Removing PWL point (3.9e-009,1.8)
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Warning: Pd = 0 is less than W.
+Warning: Ps = 0 is less than W.
+Fatal Error: R_pre_bitb: Resistance must not be zero.

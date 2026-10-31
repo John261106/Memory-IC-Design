@@ -5,15 +5,37 @@ Ignoring BSIM parameter XL
 Ignoring BSIM parameter XW
 Ignoring BSIM parameter XL
 Ignoring BSIM parameter XW
-Error on line 44 : r_pre_bitb bitb_pre bitb pwl(0n 100meg 3.98n 100meg 4.0n 500 5.8n 500 5.82n 100meg 10n 100meg)
-	 Unable to find definition of model "pwl"
-	
-	*  Unknown parameter "100meg"
-Vpre_bitb: Removing PWL point (3.9e-009,1.8)
 Warning: Pd = 0 is less than W.
 Warning: Ps = 0 is less than W.
 Warning: Pd = 0 is less than W.
 Warning: Ps = 0 is less than W.
 Warning: Pd = 0 is less than W.
 Warning: Ps = 0 is less than W.
-Fatal Error: R_pre_bitb: Resistance must not be zero.
+Direct Newton iteration for .op point succeeded.
+
+t_write1_pulldown=4.30795e-010 FROM 9.9e-010 TO 1.42079e-009
+v_ol_bitb: v(bitb)=8.04057e-007 at 3e-009
+t_write0_pulldown=4.30739e-010 FROM 5.99e-009 TO 6.42074e-009
+v_ol_bit: v(bit)=8.05459e-007 at 8e-009
+
+Measurement "i_peak_write" FAIL'ed
+e_write_op: INTEG(-i(vddsrc)*v(vdd))=-1.15835e-020 FROM 1e-009 TO 3.5e-009
+
+
+Date: Sat Oct 31 12:46:11 2026
+Total elapsed time: 0.061 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 2308
+traniter = 2279
+tranpoints = 1088
+accept = 1088
+rejected = 0
+matrix size = 13
+fillins = 0
+solver = Normal
+Matrix Compiler1: 586 bytes object code size  0.1/0.1/[0.1]
+Matrix Compiler2: off  [0.1]/0.1/0.1
+

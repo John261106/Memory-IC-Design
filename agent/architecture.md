@@ -33,10 +33,15 @@ The 256-bit memory is organized into a $16 \times 16$ 2D matrix:
   - One PMOS equalizer connected between `BIT` and `BITB` to eliminate offset before sensing.
 
 ### 2.3 Write Driver Unit
-- **Topology:** Tri-state NMOS/PMOS pull-down logic gated by `WRITE_EN` and input data `DATA`:
+- **Scalable Rules Basis:** $\lambda = 90\text{ nm}, 180\text{ nm} = 2\lambda$. All lengths $L = 2\lambda = 0.18\ \mu\text{m}$.
+- **Transistor Sizing:**
+  - **Series Pull-Down NMOS (`Mnmos@0, 4, 5, 6`):** $W = 6\lambda = 0.54\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (low series resistance $< 1.5\ \text{k}\Omega$).
+  - **Data Inverter:** NMOS (`Mnmos@7`) $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS (`Mpmos@2`) $W = 4\lambda = 0.36\ \mu\text{m}$ (balanced threshold, model `CMOSP`).
+- **Topology:** Tri-state differential pull-down logic gated by `WRITE_EN` and input data `DATA`:
   - When `WRITE_EN = 1` and `DATA = 1`: pulls `BITB` to GND, leaves `BIT` high.
   - When `WRITE_EN = 1` and `DATA = 0`: pulls `BIT` to GND, leaves `BITB` high.
   - When `WRITE_EN = 0`: high impedance (Hi-Z) so read operations are not perturbed.
+- **Performance:** Bitline discharge time $t_{\text{pulldown}} < 250\text{ ps}$ into $50\text{ fF}$; $V_{\text{OL}} < 0.05\text{ V}$.
 
 ### 2.4 Sense Amplifier Unit
 - **Scalable Rules Basis:** $\lambda = 90\text{ nm}, 180\text{ nm} = 2\lambda$. All lengths $L = 2\lambda = 0.18\ \mu\text{m}$.

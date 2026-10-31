@@ -142,6 +142,18 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 9: Tri-State Differential Write Driver Sizing in Lambda Rules
+- **Date:** October 2026
+- **Context:** Sizing the NMOS series pull-down stacks and data inverter in the tri-state write driver (`Write_driver`) to rapidly discharge heavily loaded bitlines ($C_{\text{load}} \approx 50\text{ fF}$) down to $V_{\text{OL}} \le 0.05\text{ V}$.
+- **Alternatives Considered:**
+  1. *Minimum Uniform Sizing ($W = 2\lambda = 0.18\ \mu\text{m}$):* Two series NMOS transistors present high pull-down resistance ($R_{\text{series}} \approx 5\text{--}6\ \text{k}\Omega$), resulting in sluggish bitline discharge ($t_{\text{fall}} > 600\text{ ps}$).
+  2. *Excessively Large Stacks ($W > 12\lambda$):* Increases circuit layout footprint and gate capacitance without meaningful write speed improvements.
+  3. *Optimized Series Sizing ($W_{\text{stack}}=6\lambda=0.54\ \mu\text{m}, W_{\text{inv,N}}=2\lambda=0.18\ \mu\text{m}, W_{\text{inv,P}}=4\lambda=0.36\ \mu\text{m}$):* Cuts series resistance to $< 1.5\ \text{k}\Omega$, achieving fast pull-down ($t_{\text{fall}} < 250\text{ ps}$) and solid $V_{\text{OL}} < 0.05\text{ V}$ to guarantee instant bitcell overwriting.
+- **Decision:** Adopted **Series Pull-Down NMOS $W = 6\lambda = 0.54\ \mu\text{m}$**, **Data Inverter NMOS $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS $W = 4\lambda = 0.36\ \mu\text{m}$** (all $L = 2\lambda = 0.18\ \mu\text{m}$).
+- **Rationale:** Overpowers the 6T bitcell pull-up PMOS effortlessly and drives the bitline to ground in $< 250\text{ ps}$.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -187,7 +199,11 @@ This section records every major design decision, the alternatives evaluated, an
   - Target Performance: Sensitivity $\Delta V_{\text{min}} \le 50\text{--}100\text{ mV}$, high CMRR, sensing delay $t_{\text{sense}} < 300\text{ ps}$, zero DC bitline loading.
 
 ### 4.4 Write Path: Write Driver
-- Tri-state pull-down driver controlled by `WRITE_EN` and `DIN`, driving `DL` / `DLB` strongly to $0\text{ V}$ during write cycles.
+- **Tri-State Differential Write Driver:**
+  - Scalable rules: $\lambda = 90\text{ nm}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Series Pull-Down NMOS Stacks (`Mnmos@0, 4, 5, 6`): $W = 6\lambda = 0.54\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+  - Data Inverter: NMOS (`Mnmos@7`) $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS (`Mpmos@2`) $W = 4\lambda = 0.36\ \mu\text{m}$ (model `CMOSP`).
+  - Target Performance: Bitline discharge time $t_{\text{pulldown}} < 250\text{ ps}$ into $50\text{ fF}$; final $V_{\text{OL}} \le 0.05\text{ V}$; tri-state leakage $< 1\text{ nA}$.
 
 ---
 

@@ -1,0 +1,76 @@
+*** SPICE deck for Tri-State Differential Write Driver Characterization
+*** Cell under test: Write_driver{sch}
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+*** Sizing:
+*** - Series Pull-Down NMOS (Mnmos@0, 4, 5, 6): W = 6*lambda (0.54u), L = 2*lambda (0.18u)
+*** - Data Inverter: NMOS (Mnmos@7) W = 2*lambda (0.18u), PMOS (Mpmos@2) W = 4*lambda (0.36u)
+
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** 1. WRITE DRIVER NETLIST (from Write_driver.spi) ***
+* BIT Pull-Down Leg: Mnmos@0 (gated by WRITE_EN) in series with Mnmos@4 (gated by DATAB)
+Mnmos@0 BIT   WRITE_EN net@6 gnd CMOSN L=0.18U W=0.54U
+Mnmos@4 net@6 net@3    gnd   gnd CMOSN L=0.18U W=0.54U
+
+* BITB Pull-Down Leg: Mnmos@5 (gated by WRITE_EN) in series with Mnmos@6 (gated by DATA)
+Mnmos@5 BITB  WRITE_EN net@12 gnd CMOSN L=0.18U W=0.54U
+Mnmos@6 net@12 DATA    gnd    gnd CMOSN L=0.18U W=0.54U
+
+* Data Complement Inverter: DATA -> net@3 (DATAB)
+Mnmos@7 net@3 DATA gnd gnd CMOSN L=0.18U W=0.18U
+Mpmos@2 vdd   DATA net@3 vdd CMOSP L=0.18U W=0.36U
+
+*** 2. Power Supplies ***
+VDDsrc vdd 0 DC 1.8
+VGND   gnd 0 DC 0
+
+*** 3. Realistic Bitline Capacitances ***
+* Upper column bitline load (35fF) + global bus load (15fF) = 50fF total load
+C_BIT  BIT  gnd 50f
+C_BITB BITB gnd 50f
+
+*** 4. Initial Condition: Both bitlines precharged to 1.8V ***
+.IC V(BIT)=1.8 V(BITB)=1.8
+
+*** 5. Stimulus Controls ***
+* Test Sequence:
+* - 0 to 1ns: Tri-state (WRITE_EN = 0V, both bitlines stay precharged at 1.8V)
+* - 1ns to 4ns: Write '1' (DATA = 1.8V, WRITE_EN pulses to 1.8V -> pulls BITB down to 0V)
+* - 4ns to 6ns: Precharge recovery (WRITE_EN = 0V, bitlines restored to 1.8V)
+* - 6ns to 9ns: Write '0' (DATA = 0V, WRITE_EN pulses to 1.8V -> pulls BIT down to 0V)
+
+* WRITE_EN Strobe Pulses
+VWE WRITE_EN 0 PWL(0n 0  0.98n 0  1.0n 1.8  3.5n 1.8  3.52n 0  5.98n 0  6.0n 1.8  8.5n 1.8  8.52n 0  10.0n 0)
+
+* DATA Input: 1.8V (Write 1) during 0 to 5ns; 0V (Write 0) during 5ns to 10ns
+VDATA DATA 0 PWL(0n 1.8  4.8n 1.8  5.0n 0  10.0n 0)
+
+* Precharge restore pulses to recharge the bitlines between writes
+* Restores BITB at t = 4.0ns
+VPRE_BITB BITB_pre 0 PWL(0n 1.8  3.9n 1.8  4.0n 1.8  4.01n 1.8  5.8n 1.8)
+R_PRE_BITB BITB_pre BITB PWL(0n 100MEG  3.98n 100MEG  4.0n 500  5.8n 500  5.82n 100MEG  10n 100MEG)
+
+*** 6. Automated Performance Measurements for Report ***
+
+* 1. Write '1' Pull-Down Delay (Time from WRITE_EN rising to BITB falling below 10% = 0.18V)
+.MEAS TRAN t_write1_pulldown TRIG V(WRITE_EN) VAL=0.9 RISE=1 TARG V(BITB) VAL=0.18 FALL=1
+
+* 2. Final Output Low Voltage on BITB during Write '1' (at t = 3.0ns; must be < 50mV)
+.MEAS TRAN V_OL_BITB FIND V(BITB) AT=3.0n
+
+* 3. Write '0' Pull-Down Delay (Time from WRITE_EN rising to BIT falling below 10% = 0.18V)
+.MEAS TRAN t_write0_pulldown TRIG V(WRITE_EN) VAL=0.9 RISE=2 TARG V(BIT) VAL=0.18 FALL=1
+
+* 4. Final Output Low Voltage on BIT during Write '0' (at t = 8.0ns; must be < 50mV)
+.MEAS TRAN V_OL_BIT FIND V(BIT) AT=8.0n
+
+* 5. Peak Pull-Down Current drawn through ground during write
+.MEAS TRAN I_peak_write MAX I(VGND) FROM=1.0n TO=3.5n
+
+* 6. Energy consumed during one write pull-down cycle
+.MEAS TRAN E_write_op INTEG (-I(VDDsrc)*V(vdd)) FROM=1.0n TO=3.5n
+
+*** 7. Transient Simulation ***
+.TRAN 10p 10n
+.END

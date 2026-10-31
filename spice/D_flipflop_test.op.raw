@@ -1,0 +1,50 @@
+Title: *** SPICE deck for Master-Slave Transmission-Gate D Flip-Flop Characterization
+Date: Sat Oct 31 20:00:37 2026
+Plotname: Operating Point
+Flags: real
+No. Variables: 20
+No. Points:            1
+Offset:   0.0000000000000000e+000
+Command: Linear Technology Corporation LTspice XVII
+Variables:
+	0	V(clk)	voltage
+	1	V(vdd)	voltage
+	2	V(d)	voltage
+	3	V(q1)	voltage
+	4	V(q2)	voltage
+	5	I(Cload2)	device_current
+	6	I(Cload1)	device_current
+	7	I(Vd)	device_current
+	8	I(Vclk)	device_current
+	9	I(Vddsrc)	device_current
+	10	Ix(dff1:CLK)	subckt_current
+	11	Ix(dff1:D)	subckt_current
+	12	Ix(dff1:Q)	subckt_current
+	13	Ix(dff1:GND)	subckt_current
+	14	Ix(dff1:VDD)	subckt_current
+	15	Ix(dff2:CLK)	subckt_current
+	16	Ix(dff2:D)	subckt_current
+	17	Ix(dff2:Q)	subckt_current
+	18	Ix(dff2:GND)	subckt_current
+	19	Ix(dff2:VDD)	subckt_current
+Values:
+0		0.000000000000000e+000
+	1.800000000000000e+000
+	0.000000000000000e+000
+	0.000000000000000e+000
+	0.000000000000000e+000
+	0.000000000000000e+000
+	0.000000000000000e+000
+	5.430002166096195e-012
+	0.000000000000000e+000
+	-2.516704802456998e-010
+	0.000000000000000e+000
+	-5.430001013689568e-012
+	-6.768539626512695e-012
+	-1.136366984689388e-010
+	1.258352307413854e-010
+	0.000000000000000e+000
+	-5.430001013689568e-012
+	-6.768539626512695e-012
+	-1.136366984689388e-010
+	1.258352308214997e-010

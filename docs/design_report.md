@@ -154,6 +154,23 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 10: Static Master-Slave Transmission-Gate D Flip-Flop Sizing & Feedback Connection
+- **Date:** October 2026
+- **Context:** Implementing the sequential register elements required for serial addressing (`ADDR_IN`), data buffering (`DIN`), and control pipelines. Sizing all 20 transistors across the clock generation inverters, master latch, and slave latch, and resolving internal feedback keeper power routing.
+- **Alternatives Considered:**
+  1. *True Single-Phase Clock (TSPC) Dynamic Flip-Flop:* Uses fewer transistors (~9-11) and single clock line, but suffers from dynamic node charge leakage at low or paused clock speeds, high clock slope sensitivity, and charge-sharing hazards. Unsuitable for debuggable serial shift registers where clock rates may be paused.
+  2. *Uniform Minimum-Sized Master-Slave TG DFF ($W = 2\lambda = 0.18\ \mu\text{m}$ throughout):* Clock inverters suffer high rise/fall skew under 4-TG capacitive loading; keeper inverters contend with input TGs during sampling; output stage produces sluggish edges ($> 400\text{ ps}$) into downstream shift-register stages.
+  3. *Optimized Ratioed Master-Slave TG DFF:*
+     - Clock inverters: $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$ (balanced $\tau_{\text{p}} \approx \tau_{\text{n}}$, sharp transitions $< 40\text{ ps}$).
+     - Input & Interstage TGs: $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$ (low $R_{\text{on}}$, rapid sampling).
+     - Master Forward Inverter: $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$ (trip point $V_M \approx 0.9\text{ V}$, centered noise margin).
+     - Feedback Keepers (Master & Slave): Weak sizing $W_{\text{N}} = 2\lambda = 0.18\ \mu\text{m}, W_{\text{P}} = 4\lambda = 0.36\ \mu\text{m}$ for inverters, $W_{\text{N}} = 3\lambda = 0.27\ \mu\text{m}, W_{\text{P}} = 6\lambda = 0.54\ \mu\text{m}$ for feedback TGs. Eliminates write-contention spikes while holding state statically.
+     - Slave Output Driver: $W_{\text{N}} = 6\lambda = 0.54\ \mu\text{m}, W_{\text{P}} = 12\lambda = 1.08\ \mu\text{m}$ for sharp transitions ($< 200\text{ ps}$) into $25\text{--}50\text{ fF}$ interconnect/load.
+- **Decision:** Adopted **Optimized Ratioed Master-Slave TG DFF** and corrected the feedback keeper inverter power connections (NMOS source to `GND`, PMOS source to `VDD`, correcting a 180° rotation inversion in CAD schematic).
+- **Rationale:** Achieves sub-230 ps clock-to-Q propagation delays ($t_{\text{clk}\to Q\text{, rise}} = 227.2\text{ ps}, t_{\text{clk}\to Q\text{, fall}} = 207.8\text{ ps}$), guarantees race-free cascading in shift registers, and maintains static data retention down to DC.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -205,6 +222,17 @@ This section records every major design decision, the alternatives evaluated, an
   - Data Inverter: NMOS (`Mnmos@7`) $W = 2\lambda = 0.18\ \mu\text{m}$, PMOS (`Mpmos@2`) $W = 4\lambda = 0.36\ \mu\text{m}$ (model `CMOSP`).
   - Target Performance: Bitline discharge time $t_{\text{pulldown}} < 250\text{ ps}$ into $50\text{ fF}$; final $V_{\text{OL}} \le 0.05\text{ V}$; tri-state leakage $< 1\text{ nA}$.
 
+### 4.5 Sequential Elements: Master-Slave Transmission-Gate D Flip-Flop
+- **D Flip-Flop Architecture (`D_flipflop`):**
+  - Scalable rules: $\lambda = 90\text{ nm}, L_{\text{min}} = 2\lambda = 0.18\ \mu\text{m}$.
+  - **Internal Clock Inverters (`Mnmos@8/9, Mpmos@8/9`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$. Sized to drive 4 transmission gate loads each with sharp rise/fall times.
+  - **Master Input Transmission Gate (`Mnmos@0, Mpmos@0`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$. Low on-resistance allows rapid sampling into master storage node.
+  - **Master Forward Inverter (`Mnmos@2, Mpmos@2`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$. Balanced $W_p / W_n = 2$ centers switching threshold at $V_M \approx 0.9\text{ V}$.
+  - **Master Feedback Keeper (`Mnmos@3, Mpmos@3, Mnmos@1, Mpmos@1`):** Inverter $W_{\text{N}} = 2\lambda = 0.18\ \mu\text{m}, W_{\text{P}} = 4\lambda = 0.36\ \mu\text{m}$; TG $W_{\text{N}} = 3\lambda = 0.27\ \mu\text{m}, W_{\text{P}} = 6\lambda = 0.54\ \mu\text{m}$. Deliberately sized weaker than input TG to eliminate contention.
+  - **Inter-Stage Transmission Gate (`Mnmos@7, Mpmos@7`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$. Low resistance for fast master-to-slave charge transfer.
+  - **Slave Forward Inverter / Output Stage (`Mnmos@5, Mpmos@5`):** $W_{\text{N}} = 6\lambda = 0.54\ \mu\text{m}, W_{\text{P}} = 12\lambda = 1.08\ \mu\text{m}$. Higher drive capability for sharp Q transitions into downstream shift-register loads.
+  - **Slave Feedback Keeper (`Mnmos@6, Mpmos@6, Mnmos@4, Mpmos@4`):** Inverter $W_{\text{N}} = 2\lambda = 0.18\ \mu\text{m}, W_{\text{P}} = 4\lambda = 0.36\ \mu\text{m}$; TG $W_{\text{N}} = 3\lambda = 0.27\ \mu\text{m}, W_{\text{P}} = 6\lambda = 0.54\ \mu\text{m}$. Holds slave state statically with zero DC power dissipation.
+
 ---
 
 ## 5. Physical Layout & Parasitics Strategy
@@ -236,6 +264,14 @@ This section records every major design decision, the alternatives evaluated, an
 | **Write Bitline Pull-Down Delay ($t_{\text{pulldown}}$)** | $< 500\text{ ps}$ | **430.8 ps** | — | Pulls 50fF bitline down to $< 10\% V_{\text{DD}}$ in 431ps |
 | **Write Pull-Down Symmetry ($\Delta t_{\text{W0-W1}}$)** | $< 10\text{ ps}$ | **0.06 ps** | — | 430.795ps vs 430.739ps; matched rise/fall inverter |
 | **Write Output Low Voltage ($V_{\text{OL}}$)** | $< 50\text{ mV}$ | **$< 1\ \mu\text{V}$** | — | Pulls bitline completely to ground ($0.8\ \mu\text{V}$) |
+| **DFF Clock-to-Q Rise Delay ($t_{\text{clk}\to Q\text{, rise}}$)** | $< 350\text{ ps}$ | **227.2 ps** | — | Measured at 50% $V_{\text{DD}}$ into 25 fF load |
+| **DFF Clock-to-Q Fall Delay ($t_{\text{clk}\to Q\text{, fall}}$)** | $< 350\text{ ps}$ | **207.8 ps** | — | Measured at 50% $V_{\text{DD}}$ into 25 fF load |
+| **DFF Output Rise Time ($t_{\text{rise}}$)** | $< 300\text{ ps}$ | **203.5 ps** | — | 10% to 90% full-swing output edge |
+| **DFF Output Fall Time ($t_{\text{fall}}$)** | $< 250\text{ ps}$ | **155.2 ps** | — | 90% to 10% full-swing output edge |
+| **Shift-Register Stage 2 Latency** | $< 350\text{ ps}$ | **225.5 ps** | — | Race-free stage-to-stage cascading verified |
+| **DFF Hold Stability Check** | Full rail retention | **1.800 V / 0.000 V** | — | Zero corruption when input D toggles while CLK is HIGH |
+| **DFF Dynamic Energy per Cycle ($E_{\text{cycle}}$)** | $< 300\text{ fJ}$ | **190.2 fJ** | — | Full clock cycle integration @ 100 MHz |
+| **DFF Dynamic Power ($P_{\text{avg}}$)** | $< 30\ \mu\text{W}$ | **19.02 µW** | — | Continuous switching @ 100 MHz |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

@@ -63,6 +63,18 @@ Because only **1 external address pin (`ADDR_IN`)** is provided:
 - **Option B (Sequential Counter with Reset):** An 8-bit synchronous binary counter incrementing each clock cycle, with `ADDR_IN` serving as address reset / sync pulse or serial address increment strobe.
 - **Output:** 8 parallel lines ($A[7:0]$) split into Row Address ($A[7:4]$) and Column Address ($A[3:0]$).
 
+### 2.7 Master-Slave Transmission-Gate D Flip-Flop
+- **Cell:** `D_flipflop`
+- **Scalable Rules Basis:** $\lambda = 90\text{ nm}, L_{\text{min}} = 2\lambda = 0.18\ \mu\text{m}$.
+- **Transistor Sizing:**
+  - **Clock Inverters (`Mnmos@8/9, Mpmos@8/9`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$ (balanced $\tau_p \approx \tau_n$, sharp transitions).
+  - **Master Input & Interstage TGs (`Mnmos@0/7, Mpmos@0/7`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$ (low $R_{\text{on}}$, rapid state transfer).
+  - **Master Forward Inverter (`Mnmos@2, Mpmos@2`):** $W_{\text{N}} = 4\lambda = 0.36\ \mu\text{m}, W_{\text{P}} = 8\lambda = 0.72\ \mu\text{m}$ ($V_M \approx 0.9\text{ V}$, centered noise margin).
+  - **Keeper Inverters (`Mnmos@3/6, Mpmos@3/6`):** $W_{\text{N}} = 2\lambda = 0.18\ \mu\text{m}, W_{\text{P}} = 4\lambda = 0.36\ \mu\text{m}$ (weak keeper, eliminates write contention).
+  - **Keeper TGs (`Mnmos@1/4, Mpmos@1/4`):** $W_{\text{N}} = 3\lambda = 0.27\ \mu\text{m}, W_{\text{P}} = 6\lambda = 0.54\ \mu\text{m}$.
+  - **Slave Output Driver (`Mnmos@5, Mpmos@5`):** $W_{\text{N}} = 6\lambda = 0.54\ \mu\text{m}, W_{\text{P}} = 12\lambda = 1.08\ \mu\text{m}$ (strong output drive into downstream shift-register loads).
+- **Performance:** $t_{\text{clk}\to Q\text{, rise}} = 227.2\text{ ps}, t_{\text{clk}\to Q\text{, fall}} = 207.8\text{ ps}$; dynamic energy $E_{\text{cycle}} = 190.2\text{ fJ}$; robust static retention down to DC.
+
 ---
 
 ## 3. Clock Distribution Network

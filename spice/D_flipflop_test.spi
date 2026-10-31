@@ -1,0 +1,125 @@
+*** SPICE deck for Master-Slave Transmission-Gate D Flip-Flop Characterization
+*** Cell under test: D_flipflop{sch}
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Nominal Supply: 1.8V, Temperature: 27C
+***
+*** Test Suite Features:
+*** 1. 2-Stage Cascaded Shift Register (XDFF1 -> XDFF2):
+***    - Verifies race-free stage-to-stage bit transfer (Q1 to Q2).
+*** 2. Dynamic Timing Characterization:
+***    - t_clk_to_q_rise: Clock rising edge to Q rise propagation delay.
+***    - t_clk_to_q_fall: Clock rising edge to Q fall propagation delay.
+***    - t_rise: Output transition rise time (10% to 90%).
+***    - t_fall: Output transition fall time (90% to 10%).
+***    - t_shift_stage2: Inter-stage shift register transfer latency.
+*** 3. Robustness & Hold Immunity Verification:
+***    - Tests that D changes during CLK HIGH and CLK LOW states do not corrupt stored state.
+*** 4. Power & Energy Metrics:
+***    - Measures average dynamic power (P_avg_cycle) and energy per clock cycle (E_cycle).
+
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** 1. D FLIP-FLOP SUBCIRCUIT DEFINITION ***
+.SUBCKT D_flipflop CLK D Q gnd vdd
+* Internal Clock Inverters (Wn = 4*lambda, Wp = 8*lambda)
+Mnmos@8 CLKB CLK  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@8 vdd  CLK  CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@9 CLK2 CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@9 vdd  CLKB CLK2 vdd CMOSP L=0.18U W=0.72U
+
+* Master Input Transmission Gate (Wn = 4*lambda, Wp = 8*lambda)
+Mnmos@0 D     CLKB net@6 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 net@6 CLK2 D     vdd CMOSP L=0.18U W=0.72U
+
+* Master Forward Inverter (Wn = 4*lambda, Wp = 8*lambda)
+Mnmos@2 net@22 net@6 gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd    net@6 net@22 vdd CMOSP L=0.18U W=0.72U
+
+* Master Feedback Inverter (Weak Keeper: Wn = 2*lambda, Wp = 4*lambda)
+Mnmos@3 net@14 net@22 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    net@22 net@14 vdd CMOSP L=0.18U W=0.36U
+
+* Master Feedback Transmission Gate (Wn = 3*lambda, Wp = 6*lambda)
+Mnmos@1 net@6  CLK2 net@14 gnd CMOSN L=0.18U W=0.27U
+Mpmos@1 net@14 CLKB net@6  vdd CMOSP L=0.18U W=0.54U
+
+* Inter-Stage Transmission Gate (Wn = 4*lambda, Wp = 8*lambda)
+Mnmos@7 net@22 CLK2 net@45 gnd CMOSN L=0.18U W=0.36U
+Mpmos@7 net@45 CLKB net@22 vdd CMOSP L=0.18U W=0.72U
+
+* Slave Forward Inverter / Output Driver (Wn = 6*lambda, Wp = 12*lambda)
+Mnmos@5 Q   net@45 gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@5 vdd net@45 Q   vdd CMOSP L=0.18U W=1.08U
+
+* Slave Feedback Inverter (Weak Keeper: Wn = 2*lambda, Wp = 4*lambda)
+Mnmos@6 net@48 Q   gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    Q   net@48 vdd CMOSP L=0.18U W=0.36U
+
+* Slave Feedback Transmission Gate (Wn = 3*lambda, Wp = 6*lambda)
+Mnmos@4 net@45 CLKB net@48 gnd CMOSN L=0.18U W=0.27U
+Mpmos@4 net@48 CLK2 net@45 vdd CMOSP L=0.18U W=0.54U
+.ENDS D_flipflop
+
+*** 2. CIRCUIT INSTANTIATION (Cascaded 2-Bit Shift Register) ***
+XDFF1 CLK D  Q1 gnd vdd D_flipflop
+XDFF2 CLK Q1 Q2 gnd vdd D_flipflop
+
+*** 3. POWER SUPPLIES ***
+VDDsrc vdd 0 DC 1.8
+VGND   gnd 0 DC 0
+
+*** 4. REALISTIC CAPACITIVE LOADS ***
+* 25fF load models next stage shift-register routing + decoder input
+Cload1 Q1 gnd 25f
+Cload2 Q2 gnd 25f
+
+*** 5. INITIAL CONDITIONS ***
+.ic V(Q1)=0 V(Q2)=0
+
+*** 6. STIMULUS GENERATION ***
+* 100 MHz Clock (Period = 10ns, 50% Duty Cycle, 50ps Rise/Fall edges)
+* Clock Rising Edges occur at: t = 5ns, 15ns, 25ns, 35ns
+VCLK CLK 0 PULSE(0 1.8 5n 50p 50p 4.95n 10n)
+
+* Serial Data Input Sequence D:
+* - t = 0 to 8ns: D = 0 (Clock edge at 5ns initializes/confirms Q1 = 0)
+* - t = 8ns to 18ns: D = 1.8V (Clock edge at 15ns clocks 1 into Q1; Q2 remains 0)
+* - t = 18ns to 28ns: D = 0V (Clock edge at 25ns clocks 0 into Q1; clocks 1 into Q2!)
+* - t = 28ns to 45ns: D = 0V (Clock edge at 35ns clocks 0 into Q2)
+VD D 0 PWL(0n 0  7.95n 0  8.0n 1.8  17.95n 1.8  18.0n 0  45n 0)
+
+*** 7. TRANSIENT SIMULATION ***
+.TRAN 10p 45n
+
+*** 8. AUTOMATED PERFORMANCE MEASUREMENTS ***
+* 1. Clock-to-Q Delay (Low-to-High): measured at 2nd rising clock edge (t = 15ns)
+.MEAS TRAN t_clk_to_q_rise TRIG V(CLK) VAL=0.9 RISE=2 TARG V(Q1) VAL=0.9 RISE=1
+
+* 2. Clock-to-Q Delay (High-to-Low): measured at 3rd rising clock edge (t = 25ns)
+.MEAS TRAN t_clk_to_q_fall TRIG V(CLK) VAL=0.9 RISE=3 TARG V(Q1) VAL=0.9 FALL=1
+
+* 3. Output Rise Time (10% to 90% = 0.18V to 1.62V)
+.MEAS TRAN t_rise TRIG V(Q1) VAL=0.18 RISE=1 TARG V(Q1) VAL=1.62 RISE=1
+
+* 4. Output Fall Time (90% to 10% = 1.62V to 0.18V)
+.MEAS TRAN t_fall TRIG V(Q1) VAL=1.62 FALL=1 TARG V(Q1) VAL=0.18 FALL=1
+
+* 5. Shift-Register Stage 2 Transfer Latency (CLK rise to Q2 rise at t = 25ns)
+.MEAS TRAN t_shift_stage2 TRIG V(CLK) VAL=0.9 RISE=3 TARG V(Q2) VAL=0.9 RISE=1
+
+* 6. Steady-State Output High Voltage (must be 1.8V)
+.MEAS TRAN V_OH FIND V(Q1) AT=18n
+
+* 7. Steady-State Output Low Voltage (must be < 10mV)
+.MEAS TRAN V_OL FIND V(Q1) AT=28n
+
+* 8. Hold State Verification: Q1 must stay 1.8V after D drops to 0 at t = 18ns while CLK is HIGH
+.MEAS TRAN V_hold_check FIND V(Q1) AT=22n
+
+* 9. Dynamic Energy per Clock Cycle (integrated across full 10ns clock period: 10ns to 20ns)
+.MEAS TRAN E_cycle INTEG -I(VDDsrc)*V(vdd) FROM=10n TO=20n
+
+* 10. Average Dynamic Power per Clock Cycle
+.MEAS TRAN P_avg_cycle AVG -I(VDDsrc)*V(vdd) FROM=10n TO=20n
+
+.END

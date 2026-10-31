@@ -1,0 +1,70 @@
+*** SPICE deck for cell D_flipflop{sch} from library Memory-IC-Design
+*** Architecture: Static Master-Slave Transmission-Gate D Flip-Flop (TG-MS DFF)
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+***
+*** Sizing & Optimization Rationale:
+*** 1. Clock Inverters (Mnmos@8/9, Mpmos@8/9): Wn = 4*lambda (0.36u), Wp = 8*lambda (0.72u)
+***    - Sized to drive 4 transmission gate loads each with sharp rise/fall (<40ps).
+*** 2. Master Input TG (Mnmos@0, Mpmos@0): Wn = 4*lambda (0.36u), Wp = 8*lambda (0.72u)
+***    - Low on-resistance enables fast sampling into master storage node net@6.
+*** 3. Master Forward Inverter (Mnmos@2, Mpmos@2): Wn = 4*lambda (0.36u), Wp = 8*lambda (0.72u)
+***    - Balanced Wp/Wn = 2.0 ensures V_M ~ 0.9V for high static noise margin.
+*** 4. Master Feedback Keeper (Mnmos@3, Mpmos@3, Mnmos@1, Mpmos@1):
+***    - Inverter: Wn = 2*lambda (0.18u), Wp = 4*lambda (0.36u)
+***    - TG: Wn = 3*lambda (0.27u), Wp = 6*lambda (0.54u)
+***    - Deliberately weaker than input TG to avoid contention and eliminate dynamic switching spikes.
+*** 5. Inter-Stage TG (Mnmos@7, Mpmos@7): Wn = 4*lambda (0.36u), Wp = 8*lambda (0.72u)
+***    - Low on-resistance for rapid master-to-slave charge transfer on rising clock edge.
+*** 6. Slave Forward Inverter / Output Driver (Mnmos@5, Mpmos@5): Wn = 6*lambda (0.54u), Wp = 12*lambda (1.08u)
+***    - Higher drive capability for sharp Q transitions into 25-50fF shift register and decoder loads.
+*** 7. Slave Feedback Keeper (Mnmos@6, Mpmos@6, Mnmos@4, Mpmos@4):
+***    - Inverter: Wn = 2*lambda (0.18u), Wp = 4*lambda (0.36u)
+***    - TG: Wn = 3*lambda (0.27u), Wp = 6*lambda (0.54u)
+***    - Weak keeper sizing holds state reliably with zero leakage degradation.
+
+.options parhier=local
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: D_flipflop{sch}
+* 1. Internal Clock Generation (CLK -> CLKB -> CLK2)
+Mnmos@8 CLKB CLK  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@8 vdd  CLK  CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@9 CLK2 CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@9 vdd  CLKB CLK2 vdd CMOSP L=0.18U W=0.72U
+
+* 2. Master Latch Stage
+* Input Transmission Gate: passes D to net@6 when CLK is LOW (CLKB=1, CLK2=0)
+Mnmos@0 D     CLKB net@6 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 net@6 CLK2 D     vdd CMOSP L=0.18U W=0.72U
+
+* Master Forward Inverter: net@6 (QM) -> net@22 (QMB)
+Mnmos@2 net@22 net@6 gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd    net@6 net@22 vdd CMOSP L=0.18U W=0.72U
+
+* Master Feedback Inverter: net@22 (QMB) -> net@14 (Weak Keeper)
+Mnmos@3 net@14 net@22 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    net@22 net@14 vdd CMOSP L=0.18U W=0.36U
+
+* Master Feedback Transmission Gate: closes loop to net@6 when CLK is HIGH (CLK2=1, CLKB=0)
+Mnmos@1 net@6  CLK2 net@14 gnd CMOSN L=0.18U W=0.27U
+Mpmos@1 net@14 CLKB net@6  vdd CMOSP L=0.18U W=0.54U
+
+* 3. Slave Latch Stage
+* Inter-Stage Transmission Gate: transfers net@22 (QMB) to net@45 (QSB) when CLK is HIGH
+Mnmos@7 net@22 CLK2 net@45 gnd CMOSN L=0.18U W=0.36U
+Mpmos@7 net@45 CLKB net@22 vdd CMOSP L=0.18U W=0.72U
+
+* Slave Forward Inverter / Output Stage: net@45 (QSB) -> net@56 (Q Output)
+Mnmos@5 net@56 net@45 gnd    gnd CMOSN L=0.18U W=0.54U
+Mpmos@5 vdd    net@45 net@56 vdd CMOSP L=0.18U W=1.08U
+
+* Slave Feedback Inverter: net@56 (Q) -> net@48 (Weak Keeper)
+Mnmos@6 net@48 net@56 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    net@56 net@48 vdd CMOSP L=0.18U W=0.36U
+
+* Slave Feedback Transmission Gate: closes loop to net@45 when CLK is LOW
+Mnmos@4 net@45 CLKB net@48 gnd CMOSN L=0.18U W=0.27U
+Mpmos@4 net@48 CLK2 net@45 vdd CMOSP L=0.18U W=0.54U
+
+.END

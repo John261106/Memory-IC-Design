@@ -5,6 +5,7 @@
 - **Precharge Circuit:** Complete (`Precharge_ckt{sch}`, verified in SPICE).
 - **Sense Amplifier:** Complete (`Sense_amp{sch}`, verified in SPICE).
 - **Write Driver:** Complete (`Write_driver{sch}`, verified in SPICE).
+- **D Flip-Flop:** Complete (`D_flipflop{sch}` sized and verified; testbench in `D_flipflop_test.spi` confirms 2-stage shift register cascading with sub-230ps delay).
 - **1-Bit SRAM Slice:** Complete & verified (`1Bit_SRAM.spi`).
 - **16x16 Bitcell Matrix:** Schematic created (`256bit_SRAM.spi`, connected via Jython script `04_connect_sram_top.py`).
 - **4-to-16 Decoder Script:** Complete (`scripts/05_connect_decoder.py`, automates 20 NOT + 16 NAND gates with active-high `OUT0..15`).
@@ -21,6 +22,7 @@
 - [ ] Design Column Multiplexer with 16 CMOS transmission gates + local inverters connected to shared SA & WD.
 
 ### Phase 2: Serial Addressing & Clock Tree Network
+- [x] Design, size, and verify Master-Slave Transmission-Gate D Flip-Flop (`D_flipflop.spi`, `D_flipflop_test.spi`).
 - [ ] Implement 8-bit Serial-In Parallel-Out (SIPO) shift register / sequential counter for single-pin `ADDR_IN`.
 - [ ] Design balanced Clock Tree Network distributing `CLK` to decoders, registers, and sense amp strobes.
 - [ ] Synthesize/integrate Control (`CTRL` R/W) logic state machine.

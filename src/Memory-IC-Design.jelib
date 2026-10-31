@@ -3736,7 +3736,7 @@ EWL15||D5G2;|6T_cell@517|WL|I
 X
 
 # Cell D_flipflop;1{sch}
-CD_flipflop;1{sch}||schematic|1793454662066|1793456110014|
+CD_flipflop;1{sch}||schematic|1793454662066|1793460693828|
 Ngeneric:Facet-Center|art@0||0|0||||AV
 NOff-Page|conn@0||10|51||||
 NOff-Page|conn@1||10|47||||
@@ -3834,15 +3834,15 @@ Awire|CLKB|D5G1;||2700|pmos@7|g|16|6|pin@55||16|8
 Awire|CLKB|D5G1;Y-1;||0|pin@74||-4|37|pin@64||-21|37
 Awire|CLKB|D5G1;Y-2;||900|nmos@0|g|-41|-3|pin@85||-41|-6
 Awire|GND|D5G1;X2;Y-2;||900|nmos@2|s|-7|-5|pin@15||-7|-9
-Awire|VDD|D5G1;Y-2;||900|pmos@3|d|-7|-26|pin@22||-7|-29
 Awire|GND|D5G1;X1;Y-2;||900|nmos@5|s|50|-5|pin@39||50|-9
-Awire|VDD|D5G1;Y-3;||900|pmos@6|d|50|-26|pin@46||50|-29
 Awire|GND|D5G1;Y-3;||900|nmos@9|s|2|31|pin@71||2|27
 Awire|GND|D5G1;Y-2;||900|nmos@8|s|-21|31|pin@84||-21|28
-Awire|VDD|D5G1;Y2;||2700|pmos@2|d|-7|6|pin@14||-7|9
 Awire|GND|D5G1;X2;Y1;||2700|nmos@3|s|-7|-15|pin@23||-7|-11
-Awire|VDD|D5G1;Y2;||2700|pmos@5|d|50|6|pin@38||50|9
 Awire|GND|D5G1;X2;||2700|nmos@6|s|50|-15|pin@47||50|-11
+Awire|VDD|D5G1;Y-2;||900|pmos@3|d|-7|-26|pin@22||-7|-29
+Awire|VDD|D5G1;Y-3;||900|pmos@6|d|50|-26|pin@46||50|-29
+Awire|VDD|D5G1;Y2;||2700|pmos@2|d|-7|6|pin@14||-7|9
+Awire|VDD|D5G1;Y2;||2700|pmos@5|d|50|6|pin@38||50|9
 Awire|VDD|D5G1;Y2;||2700|pmos@9|d|2|42|pin@70||2|45
 Awire|VDD|D5G1;Y3;||2700|pmos@8|d|-21|42|pin@83||-21|46
 Awire|net@3|||2700|nmos@0|d|-43|0|pin@2||-43|1
@@ -3916,10 +3916,10 @@ Awire|net@113|||1800|pin@4||-39|1|pin@29||-30|1
 Awire|net@114|||0|pin@24||-7|-21|pin@10||-23|-21
 Awire|net@115|||0|pin@48||50|-21|pin@34||34|-21
 Awire|net@116|||0|pin@18||-13|1|pin@29||-30|1
-EQ||D5G2;|pin@52||O
 ECLK||D5G2;|pin@67||I
 ED||D5G2;Y2;|pin@3||I
 EGND||D5G2;|conn@1|a|G
+EQ||D5G2;X5;|pin@52||O
 EVDD||D5G2;|conn@0|a|P
 X
 

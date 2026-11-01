@@ -1,12 +1,66 @@
-*** SPICE deck for cell 8Bit_shiftreg{ic} from library Memory-IC-Design
-*** Created on Sat Oct 31, 2026 22:49:14
-*** Last revised on Sat Oct 31, 2026 22:51:13
-*** Written on Sat Oct 31, 2026 23:03:27 by Electric VLSI Design System, version 9.08
-*** Layout tech: mocmos, foundry MOSIS
-*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
-.options parhier=local
-* Model cards described in this file:
+*** SPICE deck for cell 8Bit_shiftreg{sch} from library Memory-IC-Design
+*** Architecture: 8-Bit Serial-In Parallel-Out Shift Register (SIPO)
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+***
+*** Exports:
+***   CLK, D, GND, Q0, Q1, Q2, Q3, Q4, Q5, Q6, Q7, VDD
+
+* .options parhier=local
 .include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
 
-*** TOP LEVEL CELL: 8Bit_shiftreg{ic}
-.END
+*** SUBCIRCUIT Memory-IC-Design__D_flipflop FROM CELL D_flipflop{sch}
+.SUBCKT Memory-IC-Design__D_flipflop CLK D gnd Q vdd
+Mnmos@8 CLKB CLK  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@8 vdd  CLK  CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@9 CLK2 CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@9 vdd  CLKB CLK2 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@0 D     CLKB net@6 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 net@6 CLK2 D     vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@2 net@22 net@6 gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd    net@6 net@22 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@3 net@14 net@22 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    net@22 net@14 vdd CMOSP L=0.18U W=0.36U
+
+Mnmos@1 net@6  CLK2 net@14 gnd CMOSN L=0.18U W=0.27U
+Mpmos@1 net@14 CLKB net@6  vdd CMOSP L=0.18U W=0.54U
+
+Mnmos@7 net@22 CLK2 net@45 gnd CMOSN L=0.18U W=0.36U
+Mpmos@7 net@45 CLKB net@22 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@5 Q      net@45 gnd    gnd CMOSN L=0.18U W=0.54U
+Mpmos@5 vdd    net@45 Q      vdd CMOSP L=0.18U W=1.08U
+
+Mnmos@6 net@48 Q      gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    Q      net@48 vdd CMOSP L=0.18U W=0.36U
+
+Mnmos@4 net@45 CLKB net@48 gnd CMOSN L=0.18U W=0.27U
+Mpmos@4 net@48 CLK2 net@45 vdd CMOSP L=0.18U W=0.54U
+.ENDS Memory-IC-Design__D_flipflop
+
+*** SUBCIRCUIT Memory-IC-Design__8Bit_shiftreg
+.SUBCKT Memory-IC-Design__8Bit_shiftreg CLK D gnd Q0 Q1 Q2 Q3 Q4 Q5 Q6 Q7 vdd
+Xflop0 CLK D  gnd Q0 vdd Memory-IC-Design__D_flipflop
+Xflop1 CLK Q0 gnd Q1 vdd Memory-IC-Design__D_flipflop
+Xflop2 CLK Q1 gnd Q2 vdd Memory-IC-Design__D_flipflop
+Xflop3 CLK Q2 gnd Q3 vdd Memory-IC-Design__D_flipflop
+Xflop4 CLK Q3 gnd Q4 vdd Memory-IC-Design__D_flipflop
+Xflop5 CLK Q4 gnd Q5 vdd Memory-IC-Design__D_flipflop
+Xflop6 CLK Q5 gnd Q6 vdd Memory-IC-Design__D_flipflop
+Xflop7 CLK Q6 gnd Q7 vdd Memory-IC-Design__D_flipflop
+.ENDS Memory-IC-Design__8Bit_shiftreg
+
+*** SUBCIRCUIT Memory-IC-Design__8Bit_reg
+.SUBCKT Memory-IC-Design__8Bit_reg CLK D0 D1 D2 D3 D4 D5 D6 D7 gnd Q0 Q1 Q2 Q3 Q4 Q5 Q6 Q7 vdd
+Xflop0 CLK D0 gnd Q0 vdd Memory-IC-Design__D_flipflop
+Xflop1 CLK D1 gnd Q1 vdd Memory-IC-Design__D_flipflop
+Xflop2 CLK D2 gnd Q2 vdd Memory-IC-Design__D_flipflop
+Xflop3 CLK D3 gnd Q3 vdd Memory-IC-Design__D_flipflop
+Xflop4 CLK D4 gnd Q4 vdd Memory-IC-Design__D_flipflop
+Xflop5 CLK D5 gnd Q5 vdd Memory-IC-Design__D_flipflop
+Xflop6 CLK D6 gnd Q6 vdd Memory-IC-Design__D_flipflop
+Xflop7 CLK D7 gnd Q7 vdd Memory-IC-Design__D_flipflop
+.ENDS Memory-IC-Design__8Bit_reg

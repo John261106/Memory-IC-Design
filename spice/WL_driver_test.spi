@@ -1,0 +1,48 @@
+* WL_driver testbench
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+Vdd vdd 0 DC 1.8V
+Vgnd gnd 0 DC 0V
+
+* Inputs: IN (decoder output) and EN (WL_EN)
+* IN transitions high at 2ns
+Vin in 0 PWL(0ns 0V 2ns 0V 2.05ns 1.8V 15ns 1.8V 15.05ns 0V 25ns 0V)
+* EN transitions high at 5ns, low at 12ns
+Ven en 0 PWL(0ns 0V 5ns 0V 5.05ns 1.8V 12ns 1.8V 12.05ns 0V 25ns 0V)
+
+*** WL_driver Subcircuit
+.subckt WL_driver in en gnd wl vdd
+* NAND2 stage
+Mpmos0 nand_out in vdd vdd CMOSP L=0.18U W=0.36U
+Mpmos1 nand_out en vdd vdd CMOSP L=0.18U W=0.36U
+Mnmos0 nand_out in mid gnd CMOSN L=0.18U W=0.36U
+Mnmos1 mid      en gnd gnd CMOSN L=0.18U W=0.36U
+
+* Output Inverter Driver
+Mpmos2 wl nand_out vdd vdd CMOSP L=0.18U W=0.72U
+Mnmos2 wl nand_out gnd gnd CMOSN L=0.18U W=0.36U
+.ends
+
+Xdrv in en gnd wl vdd WL_driver
+
+* 50fF wordline load (16 bitcells + routing)
+Cload wl 0 50fF
+
+.tran 0.01n 25n
+
+* Measurements
+* Rise delay: from EN rising (50% = 0.9V) to WL rising (50% = 0.9V)
+.meas tran t_rise_wl TRIG V(en) VAL=0.9 RISE=1 TARG V(wl) VAL=0.9 RISE=1
+* Fall delay: from EN falling (50% = 0.9V) to WL falling (50% = 0.9V)
+.meas tran t_fall_wl TRIG V(en) VAL=0.9 FALL=1 TARG V(wl) VAL=0.9 FALL=1
+* 10% to 90% rise time of wordline
+.meas tran t_slew_rise TRIG V(wl) VAL=0.18 RISE=1 TARG V(wl) VAL=1.62 RISE=1
+* 90% to 10% fall time of wordline
+.meas tran t_slew_fall TRIG V(wl) VAL=1.62 FALL=1 TARG V(wl) VAL=0.18 FALL=1
+
+* Voltages
+.meas tran v_off1 FIND V(wl) AT=4.5n
+.meas tran v_on   FIND V(wl) AT=8.0n
+.meas tran v_off2 FIND V(wl) AT=14.0n
+
+.end

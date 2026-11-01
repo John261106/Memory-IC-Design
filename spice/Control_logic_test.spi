@@ -1,115 +1,111 @@
 *** SPICE deck for Control_logic Characterization Testbench
-*** Cell under test: Control_logic{sch}
+*** Cell under test: Control_logic{sch} (8-Cycle Inverted-Phase Shadow-Register-Free Architecture)
 *** Technology: TSMC 0.18um CMOS, VDD = 1.8V
 *** Nominal Supply: 1.8V, Temperature: 27C
 
 .include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
 
 *** 1. CONTROL LOGIC SUBCIRCUIT DEFINITION ***
-.SUBCKT Memory-IC-Design__Control_logic CLK CTRL COUNT_7 PCB CLK_SHADOW WL_EN WRITE_EN READ_EN gnd vdd
+.SUBCKT Memory-IC-Design__Control_logic CLK CTRL COUNT_7 PCB WL_EN WRITE_EN READ_EN gnd vdd
 
-* 1. CLK Buffer: CLK -> CLKB -> WL_EN
+* 1. CLK Inverter & PCB 3-Stage Inverting Buffer: CLK -> CLKB -> CLK_buf -> PCB (~CLK)
 Mnmos@0 CLKB CLK gnd gnd CMOSN L=0.18U W=0.36U
 Mpmos@0 vdd  CLK CLKB vdd CMOSP L=0.18U W=0.72U
 
-Mnmos@1 WL_EN CLKB gnd gnd CMOSN L=0.18U W=0.54U
-Mpmos@1 vdd   CLKB WL_EN vdd CMOSP L=0.18U W=1.08U
+Mnmos@2 CLK_buf CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd     CLKB CLK_buf vdd CMOSP L=0.18U W=0.72U
 
-* 2. PCB Precharge Buffer: CLK -> CLKB_pre -> PCB
-Mnmos@2 CLKB_pre CLK gnd gnd CMOSN L=0.18U W=0.36U
-Mpmos@2 vdd      CLK CLKB_pre vdd CMOSP L=0.18U W=0.72U
+Mnmos@3 PCB CLK_buf gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@3 vdd CLK_buf PCB vdd CMOSP L=0.18U W=1.08U
 
-Mnmos@3 PCB CLKB_pre gnd gnd CMOSN L=0.18U W=0.54U
-Mpmos@3 vdd CLKB_pre PCB vdd CMOSP L=0.18U W=1.08U
-
-* 3. CTRL Inverter: CTRL -> CTRLB
+* 2. CTRL Inverter: CTRL -> CTRLB
 Mnmos@4 CTRLB CTRL gnd gnd CMOSN L=0.18U W=0.36U
 Mpmos@4 vdd   CTRL CTRLB vdd CMOSP L=0.18U W=0.72U
 
-* 4. WRITE_EN Block: AND2(CTRLB, CLK) -> WRITE_EN
+* 3. WL_EN Block: AND2(COUNT_7, CLKB) -> WL_EN
+Mpmos@11 vdd     COUNT_7 WL_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@12 vdd     CLKB    WL_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@11 WL_ENB  COUNT_7 net@s1 gnd CMOSN L=0.18U W=0.36U
+Mnmos@12 net@s1  CLKB    gnd    gnd CMOSN L=0.18U W=0.36U
+
+Mnmos@13 WL_EN WL_ENB gnd   gnd CMOSN L=0.18U W=0.54U
+Mpmos@13 vdd   WL_ENB WL_EN vdd CMOSP L=0.18U W=1.08U
+
+* 4. WRITE_EN Block: AND2(CTRLB, WL_EN) -> WRITE_EN
 Mpmos@5 vdd        CTRLB WRITE_ENB vdd CMOSP L=0.18U W=0.36U
-Mpmos@6 vdd        CLK   WRITE_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@6 vdd        WL_EN WRITE_ENB vdd CMOSP L=0.18U W=0.36U
 Mnmos@5 WRITE_ENB  CTRLB net@w1    gnd CMOSN L=0.18U W=0.36U
-Mnmos@6 net@w1     CLK   gnd       gnd CMOSN L=0.18U W=0.36U
+Mnmos@6 net@w1     WL_EN gnd       gnd CMOSN L=0.18U W=0.36U
 
 Mnmos@7 WRITE_EN WRITE_ENB gnd      gnd CMOSN L=0.18U W=0.54U
 Mpmos@7 vdd      WRITE_ENB WRITE_EN vdd CMOSP L=0.18U W=1.08U
 
-* 5. READ_EN Block: AND2(CTRL, CLK) -> READ_EN
-Mpmos@8 vdd       CTRL READ_ENB vdd CMOSP L=0.18U W=0.36U
-Mpmos@9 vdd       CLK  READ_ENB vdd CMOSP L=0.18U W=0.36U
-Mnmos@8 READ_ENB  CTRL net@r1   gnd CMOSN L=0.18U W=0.36U
-Mnmos@9 net@r1    CLK  gnd      gnd CMOSN L=0.18U W=0.36U
+* 5. READ_EN Block: AND2(CTRL, WL_EN) -> READ_EN
+Mpmos@8 vdd       CTRL  READ_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@9 vdd       WL_EN READ_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@8 READ_ENB  CTRL  net@r1   gnd CMOSN L=0.18U W=0.36U
+Mnmos@9 net@r1    WL_EN gnd      gnd CMOSN L=0.18U W=0.36U
 
 Mnmos@10 READ_EN READ_ENB gnd     gnd CMOSN L=0.18U W=0.54U
 Mpmos@10 vdd     READ_ENB READ_EN vdd CMOSP L=0.18U W=1.08U
 
-* 6. CLK_SHADOW Block: AND2(COUNT_7, CLKB) -> CLK_SHADOW
-Mpmos@11 vdd         COUNT_7 CLK_SHADOWB vdd CMOSP L=0.18U W=0.36U
-Mpmos@12 vdd         CLKB    CLK_SHADOWB vdd CMOSP L=0.18U W=0.36U
-Mnmos@11 CLK_SHADOWB COUNT_7 net@s1      gnd CMOSN L=0.18U W=0.36U
-Mnmos@12 net@s1      CLKB    gnd         gnd CMOSN L=0.18U W=0.36U
-
-Mnmos@13 CLK_SHADOW CLK_SHADOWB gnd        gnd CMOSN L=0.18U W=0.54U
-Mpmos@13 vdd        CLK_SHADOWB CLK_SHADOW vdd CMOSP L=0.18U W=1.08U
-
 .ENDS Memory-IC-Design__Control_logic
 
 *** 2. INSTANTIATION & LOADS ***
-XCTRL_LOGIC CLK CTRL COUNT_7 PCB CLK_SHADOW WL_EN WRITE_EN READ_EN gnd vdd Memory-IC-Design__Control_logic
+XCTRL_LOGIC CLK CTRL COUNT_7 PCB WL_EN WRITE_EN READ_EN gnd vdd Memory-IC-Design__Control_logic
 
 VDDsrc vdd 0 DC 1.8
 VGND   gnd 0 DC 0
 
-* Output Capacitive Loads (representing decoders, sense amp, write driver, shadow flip-flops)
-C_pcb        PCB        gnd 40f
-C_clk_shadow CLK_SHADOW gnd 30f
-C_wl_en      WL_EN      gnd 40f
-C_write_en   WRITE_EN   gnd 25f
-C_read_en    READ_EN    gnd 25f
+* Output Capacitive Loads (representing 16 column prechargers, 16 WL drivers, write driver, sense amp)
+C_pcb      PCB      gnd 40f
+C_wl_en    WL_EN    gnd 40f
+C_write_en WRITE_EN gnd 25f
+C_read_en  READ_EN  gnd 25f
 
 *** 3. STIMULUS GENERATION ***
 * 100 MHz Master Clock (10ns period, 50ps rise/fall)
-* Rising edges: 5n, 15n, 25n, 35n, 45n, 55n, 65n (Cycle 7), 75n (Cycle 8 / Exec), 85n
+* Cycle k: rising edge at (10k-5)ns, high phase (precharge) for 5ns, falling edge at 10k ns, low phase (eval) for 5ns
+* Cycle 1..8 = 5ns..85ns (Write frame), Cycle 9..16 = 85ns..165ns (Read frame)
 VCLK CLK 0 PULSE(0 1.8 5n 50p 50p 4.95n 10n)
 
-* CTRL Input: WRITE mode (0V) for 0 to 50ns, READ mode (1.8V) for 50 to 100ns
-VCTRL CTRL 0 PWL(0n 0  49.9n 0  50.1n 1.8  100n 1.8)
+* CTRL Input: WRITE mode (0V) for Frame 1 (0 to 86ns), READ mode (1.8V) for Frame 2 (86ns to 170ns)
+VCTRL CTRL 0 PWL(0n 0  86.0n 0  86.1n 1.8  170n 1.8)
 
-* COUNT_7 Input: simulates the 3-bit counter pulse during the 8th serial bit cycle (65ns to 75ns)
-VCOUNT7 COUNT_7 0 PWL(0n 0  65.3n 0  65.4n 1.8  75.2n 1.8  75.3n 0  100n 0)
+* COUNT_7 Input: High during 8th cycle of Frame 1 (75ns to 85ns) and 8th cycle of Frame 2 (155ns to 165ns)
+VCOUNT7 COUNT_7 0 PWL(0n 0  75.3n 0  75.4n 1.8  85.3n 1.8  85.4n 0  155.3n 0  155.4n 1.8  165.3n 1.8  165.4n 0  170n 0)
 
-.TRAN 10p 100n
+.TRAN 10p 170n
 
 *** 4. AUTOMATED PERFORMANCE MEASUREMENTS ***
-* 1. Precharge Bar (PCB) verification: must be 0V during CLK=0 (e.g. at 12ns) and 1.8V during CLK=1 (e.g. at 18ns)
-.MEAS TRAN V_pcb_low  FIND V(PCB) AT=12n
-.MEAS TRAN V_pcb_high FIND V(PCB) AT=18n
+* 1. Precharge Bar (PCB = ~CLK): 0V during CLK=1 first half (e.g. 77.5ns) and 1.8V during CLK=0 second half (e.g. 82.5ns)
+.MEAS TRAN V_pcb_precharge FIND V(PCB) AT=77.5n
+.MEAS TRAN V_pcb_evaluate  FIND V(PCB) AT=82.5n
 
-* 2. Write Mode (t < 50ns, e.g. at t = 28ns during CLK=1): WRITE_EN = 1.8V, READ_EN = 0V
-.MEAS TRAN V_write_en_active   FIND V(WRITE_EN) AT=28n
-.MEAS TRAN V_read_en_inactive  FIND V(READ_EN)  AT=28n
+* 2. Non-8th Cycle Isolation (COUNT_7=0, e.g. Cycle 3 low phase at t = 32.5ns): WL_EN, WRITE_EN, READ_EN must remain 0V
+.MEAS TRAN V_wl_en_shift_idle    FIND V(WL_EN)    AT=32.5n
+.MEAS TRAN V_write_en_shift_idle FIND V(WRITE_EN) AT=32.5n
+.MEAS TRAN V_read_en_shift_idle  FIND V(READ_EN)  AT=32.5n
 
-* 3. Read Mode (t > 50ns, e.g. at t = 88ns during CLK=1): READ_EN = 1.8V, WRITE_EN = 0V
-.MEAS TRAN V_read_en_active    FIND V(READ_EN)  AT=88n
-.MEAS TRAN V_write_en_inactive FIND V(WRITE_EN) AT=88n
+* 3. Cycle 8 Write Execution (t = 82.5ns, CLK=0, COUNT_7=1, CTRL=0): WL_EN=1.8V, WRITE_EN=1.8V, READ_EN=0V
+.MEAS TRAN V_wl_en_write_exec    FIND V(WL_EN)    AT=82.5n
+.MEAS TRAN V_write_en_active     FIND V(WRITE_EN) AT=82.5n
+.MEAS TRAN V_read_en_inactive    FIND V(READ_EN)  AT=82.5n
 
-* 4. Wordline Enable (WL_EN): must follow CLK high phase (1.8V at 28ns, 0V at 32ns)
-.MEAS TRAN V_wl_en_high FIND V(WL_EN) AT=28n
-.MEAS TRAN V_wl_en_low  FIND V(WL_EN) AT=32n
+* 4. Cycle 16 Read Execution (t = 162.5ns, CLK=0, COUNT_7=1, CTRL=1): WL_EN=1.8V, READ_EN=1.8V, WRITE_EN=0V
+.MEAS TRAN V_wl_en_read_exec     FIND V(WL_EN)    AT=162.5n
+.MEAS TRAN V_read_en_active      FIND V(READ_EN)  AT=162.5n
+.MEAS TRAN V_write_en_inactive   FIND V(WRITE_EN) AT=162.5n
 
-* 5. CLK_SHADOW Strobe: must fire when COUNT_7=1 and CLK=0 (between 70ns and 75ns)
-.MEAS TRAN V_clk_shadow_peak MAX V(CLK_SHADOW) FROM=68n TO=76n
-.MEAS TRAN V_clk_shadow_idle FIND V(CLK_SHADOW) AT=30n
+* 5. Propagation Delays from CLK Falling Edge (Evaluation Start at 80ns / 160ns) and Rising Edge (Precharge Start at 85ns / 165ns)
+.MEAS TRAN t_clk_fall_to_pcb_rise      TRIG V(CLK) VAL=0.9 FALL=8  TARG V(PCB)      VAL=0.9 RISE=8
+.MEAS TRAN t_clk_rise_to_pcb_fall      TRIG V(CLK) VAL=0.9 RISE=8  TARG V(PCB)      VAL=0.9 FALL=8
+.MEAS TRAN t_clk_fall_to_wl_en_rise    TRIG V(CLK) VAL=0.9 FALL=8  TARG V(WL_EN)    VAL=0.9 RISE=1
+.MEAS TRAN t_clk_rise_to_wl_en_fall    TRIG V(CLK) VAL=0.9 RISE=9  TARG V(WL_EN)    VAL=0.9 FALL=1
+.MEAS TRAN t_clk_fall_to_write_en_rise TRIG V(CLK) VAL=0.9 FALL=8  TARG V(WRITE_EN) VAL=0.9 RISE=1
+.MEAS TRAN t_clk_fall_to_read_en_rise  TRIG V(CLK) VAL=0.9 FALL=16 TARG V(READ_EN)  VAL=0.9 RISE=1
 
-* 6. Propagation Delays
-.MEAS TRAN t_prop_clk_to_pcb_fall TRIG V(CLK) VAL=0.9 FALL=1 TARG V(PCB) VAL=0.9 FALL=1
-.MEAS TRAN t_prop_clk_to_pcb_rise TRIG V(CLK) VAL=0.9 RISE=1 TARG V(PCB) VAL=0.9 RISE=1
-
-.MEAS TRAN t_prop_write_en_rise   TRIG V(CLK) VAL=0.9 RISE=2 TARG V(WRITE_EN) VAL=0.9 RISE=2
-.MEAS TRAN t_prop_read_en_rise    TRIG V(CLK) VAL=0.9 RISE=6 TARG V(READ_EN)  VAL=0.9 RISE=1
-.MEAS TRAN t_prop_clk_shadow_rise TRIG V(CLK) VAL=0.9 FALL=7 TARG V(CLK_SHADOW) VAL=0.9 RISE=1
-
-* 7. Total Dynamic Energy and Average Power @ 100 MHz
+* 6. Average Power @ 100 MHz
+.MEAS TRAN P_avg AVG (-V(vdd)*I(VDDsrc)) FROM=5n TO=165n
 
 .END

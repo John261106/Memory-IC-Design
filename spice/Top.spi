@@ -1,0 +1,560 @@
+*** SPICE deck for cell Top{sch} from library Memory-IC-Design
+*** Complete 256-Bit (16x16) Custom CMOS SRAM IC
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** External Pins (5 Signal + 2 Power): CLK, CTRL, ADDR_IN, DIN, DOUT, VDD, GND
+
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** 1. 6T SRAM BITCELL SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__6T_cell BIT BITB gnd vdd WL
+Mnmos@0 Q   QB  gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@1 QB  Q   gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@2 Q   WL  BIT gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 BITB WL QB  gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd QB  Q   vdd CMOSP L=0.18U W=0.27U
+Mpmos@1 vdd Q   QB  vdd CMOSP L=0.18U W=0.27U
+.ENDS Memory-IC-Design__6T_cell
+
+*** 1B. MONITORED 6T SRAM BITCELL SUBCIRCUIT (Exposes Q and QB for verification) ***
+.SUBCKT Memory-IC-Design__6T_cell_mon BIT BITB gnd vdd WL Q QB
+Mnmos@0 Q   QB  gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@1 QB  Q   gnd gnd CMOSN L=0.18U W=0.63U
+Mnmos@2 Q   WL  BIT gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 BITB WL QB  gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd QB  Q   vdd CMOSP L=0.18U W=0.27U
+Mpmos@1 vdd Q   QB  vdd CMOSP L=0.18U W=0.27U
+.ENDS Memory-IC-Design__6T_cell_mon
+
+*** 2. PRECHARGE & EQUALIZATION SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__Precharge_ckt BIT BITB PCB vdd
+Mpmos@0 vdd  PCB BIT  vdd CMOSP L=0.18U W=0.36U
+Mpmos@1 vdd  PCB BITB vdd CMOSP L=0.18U W=0.36U
+Mpmos@2 BITB PCB BIT  vdd CMOSP L=0.18U W=0.27U
+.ENDS Memory-IC-Design__Precharge_ckt
+
+*** 3. COLUMN MULTIPLEXING TRANSMISSION GATE SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__TG_bitline BITB_D BITB_U BIT_D BIT_U EN gnd vdd
+Mnmos@0 BIT_U  EN  BIT_D  gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 BITB_U EN  BITB_D gnd CMOSN L=0.18U W=0.36U
+Mnmos@2 ENB    EN  gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    EN  ENB    vdd CMOSP L=0.18U W=0.36U
+Mpmos@0 BIT_D  ENB BIT_U  vdd CMOSP L=0.18U W=0.72U
+Mpmos@1 BITB_D ENB BITB_U vdd CMOSP L=0.18U W=0.72U
+.ENDS Memory-IC-Design__TG_bitline
+
+*** 4. TRI-STATE DIFFERENTIAL WRITE DRIVER SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__Write_driver BIT BITB DATA gnd vdd WRITE_EN
+Mnmos@0 BIT    WRITE_EN net@6  gnd CMOSN L=0.18U W=0.54U
+Mnmos@4 net@6  DATA     gnd    gnd CMOSN L=0.18U W=0.54U
+Mnmos@5 BITB   WRITE_EN net@12 gnd CMOSN L=0.18U W=0.54U
+Mnmos@6 net@12 DATAB    gnd    gnd CMOSN L=0.18U W=0.54U
+Mnmos@7 DATAB  DATA     gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@2 vdd    DATA     DATAB  vdd CMOSP L=0.18U W=0.36U
+.ENDS Memory-IC-Design__Write_driver
+
+*** 5. DIFFERENTIAL SENSE AMPLIFIER SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__Sense_amp BIT BITB gnd READ_EN SENSE vdd
+Mnmos@3 net@38 BIT     net@76 gnd CMOSN L=0.18U W=0.36U
+Mnmos@4 net@66 BITB    net@38 gnd CMOSN L=0.18U W=0.36U
+Mnmos@5 net@38 READ_EN gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@4 net@76 net@76  vdd    vdd CMOSP L=0.18U W=0.36U
+Mpmos@5 vdd    net@76  net@66 vdd CMOSP L=0.18U W=0.36U
+Mnmos@6 SENSE  net@66  gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    net@66  SENSE  vdd CMOSP L=0.18U W=0.36U
+.ENDS Memory-IC-Design__Sense_amp
+
+*** 6. 4-TO-16 DECODER SUBCIRCUITS ***
+.SUBCKT Memory-IC-Design__Nand A B C D gnd OUT vdd
+Mnmos@0 OUT    A net@1  gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 net@1  B net@2  gnd CMOSN L=0.18U W=0.36U
+Mnmos@2 net@2  C net@16 gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 net@16 D gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd A OUT vdd CMOSP L=0.18U W=0.36U
+Mpmos@1 vdd B OUT vdd CMOSP L=0.18U W=0.36U
+Mpmos@2 vdd C OUT vdd CMOSP L=0.18U W=0.36U
+Mpmos@3 vdd D OUT vdd CMOSP L=0.18U W=0.36U
+.ENDS Memory-IC-Design__Nand
+
+.SUBCKT Memory-IC-Design__Not gnd IN OUT vdd
+Mnmos@0 OUT IN gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd IN OUT vdd CMOSP L=0.18U W=0.72U
+.ENDS Memory-IC-Design__Not
+
+.SUBCKT Memory-IC-Design__Decoder A0 A1 A2 A3 gnd OUT0 OUT1 OUT2 OUT3 OUT4 OUT5 OUT6 OUT7 OUT8 OUT9 OUT10 OUT11 OUT12 OUT13 OUT14 OUT15 vdd
+XNot@0 gnd A0 A0B vdd Memory-IC-Design__Not
+XNot@1 gnd A1 A1B vdd Memory-IC-Design__Not
+XNot@2 gnd A2 A2B vdd Memory-IC-Design__Not
+XNot@3 gnd A3 A3B vdd Memory-IC-Design__Not
+XNand@0  A3B A2B A1B A0B gnd n0  vdd Memory-IC-Design__Nand
+XNand@1  A3B A2B A1B A0  gnd n1  vdd Memory-IC-Design__Nand
+XNand@2  A3B A2B A1  A0B gnd n2  vdd Memory-IC-Design__Nand
+XNand@3  A3B A2B A1  A0  gnd n3  vdd Memory-IC-Design__Nand
+XNand@4  A3B A2  A1B A0B gnd n4  vdd Memory-IC-Design__Nand
+XNand@5  A3B A2  A1B A0  gnd n5  vdd Memory-IC-Design__Nand
+XNand@6  A3B A2  A1  A0B gnd n6  vdd Memory-IC-Design__Nand
+XNand@7  A3B A2  A1  A0  gnd n7  vdd Memory-IC-Design__Nand
+XNand@8  A3  A2B A1B A0B gnd n8  vdd Memory-IC-Design__Nand
+XNand@9  A3  A2B A1B A0  gnd n9  vdd Memory-IC-Design__Nand
+XNand@10 A3  A2B A1  A0B gnd n10 vdd Memory-IC-Design__Nand
+XNand@11 A3  A2B A1  A0  gnd n11 vdd Memory-IC-Design__Nand
+XNand@12 A3  A2  A1B A0B gnd n12 vdd Memory-IC-Design__Nand
+XNand@13 A3  A2  A1B A0  gnd n13 vdd Memory-IC-Design__Nand
+XNand@14 A3  A2  A1  A0B gnd n14 vdd Memory-IC-Design__Nand
+XNand@15 A3  A2  A1  A0  gnd n15 vdd Memory-IC-Design__Nand
+XNot@4  gnd n0  OUT0  vdd Memory-IC-Design__Not
+XNot@5  gnd n1  OUT1  vdd Memory-IC-Design__Not
+XNot@6  gnd n2  OUT2  vdd Memory-IC-Design__Not
+XNot@7  gnd n3  OUT3  vdd Memory-IC-Design__Not
+XNot@8  gnd n4  OUT4  vdd Memory-IC-Design__Not
+XNot@9  gnd n5  OUT5  vdd Memory-IC-Design__Not
+XNot@10 gnd n6  OUT6  vdd Memory-IC-Design__Not
+XNot@11 gnd n7  OUT7  vdd Memory-IC-Design__Not
+XNot@12 gnd n8  OUT8  vdd Memory-IC-Design__Not
+XNot@13 gnd n9  OUT9  vdd Memory-IC-Design__Not
+XNot@14 gnd n10 OUT10 vdd Memory-IC-Design__Not
+XNot@15 gnd n11 OUT11 vdd Memory-IC-Design__Not
+XNot@16 gnd n12 OUT12 vdd Memory-IC-Design__Not
+XNot@17 gnd n13 OUT13 vdd Memory-IC-Design__Not
+XNot@18 gnd n14 OUT14 vdd Memory-IC-Design__Not
+XNot@19 gnd n15 OUT15 vdd Memory-IC-Design__Not
+.ENDS Memory-IC-Design__Decoder
+
+*** 7. STATIC CMOS WORDLINE DRIVER SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__WL_driver EN gnd IN vdd WL
+Mpmos@0 nand_out IN  vdd vdd CMOSP L=0.18U W=0.36U
+Mpmos@1 nand_out EN  vdd vdd CMOSP L=0.18U W=0.36U
+Mnmos@0 nand_out IN  mid gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 mid      EN  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 WL nand_out vdd vdd CMOSP L=0.18U W=0.72U
+Mnmos@2 WL nand_out gnd gnd CMOSN L=0.18U W=0.36U
+.ENDS Memory-IC-Design__WL_driver
+
+*** 8. MASTER-SLAVE TG D FLIP-FLOP SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__D_flipflop CLK D gnd Q vdd
+Mnmos@8 CLKB CLK  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@8 vdd  CLK  CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@9 CLK2 CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@9 vdd  CLKB CLK2 vdd CMOSP L=0.18U W=0.72U
+Mnmos@0 D     CLKB net@6 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 net@6 CLK2 D     vdd CMOSP L=0.18U W=0.72U
+Mnmos@2 net@22 net@6 gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd    net@6 net@22 vdd CMOSP L=0.18U W=0.72U
+Mnmos@3 net@14 net@22 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    net@22 net@14 vdd CMOSP L=0.18U W=0.36U
+Mnmos@1 net@6  CLK2 net@14 gnd CMOSN L=0.18U W=0.27U
+Mpmos@1 net@14 CLKB net@6  vdd CMOSP L=0.18U W=0.54U
+Mnmos@7 net@22 CLK2 net@45 gnd CMOSN L=0.18U W=0.36U
+Mpmos@7 net@45 CLKB net@22 vdd CMOSP L=0.18U W=0.72U
+Mnmos@5 Q      net@45 gnd    gnd CMOSN L=0.18U W=0.54U
+Mpmos@5 vdd    net@45 Q      vdd CMOSP L=0.18U W=1.08U
+Mnmos@6 net@48 Q      gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    Q      net@48 vdd CMOSP L=0.18U W=0.36U
+Mnmos@4 net@45 CLKB net@48 gnd CMOSN L=0.18U W=0.27U
+Mpmos@4 net@48 CLK2 net@45 vdd CMOSP L=0.18U W=0.54U
+.ENDS Memory-IC-Design__D_flipflop
+
+*** 9. 8-BIT SIPO SHIFT REGISTER SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__8Bit_shiftreg CLK D gnd Q0 Q1 Q2 Q3 Q4 Q5 Q6 Q7 vdd
+Xflop0 CLK D  gnd Q0 vdd Memory-IC-Design__D_flipflop
+Xflop1 CLK Q0 gnd Q1 vdd Memory-IC-Design__D_flipflop
+Xflop2 CLK Q1 gnd Q2 vdd Memory-IC-Design__D_flipflop
+Xflop3 CLK Q2 gnd Q3 vdd Memory-IC-Design__D_flipflop
+Xflop4 CLK Q3 gnd Q4 vdd Memory-IC-Design__D_flipflop
+Xflop5 CLK Q4 gnd Q5 vdd Memory-IC-Design__D_flipflop
+Xflop6 CLK Q5 gnd Q6 vdd Memory-IC-Design__D_flipflop
+Xflop7 CLK Q6 gnd Q7 vdd Memory-IC-Design__D_flipflop
+.ENDS Memory-IC-Design__8Bit_shiftreg
+
+*** 10. 3-BIT SYNCHRONOUS COUNTER SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__3Bit_counter CLK COUNT_7 gnd vdd C0 C1 C2
+XD_flipfl@3 CLK C0B gnd C0 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@4 CLK D1  gnd C1 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@5 CLK D2  gnd C2 vdd Memory-IC-Design__D_flipflop
+Mnmos@0 C0B C0 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd C0 C0B vdd CMOSP L=0.18U W=0.72U
+Mnmos@1 C1B C1 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@1 vdd C1 C1B vdd CMOSP L=0.18U W=0.72U
+Mnmos@2 C2B C2 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd C2 C2B vdd CMOSP L=0.18U W=0.72U
+Mpmos@3 vdd    C0 C01B vdd CMOSP L=0.18U W=0.36U
+Mpmos@4 vdd    C1 C01B vdd CMOSP L=0.18U W=0.36U
+Mnmos@3 C01B   C0 net@m1 gnd CMOSN L=0.18U W=0.36U
+Mnmos@4 net@m1 C1 gnd    gnd CMOSN L=0.18U W=0.36U
+Mnmos@5 C01 C01B gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@5 vdd C01B C01 vdd CMOSP L=0.18U W=0.72U
+Mpmos@6 vdd      C0 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mpmos@7 vdd      C1 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mpmos@8 vdd      C2 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mnmos@6 COUNT_7B C0 net@m2   gnd CMOSN L=0.18U W=0.54U
+Mnmos@7 net@m2   C1 net@m3   gnd CMOSN L=0.18U W=0.54U
+Mnmos@8 net@m3   C2 gnd      gnd CMOSN L=0.18U W=0.54U
+Mnmos@9 COUNT_7 COUNT_7B gnd     gnd CMOSN L=0.18U W=0.54U
+Mpmos@9 vdd     COUNT_7B COUNT_7 vdd CMOSP L=0.18U W=1.08U
+Mnmos@10 C1  C0B D1 gnd CMOSN L=0.18U W=0.36U
+Mpmos@10 D1  C0  C1 vdd CMOSP L=0.18U W=0.72U
+Mnmos@11 C1B C0  D1 gnd CMOSN L=0.18U W=0.36U
+Mpmos@11 D1  C0B C1B vdd CMOSP L=0.18U W=0.72U
+Mnmos@12 C2  C01B D2 gnd CMOSN L=0.18U W=0.36U
+Mpmos@12 D2  C01  C2 vdd CMOSP L=0.18U W=0.72U
+Mnmos@13 C2B C01  D2 gnd CMOSN L=0.18U W=0.36U
+Mpmos@13 D2  C01B C2B vdd CMOSP L=0.18U W=0.72U
+.ENDS Memory-IC-Design__3Bit_counter
+
+*** 11. 8-CYCLE INVERTED-PHASE CONTROL LOGIC SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__Control_logic CLK COUNT_7 CTRL gnd PCB READ_EN vdd WL_EN WRITE_EN
+Mnmos@0 CLKB CLK gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd  CLK CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@2 CLK_buf CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd     CLKB CLK_buf vdd CMOSP L=0.18U W=0.72U
+Mnmos@3 PCB CLK_buf gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@3 vdd CLK_buf PCB vdd CMOSP L=0.18U W=1.08U
+Mnmos@4 CTRLB CTRL gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@4 vdd   CTRL CTRLB vdd CMOSP L=0.18U W=0.72U
+Mpmos@11 vdd     COUNT_7 WL_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@12 vdd     CLKB    WL_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@11 WL_ENB  COUNT_7 net@s1 gnd CMOSN L=0.18U W=0.36U
+Mnmos@12 net@s1  CLKB    gnd    gnd CMOSN L=0.18U W=0.36U
+Mnmos@13 WL_EN WL_ENB gnd   gnd CMOSN L=0.18U W=0.54U
+Mpmos@13 vdd   WL_ENB WL_EN vdd CMOSP L=0.18U W=1.08U
+Mpmos@5 vdd        CTRLB WRITE_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@6 vdd        WL_EN WRITE_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@5 WRITE_ENB  CTRLB net@w1    gnd CMOSN L=0.18U W=0.36U
+Mnmos@6 net@w1     WL_EN gnd       gnd CMOSN L=0.18U W=0.36U
+Mnmos@7 WRITE_EN WRITE_ENB gnd      gnd CMOSN L=0.18U W=0.54U
+Mpmos@7 vdd      WRITE_ENB WRITE_EN vdd CMOSP L=0.18U W=1.08U
+Mpmos@8 vdd       CTRL  READ_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@9 vdd       WL_EN READ_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@8 READ_ENB  CTRL  net@r1   gnd CMOSN L=0.18U W=0.36U
+Mnmos@9 net@r1    WL_EN gnd      gnd CMOSN L=0.18U W=0.36U
+Mnmos@10 READ_EN READ_ENB gnd     gnd CMOSN L=0.18U W=0.54U
+Mpmos@10 vdd     READ_ENB READ_EN vdd CMOSP L=0.18U W=1.08U
+.ENDS Memory-IC-Design__Control_logic
+
+*** TOP LEVEL CELL: Top{sch}
+
+* 1. Serial Address Shift Register (Directly drives CA0..CA3 and RA0..RA3)
+X8Bit_shi@0 CLK ADDR_IN gnd CA0 CA1 CA2 CA3 RA0 RA1 RA2 RA3 vdd Memory-IC-Design__8Bit_shiftreg
+
+* 2. 3-Bit Modulo-8 Counter & Central Control Logic
+X3Bit_cou@0 CLK COUNT_7 gnd vdd C0 C1 C2 Memory-IC-Design__3Bit_counter
+XControl_@0 CLK COUNT_7 CTRL gnd PCB READ_EN vdd WL_EN WRITE_EN Memory-IC-Design__Control_logic
+
+* 3. 4-to-16 Row Decoder & Column Decoder
+XDecoder@0 RA0 RA1 RA2 RA3 gnd RDEC0 RDEC1 RDEC2 RDEC3 RDEC4 RDEC5 RDEC6 RDEC7 RDEC8 RDEC9 RDEC10 RDEC11 RDEC12 RDEC13 RDEC14 RDEC15 vdd Memory-IC-Design__Decoder
+XDecoder@1 CA0 CA1 CA2 CA3 gnd COL0 COL1 COL2 COL3 COL4 COL5 COL6 COL7 COL8 COL9 COL10 COL11 COL12 COL13 COL14 COL15 vdd Memory-IC-Design__Decoder
+
+* 4. 16 Static CMOS Wordline Drivers (Gated by WL_EN)
+XWL_drive@0 WL_EN gnd RDEC0 vdd WL0 Memory-IC-Design__WL_driver
+XWL_drive@1 WL_EN gnd RDEC1 vdd WL1 Memory-IC-Design__WL_driver
+XWL_drive@2 WL_EN gnd RDEC2 vdd WL2 Memory-IC-Design__WL_driver
+XWL_drive@3 WL_EN gnd RDEC3 vdd WL3 Memory-IC-Design__WL_driver
+XWL_drive@4 WL_EN gnd RDEC4 vdd WL4 Memory-IC-Design__WL_driver
+XWL_drive@5 WL_EN gnd RDEC5 vdd WL5 Memory-IC-Design__WL_driver
+XWL_drive@6 WL_EN gnd RDEC6 vdd WL6 Memory-IC-Design__WL_driver
+XWL_drive@7 WL_EN gnd RDEC7 vdd WL7 Memory-IC-Design__WL_driver
+XWL_drive@8 WL_EN gnd RDEC8 vdd WL8 Memory-IC-Design__WL_driver
+XWL_drive@9 WL_EN gnd RDEC9 vdd WL9 Memory-IC-Design__WL_driver
+XWL_drive@10 WL_EN gnd RDEC10 vdd WL10 Memory-IC-Design__WL_driver
+XWL_drive@11 WL_EN gnd RDEC11 vdd WL11 Memory-IC-Design__WL_driver
+XWL_drive@12 WL_EN gnd RDEC12 vdd WL12 Memory-IC-Design__WL_driver
+XWL_drive@13 WL_EN gnd RDEC13 vdd WL13 Memory-IC-Design__WL_driver
+XWL_drive@14 WL_EN gnd RDEC14 vdd WL14 Memory-IC-Design__WL_driver
+XWL_drive@15 WL_EN gnd RDEC15 vdd WL15 Memory-IC-Design__WL_driver
+
+* 5. 256-Bit (16x16) 6T SRAM Core Array (256 Bitcells)
+Xcell_r0_c0 BL0 BLB0 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c1 BL1 BLB1 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c2 BL2 BLB2 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c3 BL3 BLB3 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c4 BL4 BLB4 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c5 BL5 BLB5 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c6 BL6 BLB6 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c7 BL7 BLB7 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c8 BL8 BLB8 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c9 BL9 BLB9 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c10 BL10 BLB10 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c11 BL11 BLB11 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c12 BL12 BLB12 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c13 BL13 BLB13 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c14 BL14 BLB14 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r0_c15 BL15 BLB15 gnd vdd WL0 Memory-IC-Design__6T_cell
+Xcell_r1_c0 BL0 BLB0 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c1 BL1 BLB1 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c2 BL2 BLB2 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c3 BL3 BLB3 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c4 BL4 BLB4 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c5 BL5 BLB5 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c6 BL6 BLB6 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c7 BL7 BLB7 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c8 BL8 BLB8 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c9 BL9 BLB9 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c10 BL10 BLB10 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c11 BL11 BLB11 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c12 BL12 BLB12 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c13 BL13 BLB13 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c14 BL14 BLB14 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r1_c15 BL15 BLB15 gnd vdd WL1 Memory-IC-Design__6T_cell
+Xcell_r2_c0 BL0 BLB0 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c1 BL1 BLB1 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c2 BL2 BLB2 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c3 BL3 BLB3 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c4 BL4 BLB4 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c5 BL5 BLB5 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c6 BL6 BLB6 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c7 BL7 BLB7 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c8 BL8 BLB8 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c9 BL9 BLB9 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c10 BL10 BLB10 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c11 BL11 BLB11 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c12 BL12 BLB12 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c13 BL13 BLB13 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c14 BL14 BLB14 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r2_c15 BL15 BLB15 gnd vdd WL2 Memory-IC-Design__6T_cell
+Xcell_r3_c0 BL0 BLB0 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c1 BL1 BLB1 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c2 BL2 BLB2 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c3 BL3 BLB3 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c4 BL4 BLB4 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c5 BL5 BLB5 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c6 BL6 BLB6 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c7 BL7 BLB7 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c8 BL8 BLB8 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c9 BL9 BLB9 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c10 BL10 BLB10 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c11 BL11 BLB11 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c12 BL12 BLB12 gnd vdd WL3 Q_r3_c12 QB_r3_c12 Memory-IC-Design__6T_cell_mon
+Xcell_r3_c13 BL13 BLB13 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c14 BL14 BLB14 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r3_c15 BL15 BLB15 gnd vdd WL3 Memory-IC-Design__6T_cell
+Xcell_r4_c0 BL0 BLB0 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c1 BL1 BLB1 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c2 BL2 BLB2 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c3 BL3 BLB3 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c4 BL4 BLB4 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c5 BL5 BLB5 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c6 BL6 BLB6 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c7 BL7 BLB7 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c8 BL8 BLB8 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c9 BL9 BLB9 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c10 BL10 BLB10 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c11 BL11 BLB11 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c12 BL12 BLB12 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c13 BL13 BLB13 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c14 BL14 BLB14 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r4_c15 BL15 BLB15 gnd vdd WL4 Memory-IC-Design__6T_cell
+Xcell_r5_c0 BL0 BLB0 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c1 BL1 BLB1 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c2 BL2 BLB2 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c3 BL3 BLB3 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c4 BL4 BLB4 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c5 BL5 BLB5 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c6 BL6 BLB6 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c7 BL7 BLB7 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c8 BL8 BLB8 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c9 BL9 BLB9 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c10 BL10 BLB10 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c11 BL11 BLB11 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c12 BL12 BLB12 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c13 BL13 BLB13 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c14 BL14 BLB14 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r5_c15 BL15 BLB15 gnd vdd WL5 Memory-IC-Design__6T_cell
+Xcell_r6_c0 BL0 BLB0 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c1 BL1 BLB1 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c2 BL2 BLB2 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c3 BL3 BLB3 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c4 BL4 BLB4 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c5 BL5 BLB5 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c6 BL6 BLB6 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c7 BL7 BLB7 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c8 BL8 BLB8 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c9 BL9 BLB9 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c10 BL10 BLB10 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c11 BL11 BLB11 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c12 BL12 BLB12 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c13 BL13 BLB13 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c14 BL14 BLB14 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r6_c15 BL15 BLB15 gnd vdd WL6 Memory-IC-Design__6T_cell
+Xcell_r7_c0 BL0 BLB0 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c1 BL1 BLB1 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c2 BL2 BLB2 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c3 BL3 BLB3 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c4 BL4 BLB4 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c5 BL5 BLB5 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c6 BL6 BLB6 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c7 BL7 BLB7 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c8 BL8 BLB8 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c9 BL9 BLB9 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c10 BL10 BLB10 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c11 BL11 BLB11 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c12 BL12 BLB12 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c13 BL13 BLB13 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c14 BL14 BLB14 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r7_c15 BL15 BLB15 gnd vdd WL7 Memory-IC-Design__6T_cell
+Xcell_r8_c0 BL0 BLB0 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c1 BL1 BLB1 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c2 BL2 BLB2 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c3 BL3 BLB3 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c4 BL4 BLB4 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c5 BL5 BLB5 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c6 BL6 BLB6 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c7 BL7 BLB7 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c8 BL8 BLB8 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c9 BL9 BLB9 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c10 BL10 BLB10 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c11 BL11 BLB11 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c12 BL12 BLB12 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c13 BL13 BLB13 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c14 BL14 BLB14 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r8_c15 BL15 BLB15 gnd vdd WL8 Memory-IC-Design__6T_cell
+Xcell_r9_c0 BL0 BLB0 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c1 BL1 BLB1 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c2 BL2 BLB2 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c3 BL3 BLB3 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c4 BL4 BLB4 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c5 BL5 BLB5 gnd vdd WL9 Q_r9_c5 QB_r9_c5 Memory-IC-Design__6T_cell_mon
+Xcell_r9_c6 BL6 BLB6 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c7 BL7 BLB7 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c8 BL8 BLB8 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c9 BL9 BLB9 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c10 BL10 BLB10 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c11 BL11 BLB11 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c12 BL12 BLB12 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c13 BL13 BLB13 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c14 BL14 BLB14 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r9_c15 BL15 BLB15 gnd vdd WL9 Memory-IC-Design__6T_cell
+Xcell_r10_c0 BL0 BLB0 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c1 BL1 BLB1 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c2 BL2 BLB2 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c3 BL3 BLB3 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c4 BL4 BLB4 gnd vdd WL10 Q_r10_c4 QB_r10_c4 Memory-IC-Design__6T_cell_mon
+Xcell_r10_c5 BL5 BLB5 gnd vdd WL10 Q_r10_c5 QB_r10_c5 Memory-IC-Design__6T_cell_mon
+Xcell_r10_c6 BL6 BLB6 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c7 BL7 BLB7 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c8 BL8 BLB8 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c9 BL9 BLB9 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c10 BL10 BLB10 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c11 BL11 BLB11 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c12 BL12 BLB12 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c13 BL13 BLB13 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c14 BL14 BLB14 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r10_c15 BL15 BLB15 gnd vdd WL10 Memory-IC-Design__6T_cell
+Xcell_r11_c0 BL0 BLB0 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c1 BL1 BLB1 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c2 BL2 BLB2 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c3 BL3 BLB3 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c4 BL4 BLB4 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c5 BL5 BLB5 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c6 BL6 BLB6 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c7 BL7 BLB7 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c8 BL8 BLB8 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c9 BL9 BLB9 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c10 BL10 BLB10 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c11 BL11 BLB11 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c12 BL12 BLB12 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c13 BL13 BLB13 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c14 BL14 BLB14 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r11_c15 BL15 BLB15 gnd vdd WL11 Memory-IC-Design__6T_cell
+Xcell_r12_c0 BL0 BLB0 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c1 BL1 BLB1 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c2 BL2 BLB2 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c3 BL3 BLB3 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c4 BL4 BLB4 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c5 BL5 BLB5 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c6 BL6 BLB6 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c7 BL7 BLB7 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c8 BL8 BLB8 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c9 BL9 BLB9 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c10 BL10 BLB10 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c11 BL11 BLB11 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c12 BL12 BLB12 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c13 BL13 BLB13 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c14 BL14 BLB14 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r12_c15 BL15 BLB15 gnd vdd WL12 Memory-IC-Design__6T_cell
+Xcell_r13_c0 BL0 BLB0 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c1 BL1 BLB1 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c2 BL2 BLB2 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c3 BL3 BLB3 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c4 BL4 BLB4 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c5 BL5 BLB5 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c6 BL6 BLB6 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c7 BL7 BLB7 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c8 BL8 BLB8 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c9 BL9 BLB9 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c10 BL10 BLB10 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c11 BL11 BLB11 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c12 BL12 BLB12 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c13 BL13 BLB13 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c14 BL14 BLB14 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r13_c15 BL15 BLB15 gnd vdd WL13 Memory-IC-Design__6T_cell
+Xcell_r14_c0 BL0 BLB0 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c1 BL1 BLB1 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c2 BL2 BLB2 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c3 BL3 BLB3 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c4 BL4 BLB4 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c5 BL5 BLB5 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c6 BL6 BLB6 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c7 BL7 BLB7 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c8 BL8 BLB8 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c9 BL9 BLB9 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c10 BL10 BLB10 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c11 BL11 BLB11 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c12 BL12 BLB12 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c13 BL13 BLB13 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c14 BL14 BLB14 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r14_c15 BL15 BLB15 gnd vdd WL14 Memory-IC-Design__6T_cell
+Xcell_r15_c0 BL0 BLB0 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c1 BL1 BLB1 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c2 BL2 BLB2 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c3 BL3 BLB3 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c4 BL4 BLB4 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c5 BL5 BLB5 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c6 BL6 BLB6 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c7 BL7 BLB7 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c8 BL8 BLB8 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c9 BL9 BLB9 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c10 BL10 BLB10 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c11 BL11 BLB11 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c12 BL12 BLB12 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c13 BL13 BLB13 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c14 BL14 BLB14 gnd vdd WL15 Memory-IC-Design__6T_cell
+Xcell_r15_c15 BL15 BLB15 gnd vdd WL15 Memory-IC-Design__6T_cell
+
+* 6. 16 Column Precharge Units (Dedicated per column)
+XPrecharg@0 BL0 BLB0 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@1 BL1 BLB1 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@2 BL2 BLB2 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@3 BL3 BLB3 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@4 BL4 BLB4 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@5 BL5 BLB5 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@6 BL6 BLB6 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@7 BL7 BLB7 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@8 BL8 BLB8 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@9 BL9 BLB9 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@10 BL10 BLB10 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@11 BL11 BLB11 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@12 BL12 BLB12 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@13 BL13 BLB13 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@14 BL14 BLB14 PCB vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@15 BL15 BLB15 PCB vdd Memory-IC-Design__Precharge_ckt
+
+* 7. 16 Column Multiplexing Transmission Gates
+XTG_bitli@0 DLB BLB0 DL BL0 COL0 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@1 DLB BLB1 DL BL1 COL1 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@2 DLB BLB2 DL BL2 COL2 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@3 DLB BLB3 DL BL3 COL3 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@4 DLB BLB4 DL BL4 COL4 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@5 DLB BLB5 DL BL5 COL5 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@6 DLB BLB6 DL BL6 COL6 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@7 DLB BLB7 DL BL7 COL7 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@8 DLB BLB8 DL BL8 COL8 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@9 DLB BLB9 DL BL9 COL9 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@10 DLB BLB10 DL BL10 COL10 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@11 DLB BLB11 DL BL11 COL11 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@12 DLB BLB12 DL BL12 COL12 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@13 DLB BLB13 DL BL13 COL13 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@14 DLB BLB14 DL BL14 COL14 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@15 DLB BLB15 DL BL15 COL15 gnd vdd Memory-IC-Design__TG_bitline
+
+* 8. Shared Tri-State Write Driver & Shared Differential Sense Amplifier
+XWrite_dr@0 DL DLB DIN gnd vdd WRITE_EN Memory-IC-Design__Write_driver
+XSense_am@0 DL DLB gnd READ_EN DOUT vdd Memory-IC-Design__Sense_amp

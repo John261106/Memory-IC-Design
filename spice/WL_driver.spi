@@ -1,0 +1,27 @@
+*** SPICE deck for cell WL_driver{sch} from library Memory-IC-Design
+*** Architecture: Static CMOS 2-Input AND Gate Wordline Driver (NAND2 + Inverter Driver)
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+***
+*** Sizing:
+***   NAND2 stage: PMOS W = 4*lambda (0.36u), NMOS W = 4*lambda (0.36u), L = 0.18u
+***   Driver stage: PMOS W = 8*lambda (0.72u), NMOS W = 4*lambda (0.36u), L = 0.18u
+***
+*** Exports:
+***   IN, EN, GND, VDD, WL
+
+.options parhier=local
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** SUBCIRCUIT Memory-IC-Design__WL_driver
+.SUBCKT Memory-IC-Design__WL_driver EN gnd IN vdd WL
+* NAND2 Stage
+Mpmos@0 nand_out IN  vdd vdd CMOSP L=0.18U W=0.36U
+Mpmos@1 nand_out EN  vdd vdd CMOSP L=0.18U W=0.36U
+Mnmos@0 nand_out IN  mid gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 mid      EN  gnd gnd CMOSN L=0.18U W=0.36U
+
+* Output Driver Inverter Stage
+Mpmos@2 WL nand_out vdd vdd CMOSP L=0.18U W=0.72U
+Mnmos@2 WL nand_out gnd gnd CMOSN L=0.18U W=0.36U
+.ENDS Memory-IC-Design__WL_driver

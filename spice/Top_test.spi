@@ -1,0 +1,93 @@
+*** Full Chip Top-Level End-to-End Verification Testbench
+*** Cell under test: Top{sch} (256-Bit 16x16 Custom CMOS SRAM IC - 8-Cycle Shadow-Register-Free Architecture)
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V, Temp = 27C
+***
+*** End-to-End 8-Cycle Verification Sequence (100 MHz Master Clock, T = 10ns; Cycle = Rising Edge to Rising Edge):
+***   - Frame 1 (5-85ns):    Shift Address 0xA5 (Row 10, Col 5); Precharge at 75-80ns; WRITE '1' (CTRL=0, DIN=1.8V) at 80-85ns
+***   - Frame 2 (85-165ns):  Shift Address 0x3C (Row 3, Col 12); Precharge at 155-160ns; WRITE '0' (CTRL=0, DIN=0.0V) at 160-165ns
+***   - Frame 3 (165-245ns): Shift Address 0xA5 (Row 10, Col 5); Precharge at 235-240ns; READ  '1' (CTRL=1) at 240-245ns -> DOUT = 1.8V
+***   - Frame 4 (245-325ns): Shift Address 0x3C (Row 3, Col 12); Precharge at 315-320ns; READ  '0' (CTRL=1) at 320-325ns -> DOUT = 0.0V
+
+.include D:\Projects\Memory-IC-Design\spice\Top.spi
+
+*** 1. Power Supplies & Output Load
+VDDsrc vdd 0 DC 1.8
+VGND   gnd 0 DC 0
+C_dout DOUT gnd 20f
+
+*** 2. Initial Conditions
+* Initialize 3-bit counter to 111 before first rising edge at t=5ns so Edge #1 (t=5ns) is Count 000
+* and Edge #8 (t=75ns) reaches Count 111 (COUNT_7=1) right as the 8th address bit shifts in!
+.ic V(C0)=1.8 V(C1)=1.8 V(C2)=1.8
+* Initialize Cell(Row 10, Col 5) to opposite state (DATA=0: Q=1.8V, QB=0V) to verify Write '1' flips it
+.ic V(Q_r10_c5)=1.8 V(QB_r10_c5)=0
+* Initialize Cell(Row 3, Col 12) to opposite state (DATA=1: Q=0V, QB=1.8V) to verify Write '0' flips it
+.ic V(Q_r3_c12)=0 V(QB_r3_c12)=1.8
+* Initialize adjacent unselected cells on Row 10 (Col 4) and Col 5 (Row 9) to verify zero disturb
+.ic V(Q_r10_c4)=1.8 V(QB_r10_c4)=0
+.ic V(Q_r9_c5)=0 V(QB_r9_c5)=1.8
+
+*** 3. External Pin Stimuli (5 Pins: CLK, CTRL, ADDR_IN, DIN, DOUT)
+* Master Clock: 100 MHz (Rising edges at 5ns, 15ns, 25ns, ..., 325ns; Falling edges at 10ns, 20ns, ..., 320ns)
+VCLK CLK 0 PULSE(0 1.8 5n 50p 50p 4.95n 10n)
+
+* Serial Address Input (ADDR_IN):
+*   Frame 1 (5-85ns):   0xA5 (RA=1010, CA=0101)
+*   Frame 2 (85-165ns): 0x3C (RA=0011, CA=1100)
+*   Frame 3 (165-245ns):0xA5 (RA=1010, CA=0101)
+*   Frame 4 (245-325ns):0x3C (RA=0011, CA=1100)
+VADDR ADDR_IN 0 PWL(0n 1.8 9.9n 1.8 10.1n 0.0 19.9n 0.0 20.1n 1.8 29.9n 1.8 30.1n 0.0 39.9n 0.0 40.1n 0.0 49.9n 0.0 50.1n 1.8 59.9n 1.8 60.1n 0.0 69.9n 0.0 70.1n 1.8 79.9n 1.8 80.1n 0.0 89.9n 0.0 90.1n 0.0 99.9n 0.0 100.1n 1.8 109.9n 1.8 110.1n 1.8 119.9n 1.8 120.1n 1.8 129.9n 1.8 130.1n 1.8 139.9n 1.8 140.1n 0.0 149.9n 0.0 150.1n 0.0 159.9n 0.0 160.1n 1.8 169.9n 1.8 170.1n 0.0 179.9n 0.0 180.1n 1.8 189.9n 1.8 190.1n 0.0 199.9n 0.0 200.1n 0.0 209.9n 0.0 210.1n 1.8 219.9n 1.8 220.1n 0.0 229.9n 0.0 230.1n 1.8 239.9n 1.8 240.1n 0.0 249.9n 0.0 250.1n 0.0 259.9n 0.0 260.1n 1.8 269.9n 1.8 270.1n 1.8 279.9n 1.8 280.1n 1.8 289.9n 1.8 290.1n 1.8 299.9n 1.8 300.1n 0.0 309.9n 0.0 310.1n 0.0 319.9n 0.0 320.1n 0.0 330n 0.0)
+
+* Read/Write Control (CTRL: 0 = Write during Frames 1 & 2 [0..166ns], 1 = Read during Frames 3 & 4 [166..330ns])
+VCTRL CTRL 0 PWL(0n 0  165.9n 0  166.0n 1.8  330n 1.8)
+
+* Write Data Input (DIN: 1.8V ('1') during Frame 1 [0..86ns], 0V ('0') during Frame 2 [86..330ns])
+VDIN DIN 0 PWL(0n 1.8  85.9n 1.8  86.0n 0  330n 0)
+
+.TRAN 20p 330n
+
+*** 4. Automated End-to-End Verification Measurements
+
+* --- A. Frame 1 Shift Register Address Settlement Check (at t = 79ns, before 8th cycle falling edge) ---
+* Expected Shifted Address: 0xA5 -> RA[3:0] = 1010 (Row 10), CA[3:0] = 0101 (Col 5)
+.MEAS TRAN V_ra3_f1 FIND V(RA3) AT=79n
+.MEAS TRAN V_ra2_f1 FIND V(RA2) AT=79n
+.MEAS TRAN V_ra1_f1 FIND V(RA1) AT=79n
+.MEAS TRAN V_ra0_f1 FIND V(RA0) AT=79n
+.MEAS TRAN V_ca3_f1 FIND V(CA3) AT=79n
+.MEAS TRAN V_ca2_f1 FIND V(CA2) AT=79n
+.MEAS TRAN V_ca1_f1 FIND V(CA1) AT=79n
+.MEAS TRAN V_ca0_f1 FIND V(CA0) AT=79n
+
+* --- B. Frame 1 (Cycle 8 Low Phase, t = 80..85ns): Write '1' (DIN=1.8V) to Cell(Row 10, Col 5) ---
+.MEAS TRAN V_wl10_w1           FIND V(WL10)      AT=82.5n
+.MEAS TRAN V_col5_w1           FIND V(COL5)      AT=82.5n
+.MEAS TRAN V_r10c5_Q_after_w1  FIND V(Q_r10_c5)  AT=84.5n
+.MEAS TRAN V_r10c5_QB_after_w1 FIND V(QB_r10_c5) AT=84.5n
+.MEAS TRAN t_write1_flip TRIG V(CLK) VAL=0.9 FALL=8 TARG V(QB_r10_c5) VAL=1.62 RISE=1
+
+* --- C. Frame 2 (Cycle 16 Low Phase, t = 160..165ns): Write '0' (DIN=0.0V) to Cell(Row 3, Col 12) ---
+.MEAS TRAN V_wl3_w0            FIND V(WL3)       AT=162.5n
+.MEAS TRAN V_col12_w0          FIND V(COL12)     AT=162.5n
+.MEAS TRAN V_r3c12_Q_after_w0  FIND V(Q_r3_c12)  AT=164.5n
+.MEAS TRAN V_r3c12_QB_after_w0 FIND V(QB_r3_c12) AT=164.5n
+.MEAS TRAN t_write0_flip TRIG V(CLK) VAL=0.9 FALL=16 TARG V(Q_r3_c12) VAL=1.62 RISE=1
+
+* --- D. Frame 3 (Cycle 24 Low Phase, t = 240..245ns): Read '1' from Cell(Row 10, Col 5) ---
+.MEAS TRAN V_dout_read1 FIND V(DOUT) AT=244n
+.MEAS TRAN V_dl_read1   FIND V(DL)   AT=244n
+.MEAS TRAN V_dlb_read1  FIND V(DLB)  AT=244n
+.MEAS TRAN t_cq_read1   TRIG V(CLK) VAL=0.9 FALL=24 TARG V(DOUT) VAL=0.9 RISE=1 TD=239n
+
+* --- E. Frame 4 (Cycle 32 Low Phase, t = 320..325ns): Read '0' from Cell(Row 3, Col 12) ---
+.MEAS TRAN V_dout_read0 FIND V(DOUT) AT=324n
+.MEAS TRAN V_dl_read0   FIND V(DL)   AT=324n
+.MEAS TRAN V_dlb_read0  FIND V(DLB)  AT=324n
+.MEAS TRAN t_cq_read0   TRIG V(CLK) VAL=0.9 FALL=32 TARG V(DOUT) VAL=0.9 FALL=1 TD=319n
+
+* --- F. Unselected Neighbor Disturb Checks & Total Chip Power (at end of 4 frames t = 325ns) ---
+.MEAS TRAN V_unselected_r10c4_Q FIND V(Q_r10_c4) AT=325n
+.MEAS TRAN V_unselected_r9c5_QB FIND V(QB_r9_c5) AT=325n
+.MEAS TRAN P_chip_avg AVG (-V(vdd)*I(VDDsrc)) FROM=5n TO=325n
+
+.END

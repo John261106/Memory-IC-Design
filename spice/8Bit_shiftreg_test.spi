@@ -1,0 +1,85 @@
+* Precise Testbench for 8Bit_shiftreg and 8Bit_reg shadow latching
+* Technology: TSMC 0.18um CMOS, VDD = 1.8V
+.include D:\Projects\Memory-IC-Design\spice\8Bit_shiftreg.spi
+
+* Power Supplies
+Vdd vdd 0 DC 1.8V
+Vgnd gnd 0 DC 0V
+
+* Master Clock: 100MHz (T = 10ns, high from 0 to 5ns, rising edge at 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100ns)
+Vclk clk 0 PULSE(0 1.8 0 50p 50p 4.95n 10n)
+
+* Serial Data Input (D) changes at CLK falling edges (t = 5ns, 15ns, 25ns, 35ns, 45ns, 55ns, 65ns, 75ns)
+Vd d 0 PWL(
++   0.0ns 1.8V
++   4.9ns 1.8V   5.1ns 0.0V
++  14.9ns 0.0V  15.1ns 1.8V
++  34.9ns 1.8V  35.1ns 0.0V
++  54.9ns 0.0V  55.1ns 1.8V
++  64.9ns 1.8V  65.1ns 0.0V
++  74.9ns 0.0V  75.1ns 1.8V
++ 110.0ns 1.8V
++ )
+
+* CLK_SHADOW strobe generated during cycle 7 low phase (75.5ns to 79.5ns)
+Vshadow clk_shadow 0 PWL(
++   0.0ns 0.0V
++  75.4ns 0.0V  75.5ns 1.8V
++  79.4ns 1.8V  79.5ns 0.0V
++ 110.0ns 0.0V
++ )
+
+* Instantiate 8-Bit Shift Register
+Xshift clk d gnd sq0 sq1 sq2 sq3 sq4 sq5 sq6 sq7 vdd Memory-IC-Design__8Bit_shiftreg
+
+* Instantiate 8-Bit Shadow Register
+Xreg clk_shadow sq0 sq1 sq2 sq3 sq4 sq5 sq6 sq7 gnd rq0 rq1 rq2 rq3 rq4 rq5 rq6 rq7 vdd Memory-IC-Design__8Bit_reg
+
+* Load Capacitances (representing routing + decoder input gates: ~10fF each)
+C0 rq0 0 10fF
+C1 rq1 0 10fF
+C2 rq2 0 10fF
+C3 rq3 0 10fF
+C4 rq4 0 10fF
+C5 rq5 0 10fF
+C6 rq6 0 10fF
+C7 rq7 0 10fF
+
+* Simulation setup
+.tran 0.01n 100n
+
+* Measurements
+* Check shift register outputs at t = 74.5ns (during Cycle 7, before shadow latch)
+.meas tran sq0_c7 FIND V(sq0) AT=74.5n
+.meas tran sq1_c7 FIND V(sq1) AT=74.5n
+.meas tran sq2_c7 FIND V(sq2) AT=74.5n
+.meas tran sq3_c7 FIND V(sq3) AT=74.5n
+.meas tran sq4_c7 FIND V(sq4) AT=74.5n
+.meas tran sq5_c7 FIND V(sq5) AT=74.5n
+.meas tran sq6_c7 FIND V(sq6) AT=74.5n
+.meas tran sq7_c7 FIND V(sq7) AT=74.5n
+
+* Check shadow register outputs at t = 79.8ns (immediately after shadow capture)
+.meas tran rq0_latched FIND V(rq0) AT=79.8n
+.meas tran rq1_latched FIND V(rq1) AT=79.8n
+.meas tran rq2_latched FIND V(rq2) AT=79.8n
+.meas tran rq3_latched FIND V(rq3) AT=79.8n
+.meas tran rq4_latched FIND V(rq4) AT=79.8n
+.meas tran rq5_latched FIND V(rq5) AT=79.8n
+.meas tran rq6_latched FIND V(rq6) AT=79.8n
+.meas tran rq7_latched FIND V(rq7) AT=79.8n
+
+* Check shift register outputs at t = 85.0ns (during Cycle 8: sq0 should now be 1!)
+.meas tran sq0_c8 FIND V(sq0) AT=85.0n
+
+* Check shadow register outputs at t = 95.0ns (during Cycle 9: rq outputs MUST maintain latched value!)
+.meas tran rq0_hold FIND V(rq0) AT=95.0n
+.meas tran rq1_hold FIND V(rq1) AT=95.0n
+.meas tran rq2_hold FIND V(rq2) AT=95.0n
+.meas tran rq3_hold FIND V(rq3) AT=95.0n
+.meas tran rq4_hold FIND V(rq4) AT=95.0n
+.meas tran rq5_hold FIND V(rq5) AT=95.0n
+.meas tran rq6_hold FIND V(rq6) AT=95.0n
+.meas tran rq7_hold FIND V(rq7) AT=95.0n
+
+.end

@@ -75,6 +75,33 @@ Because only **1 external address pin (`ADDR_IN`)** is provided:
   - **Slave Output Driver (`Mnmos@5, Mpmos@5`):** $W_{\text{N}} = 6\lambda = 0.54\ \mu\text{m}, W_{\text{P}} = 12\lambda = 1.08\ \mu\text{m}$ (strong output drive into downstream shift-register loads).
 - **Performance:** $t_{\text{clk}\to Q\text{, rise}} = 227.2\text{ ps}, t_{\text{clk}\to Q\text{, fall}} = 207.8\text{ ps}$; dynamic energy $E_{\text{cycle}} = 190.2\text{ fJ}$; robust static retention down to DC.
 
+### 2.8 3-Bit Synchronous Binary Counter
+- **Cell:** `3Bit_counter`
+- **Topology:** Modulo-8 synchronous counter using 3 TG-MS D-flip-flops and transistor-level combinational gates.
+- **Hazard-Free Terminal Count:** Direct path-balanced 3-input NAND + strong INV replaces cascaded gates to eliminate 011 -> 100 skew spikes (hazard glitch reduced from 251.2 mV to 0.99 mV).
+- **Performance:** $t_{\text{clk}\to \text{COUNT\_7, rise}} = 338.2\text{ ps}, t_{\text{clk}\to \text{COUNT\_7, fall}} = 275.8\text{ ps}$; frame energy $1.962\text{ pJ}$ @ 100 MHz.
+
+### 2.9 Central Multi-Strobe Timing Generator
+- **Cell:** `Control_logic`
+- **Inputs:** `CLK`, `CTRL` (1=Read, 0=Write), `COUNT_7`, `VDD`, `GND`.
+- **Outputs:** `PCB` (precharge bar), `CLK_SHADOW` (shadow address latch), `WL_EN` (wordline strobe), `WRITE_EN`, `READ_EN`.
+- **Transistor Sizing:** Built with transistor-level CMOS gates ($W_n = 4\lambda, W_p = 8\lambda$ internal, $W_n = 6\lambda = 0.54\ \mu\text{m}, W_p = 12\lambda = 1.08\ \mu\text{m}$ output buffers).
+- **Performance:** $t_{\text{prop,write\_en}} = 149.9\text{ ps}, t_{\text{prop,read\_en}} = 147.9\text{ ps}, t_{\text{prop,clk\_shadow}} = 213.3\text{ ps}$.
+
+### 2.10 Serial-In Parallel-Out Address Register & Shadow Latch
+- **Cells:** `8Bit_shiftreg`, `8Bit_reg`
+- **Architecture:** 8-stage SIPO shift register clocked continuously by master `CLK` captures serial bits from `ADDR_IN`. At Cycle 7 low phase, `Control_logic.CLK_SHADOW` pulses to transfer $Q[7:0]$ into `8Bit_reg`.
+- **Pin Pitch-Matching:** `8Bit_shiftreg;2{ic}` outputs $Q[0:7]$ at $X=7, Y=[7, 5, 3, 1, -1, -3, -5, -7]$ directly align horizontally with `8Bit_reg;1{ic}` inputs $D[0:7]$ at $X=-8, Y=[7, 5, 3, 1, -1, -3, -5, -7]$ with zero wire crossing.
+- **Performance:** $56.09\ \mu\text{W}$ average power; solid DC retention during shift ($V_{\text{OL}} \le 23\ \mu\text{V}$, $V_{\text{OH}} = 1.800\text{ V}$).
+
+### 2.11 Static CMOS Wordline Driver
+- **Cell:** `WL_driver`
+- **Topology:** Static CMOS 2-input AND gate (NAND2 stage + high-drive inverter driver).
+- **Transistor Sizing:**
+  - NAND2 Stage: PMOS $W = 4\lambda = 0.36\ \mu\text{m}$, NMOS $W = 4\lambda = 0.36\ \mu\text{m}$, $L = 0.18\ \mu\text{m}$.
+  - Driver Inverter: PMOS $W = 8\lambda = 0.72\ \mu\text{m}$, NMOS $W = 4\lambda = 0.36\ \mu\text{m}$, $L = 0.18\ \mu\text{m}$.
+- **Performance:** $t_{\text{rise}} = 288.9\text{ ps}, t_{\text{fall}} = 256.8\text{ ps}$ into full 50 fF wordline load; $V_{\text{OL}} \le 45\text{ nV}$ when unselected.
+
 ---
 
 ## 3. Clock Distribution Network

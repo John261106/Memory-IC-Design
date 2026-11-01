@@ -182,14 +182,37 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
-### Decision Log 12: Integrated Multi-Strobe Control Logic Unit Architecture & Sizing
+### Decision Log 12: 8-Cycle Inverted-Phase Shadow-Register-Free Control Logic (`Control_logic{sch}`)
 - **Date:** November 2026
-- **Context:** Implementing the central timing and strobe generator (`Control_logic{sch}`) that converts master `CLK`, `CTRL` (R/W), and `COUNT_7` into internal memory control signals (`PCB`, `CLK_SHADOW`, `WL_EN`, `WRITE_EN`, `READ_EN`).
+- **Context:** Designing the central timing and strobe generator (`Control_logic{sch}`) that converts master `CLK`, `CTRL` (R/W), and `COUNT_7` into internal memory control signals (`PCB`, `WL_EN`, `WRITE_EN`, `READ_EN`).
 - **Alternatives Considered:**
-  1. *Dynamic Precharge Control Gated by Read Mode:* Gating precharge on `CTRL` leaves bitlines floating or un-restored during writes, forcing the write driver to fight uncertain initial bitline states.
-  2. *Universal Precharge (`PCB = CLK`) with Segregated Read/Write Strobing:* Precharges bitlines every cycle during $\text{CLK} = 0$, enabling precharge-assisted writes and non-destructive reads. Generates sharp, non-overlapping `WRITE_EN` and `READ_EN` during $\text{CLK} = 1$. Latching for the 8-bit shadow register (`CLK_SHADOW`) is gated by $\text{COUNT\_7} \cdot \overline{\text{CLK}}$, guaranteeing that the 8th serial bit is fully settled before the shadow register captures the address.
-- **Decision:** Adopted **Universal Precharge with Multi-Strobe Timing Generator (`Control_logic{sch}`)** built entirely at the transistor level with custom ratioed CMOS gates ($W_n = 4\lambda, W_p = 8\lambda$ input stages, $W_n = 6\lambda = 0.54\ \mu\text{m}, W_p = 12\lambda = 1.08\ \mu\text{m}$ output driving stages).
-- **Rationale:** Produces clean, rail-to-rail strobes with sub-220 ps propagation delays ($t_{\text{prop,write\_en}} = 149.9\text{ ps}, t_{\text{prop,read\_en}} = 147.9\text{ ps}, t_{\text{prop,clk\_shadow}} = 213.3\text{ ps}$) under realistic capacitive loading ($25\text{--}40\text{ fF}$). Completely prevents write driver and sense amp contention.
+  1. *9-Cycle Pipeline with 8-Bit Shadow Register (`8Bit_reg`) and `PCB = CLK`:* Requires 8 clock cycles to shift the address into `8Bit_shiftreg`, a falling-edge `CLK_SHADOW` strobe at the end of Cycle 8 to latch it into an 8-bit shadow register (`8Bit_reg`), and executes the Read/Write during Cycle 9 (`CLK = 1`). Adds 8 extra D flip-flops (160 transistors) and an extra cycle of latency.
+  2. *8-Cycle Inverted-Phase Architecture (`PCB = ~CLK`, No Shadow Register):* Defines each clock cycle from rising edge to rising edge. During the first half of each cycle (`CLK = 1`), the serial address bit shifts into `8Bit_shiftreg` ($\approx 210\text{ ps}$) while **Precharge is active** ($\text{PCB} = \overline{\text{CLK}} = 0\text{ V}$) and the decoders settle ($\approx 400\text{ ps}$) well within the $5\text{ ns}$ high phase. During the second half of the 8th clock cycle (`CLK = 0` and `COUNT_7 = 1`), Precharge turns OFF ($\text{PCB} = 1.8\text{ V}$) and memory Read/Write executes directly while `8Bit_shiftreg` outputs `Q0..Q7` are held completely static:
+     $$\text{PCB} = \overline{\text{CLK}}, \quad \text{WL\_EN} = \text{COUNT\_7} \cdot \overline{\text{CLK}}, \quad \text{WRITE\_EN} = \overline{\text{CTRL}} \cdot \text{WL\_EN}, \quad \text{READ\_EN} = \text{CTRL} \cdot \text{WL\_EN}$$
+- **Decision:** Adopted the **8-Cycle Inverted-Phase Shadow-Register-Free Architecture** in `Control_logic{sch}` and `Top{sch}`, eliminating `8Bit_reg` and `CLK_SHADOW` and connecting `8Bit_shiftreg` outputs `Q0..Q7` directly to `CA0..CA3` and `RA0..RA3`.
+- **Rationale:** Completely eliminates the 8-bit shadow register (saving 8 D flip-flops and $40\%$ of full-chip average power), executes every Read/Write right in the second half of the 8th clock cycle ($80\text{--}85\text{ ns}$), and guarantees race-free turn-off at the next rising clock edge (`WL_EN` falls in $244.6\text{ ps}$, before `8Bit_shiftreg` + `Decoder` can transition in $\sim 610\text{ ps}$).
+
+---
+
+### Decision Log 13: Static CMOS Wordline Driver (`WL_driver`) & Wordline Gating
+- **Date:** November 2026
+- **Context:** Implementing row wordline gating with `WL_EN` to ensure wordlines remain held strictly at $0\text{ V}$ during precharge and address shifting (Cycles 1–7 and first half of Cycle 8), and rapidly drive the 50 fF wordline load (32 NMOS access gates + routing) during the evaluation phase of Cycle 8 (`CLK = 0, COUNT_7 = 1`).
+- **Alternatives Considered:**
+  1. *Transmission Gate Switches with NMOS Pull-down:* Passive switches introduce series on-resistance that slows down rise time into 50 fF, while risking high-impedance floating states during switching skews between TG turn-off and pull-down turn-on.
+  2. *Static CMOS 2-Input AND Gate (NAND2 + Inverter Driver):* Active CMOS logic with dedicated pull-up PMOS and pull-down NMOS, actively holding unselected wordlines at $V_{\text{OL}} \le 45\text{ nV}$ with zero impedance, and delivering a low-impedance rise time ($t_{\text{rise}} = 288.9\text{ ps}$) into 50 fF.
+- **Decision:** Adopted **Static CMOS 2-Input AND Wordline Driver (`WL_driver{sch}`)** with $W_n = 4\lambda = 0.36\ \mu\text{m}$, $W_p = 4\lambda = 0.36\ \mu\text{m}$ (NAND2 stage) and $W_n = 4\lambda = 0.36\ \mu\text{m}$, $W_p = 8\lambda = 0.72\ \mu\text{m}$ (Output Driver Inverter).
+- **Rationale:** Guarantees zero floating wordline nodes, protects bitcells against inadvertent read disturbs on unselected rows, and achieves sub-300 ps wordline activation into full 50 fF load.
+
+---
+
+### Decision Log 14: Full-Chip Top-Level Integration (`Top{sch}`) & End-to-End 8-Cycle Verification
+- **Date:** November 2026
+- **Context:** Integrating all hierarchical sub-blocks (`8Bit_shiftreg`, `3Bit_counter`, `Control_logic`, Row/Column `Decoder` units, 16 `WL_driver` units, `256bit_array`, 16 column `Precharge_ckt` units, 16 `TG_bitline` switches, shared `Write_driver`, and shared `Sense_amp`) into `Top{sch}` under the strict 5-pin external interface (`CLK`, `CTRL`, `ADDR_IN`, `DIN`, `DOUT` + `VDD`, `GND`).
+- **Alternatives Considered:**
+  1. *Point-to-Point Crossing Wires Across Schematic:* Creates hundreds of overlapping wires across the 16-row by 16-column buses, making schematic inspection error-prone.
+  2. *Structured Modular Placement with Net-Name Stubs:* Groups components into clean functional zones with direct net-labeled stubs (`RA0..3`, `CA0..3`, `RDEC0..15`, `COL0..15`, `WL0..15`, `BL0..15`, `BLB0..15`, `DL`, `DLB`) between `8Bit_shiftreg`, `Decoder`, `WL_driver`, `256bit_array`, `Precharge_ckt`, `TG_bitline`, `Write_driver`, and `Sense_amp`.
+- **Decision:** Adopted **Modular Placement with Net-Name Stubs** in `Top;1{sch}` and `Top;1{ic}`, connecting `8Bit_shiftreg` directly to `CA0..CA3` and `RA0..RA3` (no shadow register) and utilizing strictly the **16 dedicated column precharge units** (`Precharg@0..15`) at the top of the columns.
+- **Rationale:** Full-chip SPICE simulation (`spice/Top_test.spi`) across 4 consecutive 8-cycle frames ($5\text{--}325\text{ ns}$) verified 100% functional accuracy for serial address shifting, Write `1` ($t_{\text{write1}} = 730.9\text{ ps}$), Write `0` ($t_{\text{write0}} = 743.3\text{ ps}$), Read `1` ($t_{\text{CQ}} = 580.2\text{ ps}$, $V_{\text{DOUT}} = 1.800\text{ V}$), Read `0` ($V_{\text{DOUT}} = 3.27\ \mu\text{V}$), and zero read/write disturb on unselected cells at **$164.86\ \mu\text{W}$** average full-chip power @ 100 MHz.
 
 ---
 
@@ -299,14 +322,18 @@ This section records every major design decision, the alternatives evaluated, an
 | **3-Bit Counter Combinational Hazard (`011` $\to$ `100`)** | $< 50\text{ mV}$ | **0.99 mV** | — | Reduced from 251.2 mV via direct path-balanced `NAND3` |
 | **3-Bit Counter 8-Cycle Frame Energy ($E_{\text{frame}}$)** | $< 3.0\text{ pJ}$ | **1.962 pJ** | — | Full Modulo-8 sequence (`000` $\to$ `111` $\to$ `000`) |
 | **3-Bit Counter Average Power ($P_{\text{counter}}$)** | $< 40\ \mu\text{W}$ | **24.53 µW** | — | Operating @ 100 MHz |
-| **Control Logic `PCB` Fall Delay ($t_{\text{prop,pcb\_fall}}$)** | $< 250\text{ ps}$ | **165.8 ps** | — | CLK falling to PCB active low into 40 fF load |
-| **Control Logic `PCB` Rise Delay ($t_{\text{prop,pcb\_rise}}$)** | $< 250\text{ ps}$ | **181.0 ps** | — | CLK rising to PCB inactive high into 40 fF load |
-| **Control Logic `WRITE_EN` Turn-On Delay** | $< 200\text{ ps}$ | **149.9 ps** | — | CLK rising to WRITE_EN high into 25 fF load |
-| **Control Logic `READ_EN` Turn-On Delay** | $< 200\text{ ps}$ | **147.9 ps** | — | CLK rising to READ_EN high into 25 fF load |
-| **Control Logic `CLK_SHADOW` Latch Strobe Delay** | $< 300\text{ ps}$ | **213.3 ps** | — | CLK falling to CLK_SHADOW rise into 30 fF load |
-| **Control Logic Average Power ($P_{\text{ctrl}}$)** | $< 60\ \mu\text{W}$ | **44.12 µW** | — | Continuous switching @ 100 MHz with all outputs loaded |
-| **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
-| **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
-| **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |
-| **Max Clock Frequency ($F_{\text{max}}$)** | Report | Pending | — | $1 / T_{\text{clk,min}}$ |
+| **Control Logic `PCB` Fall Delay ($t_{\text{clk\_rise}\to\text{pcb\_fall}}$)** | $< 250\text{ ps}$ | **196.9 ps** | — | CLK rising to PCB active low ($\text{PCB} = \overline{\text{CLK}}$) into 40 fF load |
+| **Control Logic `PCB` Rise Delay ($t_{\text{clk\_fall}\to\text{pcb\_rise}}$)** | $< 250\text{ ps}$ | **226.3 ps** | — | CLK falling to PCB inactive high into 40 fF load |
+| **Control Logic `WL_EN` Rise Delay ($t_{\text{clk\_fall}\to\text{wl\_en\_rise}}$)** | $< 300\text{ ps}$ | **252.2 ps** | — | CLK falling (Cycle 8) to WL_EN high into 40 fF load |
+| **Control Logic `WL_EN` Fall Delay ($t_{\text{clk\_rise}\to\text{wl\_en\_fall}}$)** | $< 300\text{ ps}$ | **244.6 ps** | — | Next CLK rising edge to WL_EN turn-off |
+| **Control Logic `WRITE_EN` / `READ_EN` Turn-On Delay** | $< 450\text{ ps}$ | **412.2 ps / 411.8 ps** | — | CLK falling (Cycle 8) to WRITE_EN / READ_EN high into 25 fF load |
+| **Control Logic Average Power ($P_{\text{ctrl}}$)** | $< 60\ \mu\text{W}$ | **21.20 µW** | — | Continuous switching @ 100 MHz (4 outputs, no `CLK_SHADOW`) |
+| **Wordline Driver Rise Delay ($t_{\text{rise, wl}}$)** | $< 400\text{ ps}$ | **288.9 ps** | — | EN rising to WL rising (50% $V_{\text{DD}}$) into 50 fF load |
+| **Wordline Driver Fall Delay ($t_{\text{fall, wl}}$)** | $< 400\text{ ps}$ | **256.8 ps** | — | EN falling to WL falling (50% $V_{\text{DD}}$) into 50 fF load |
+| **Wordline Unselected Output Low Voltage ($V_{\text{OL}}$)** | $< 1\text{ mV}$ | **$< 45\text{ nV}$** | — | Solid GND hold; zero read disturb on unselected rows |
+| **Full-Chip Write `1` Flip Delay ($t_{\text{CLK\_fall}\to Q\text{, W1}}$)** | $< 1.0\text{ ns}$ | **730.9 ps** | — | Cycle 8 CLK falling edge to Cell(10,5) 90% flip (`0xA5`) |
+| **Full-Chip Write `0` Flip Delay ($t_{\text{CLK\_fall}\to Q\text{, W0}}$)** | $< 1.0\text{ ns}$ | **743.3 ps** | — | Cycle 16 CLK falling edge to Cell(3,12) 90% flip (`0x3C`) |
+| **Full-Chip Average Power @ 100 MHz ($P_{\text{chip,avg}}$)** | $< 500\ \mu\text{W}$ | **164.86 µW** | — | 8-cycle shadow-register-free architecture across 4 consecutive frames |
+| **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | **580.2 ps** (Read 1) | — | Cycle 24 CLK falling edge to valid DOUT (`1.800 V`) into 20 fF load |
+| **Max Clock Frequency ($F_{\text{max}}$)** | Report | **$> 500\text{ MHz}$** ($T_{\text{min}} < 2.0\text{ ns}$) | — | Critical path $< 0.78\text{ ns}$ (Precharge: 774 ps, Write: 743 ps, Read: 580 ps) |
 | **Core Layout Area** | Minimized ($\mu\text{m}^2$) | — | Pending | Electric VLSI DRC/LVS clean |

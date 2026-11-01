@@ -1,0 +1,66 @@
+*** SPICE deck for cell Control_logic{sch} from library Memory-IC-Design
+*** Architecture: Multi-Strobe Timing & Control Logic Unit
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+***
+*** Inputs:  CLK, CTRL, COUNT_7, VDD, GND
+*** Outputs: PCB, CLK_SHADOW, WL_EN, WRITE_EN, READ_EN
+***
+*** Equations:
+***   PCB        = CLK (buffered active-low: 0V during CLK=0 precharge, 1.8V during CLK=1 evaluation)
+***   WL_EN      = CLK (buffered active-high: 1.8V during CLK=1 evaluation, 0V during CLK=0 precharge)
+***   CLK_SHADOW = COUNT_7 & ~CLK (positive pulse to latch shadow register at end of 8th bit cycle)
+***   WRITE_EN   = ~CTRL & CLK (active-high strobe to write driver when CTRL=0)
+***   READ_EN    = CTRL & CLK  (active-high strobe to sense amplifier when CTRL=1)
+
+.options parhier=local
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: Control_logic{sch}
+
+* 1. CLK Buffer: CLK -> CLKB -> WL_EN
+Mnmos@0 CLKB CLK gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd  CLK CLKB vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@1 WL_EN CLKB gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@1 vdd   CLKB WL_EN vdd CMOSP L=0.18U W=1.08U
+
+* 2. PCB Precharge Buffer: CLK -> CLKB_pre -> PCB
+Mnmos@2 CLKB_pre CLK gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd      CLK CLKB_pre vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@3 PCB CLKB_pre gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@3 vdd CLKB_pre PCB vdd CMOSP L=0.18U W=1.08U
+
+* 3. CTRL Inverter: CTRL -> CTRLB
+Mnmos@4 CTRLB CTRL gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@4 vdd   CTRL CTRLB vdd CMOSP L=0.18U W=0.72U
+
+* 4. WRITE_EN Block: AND2(CTRLB, CLK) -> WRITE_EN
+Mpmos@5 vdd        CTRLB WRITE_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@6 vdd        CLK   WRITE_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@5 WRITE_ENB  CTRLB net@w1    gnd CMOSN L=0.18U W=0.36U
+Mnmos@6 net@w1     CLK   gnd       gnd CMOSN L=0.18U W=0.36U
+
+Mnmos@7 WRITE_EN WRITE_ENB gnd      gnd CMOSN L=0.18U W=0.54U
+Mpmos@7 vdd      WRITE_ENB WRITE_EN vdd CMOSP L=0.18U W=1.08U
+
+* 5. READ_EN Block: AND2(CTRL, CLK) -> READ_EN
+Mpmos@8 vdd       CTRL READ_ENB vdd CMOSP L=0.18U W=0.36U
+Mpmos@9 vdd       CLK  READ_ENB vdd CMOSP L=0.18U W=0.36U
+Mnmos@8 READ_ENB  CTRL net@r1   gnd CMOSN L=0.18U W=0.36U
+Mnmos@9 net@r1    CLK  gnd      gnd CMOSN L=0.18U W=0.36U
+
+Mnmos@10 READ_EN READ_ENB gnd     gnd CMOSN L=0.18U W=0.54U
+Mpmos@10 vdd     READ_ENB READ_EN vdd CMOSP L=0.18U W=1.08U
+
+* 6. CLK_SHADOW Block: AND2(COUNT_7, CLKB) -> CLK_SHADOW
+Mpmos@11 vdd         COUNT_7 CLK_SHADOWB vdd CMOSP L=0.18U W=0.36U
+Mpmos@12 vdd         CLKB    CLK_SHADOWB vdd CMOSP L=0.18U W=0.36U
+Mnmos@11 CLK_SHADOWB COUNT_7 net@s1      gnd CMOSN L=0.18U W=0.36U
+Mnmos@12 net@s1      CLKB    gnd         gnd CMOSN L=0.18U W=0.36U
+
+Mnmos@13 CLK_SHADOW CLK_SHADOWB gnd        gnd CMOSN L=0.18U W=0.54U
+Mpmos@13 vdd        CLK_SHADOWB CLK_SHADOW vdd CMOSP L=0.18U W=1.08U
+
+.END

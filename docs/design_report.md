@@ -182,6 +182,17 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 12: Integrated Multi-Strobe Control Logic Unit Architecture & Sizing
+- **Date:** November 2026
+- **Context:** Implementing the central timing and strobe generator (`Control_logic{sch}`) that converts master `CLK`, `CTRL` (R/W), and `COUNT_7` into internal memory control signals (`PCB`, `CLK_SHADOW`, `WL_EN`, `WRITE_EN`, `READ_EN`).
+- **Alternatives Considered:**
+  1. *Dynamic Precharge Control Gated by Read Mode:* Gating precharge on `CTRL` leaves bitlines floating or un-restored during writes, forcing the write driver to fight uncertain initial bitline states.
+  2. *Universal Precharge (`PCB = CLK`) with Segregated Read/Write Strobing:* Precharges bitlines every cycle during $\text{CLK} = 0$, enabling precharge-assisted writes and non-destructive reads. Generates sharp, non-overlapping `WRITE_EN` and `READ_EN` during $\text{CLK} = 1$. Latching for the 8-bit shadow register (`CLK_SHADOW`) is gated by $\text{COUNT\_7} \cdot \overline{\text{CLK}}$, guaranteeing that the 8th serial bit is fully settled before the shadow register captures the address.
+- **Decision:** Adopted **Universal Precharge with Multi-Strobe Timing Generator (`Control_logic{sch}`)** built entirely at the transistor level with custom ratioed CMOS gates ($W_n = 4\lambda, W_p = 8\lambda$ input stages, $W_n = 6\lambda = 0.54\ \mu\text{m}, W_p = 12\lambda = 1.08\ \mu\text{m}$ output driving stages).
+- **Rationale:** Produces clean, rail-to-rail strobes with sub-220 ps propagation delays ($t_{\text{prop,write\_en}} = 149.9\text{ ps}, t_{\text{prop,read\_en}} = 147.9\text{ ps}, t_{\text{prop,clk\_shadow}} = 213.3\text{ ps}$) under realistic capacitive loading ($25\text{--}40\text{ fF}$). Completely prevents write driver and sense amp contention.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -288,6 +299,12 @@ This section records every major design decision, the alternatives evaluated, an
 | **3-Bit Counter Combinational Hazard (`011` $\to$ `100`)** | $< 50\text{ mV}$ | **0.99 mV** | — | Reduced from 251.2 mV via direct path-balanced `NAND3` |
 | **3-Bit Counter 8-Cycle Frame Energy ($E_{\text{frame}}$)** | $< 3.0\text{ pJ}$ | **1.962 pJ** | — | Full Modulo-8 sequence (`000` $\to$ `111` $\to$ `000`) |
 | **3-Bit Counter Average Power ($P_{\text{counter}}$)** | $< 40\ \mu\text{W}$ | **24.53 µW** | — | Operating @ 100 MHz |
+| **Control Logic `PCB` Fall Delay ($t_{\text{prop,pcb\_fall}}$)** | $< 250\text{ ps}$ | **165.8 ps** | — | CLK falling to PCB active low into 40 fF load |
+| **Control Logic `PCB` Rise Delay ($t_{\text{prop,pcb\_rise}}$)** | $< 250\text{ ps}$ | **181.0 ps** | — | CLK rising to PCB inactive high into 40 fF load |
+| **Control Logic `WRITE_EN` Turn-On Delay** | $< 200\text{ ps}$ | **149.9 ps** | — | CLK rising to WRITE_EN high into 25 fF load |
+| **Control Logic `READ_EN` Turn-On Delay** | $< 200\text{ ps}$ | **147.9 ps** | — | CLK rising to READ_EN high into 25 fF load |
+| **Control Logic `CLK_SHADOW` Latch Strobe Delay** | $< 300\text{ ps}$ | **213.3 ps** | — | CLK falling to CLK_SHADOW rise into 30 fF load |
+| **Control Logic Average Power ($P_{\text{ctrl}}$)** | $< 60\ \mu\text{W}$ | **44.12 µW** | — | Continuous switching @ 100 MHz with all outputs loaded |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

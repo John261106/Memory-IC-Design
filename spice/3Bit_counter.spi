@@ -1,0 +1,96 @@
+*** SPICE deck for cell 3Bit_counter{sch} from library Memory-IC-Design
+*** Architecture: 3-Bit Synchronous Binary Counter (Modulo-8) with Hazard-Free Terminal Count (COUNT_7)
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Lambda rules: 180nm = 2*lambda -> lambda = 90nm
+***
+*** Logic Equations:
+***   D0 = C0B = ~C0
+***   D1 = C1 ^ C0
+***   C01 = C0 & C1
+***   D2 = C2 ^ C01
+***   COUNT_7 = C0 & C1 & C2 (Direct 3-Input NAND + Strong Output INV to eliminate 011->100 path skew hazard)
+
+.options parhier=local
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** SUBCIRCUIT Memory-IC-Design__D_flipflop FROM CELL D_flipflop{sch}
+.SUBCKT Memory-IC-Design__D_flipflop CLK D gnd Q vdd
+Mnmos@8 CLKB CLK  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@8 vdd  CLK  CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@9 CLK2 CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@9 vdd  CLKB CLK2 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@0 D     CLKB net@6 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 net@6 CLK2 D     vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@2 net@22 net@6 gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd    net@6 net@22 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@3 net@14 net@22 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    net@22 net@14 vdd CMOSP L=0.18U W=0.36U
+
+Mnmos@1 net@6  CLK2 net@14 gnd CMOSN L=0.18U W=0.27U
+Mpmos@1 net@14 CLKB net@6  vdd CMOSP L=0.18U W=0.54U
+
+Mnmos@7 net@22 CLK2 net@45 gnd CMOSN L=0.18U W=0.36U
+Mpmos@7 net@45 CLKB net@22 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@5 Q   net@45 gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@5 vdd net@45 Q   vdd CMOSP L=0.18U W=1.08U
+
+Mnmos@6 net@48 Q   gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    Q   net@48 vdd CMOSP L=0.18U W=0.36U
+
+Mnmos@4 net@45 CLKB net@48 gnd CMOSN L=0.18U W=0.27U
+Mpmos@4 net@48 CLK2 net@45 vdd CMOSP L=0.18U W=0.54U
+.ENDS Memory-IC-Design__D_flipflop
+
+*** TOP LEVEL CELL: 3Bit_counter{sch}
+* 1. Three D Flip-Flops (C0, C1, C2)
+XD_flipfl@3 CLK C0B gnd C0 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@4 CLK D1  gnd C1 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@5 CLK D2  gnd C2 vdd Memory-IC-Design__D_flipflop
+
+* 2. Complement Inverters (C0 -> C0B, C1 -> C1B, C2 -> C2B)
+Mnmos@0 C0B C0 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd C0 C0B vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@1 C1B C1 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@1 vdd C1 C1B vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@2 C2B C2 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd C2 C2B vdd CMOSP L=0.18U W=0.72U
+
+* 3. AND2 Block: C01 = C0 & C1 (NAND2 + INV for D2 next-state carry)
+Mpmos@3 vdd    C0 C01B vdd CMOSP L=0.18U W=0.36U
+Mpmos@4 vdd    C1 C01B vdd CMOSP L=0.18U W=0.36U
+Mnmos@3 C01B   C0 net@m1 gnd CMOSN L=0.18U W=0.36U
+Mnmos@4 net@m1 C1 gnd    gnd CMOSN L=0.18U W=0.36U
+
+Mnmos@5 C01 C01B gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@5 vdd C01B C01 vdd CMOSP L=0.18U W=0.72U
+
+* 4. Direct Path-Balanced AND3 Block (Terminal Count): COUNT_7 = C0 & C1 & C2 (NAND3 + Strong Output INV)
+Mpmos@6 vdd      C0 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mpmos@7 vdd      C1 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mpmos@8 vdd      C2 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mnmos@6 COUNT_7B C0 net@m2   gnd CMOSN L=0.18U W=0.54U
+Mnmos@7 net@m2   C1 net@m3   gnd CMOSN L=0.18U W=0.54U
+Mnmos@8 net@m3   C2 gnd      gnd CMOSN L=0.18U W=0.54U
+
+Mnmos@9 COUNT_7 COUNT_7B gnd     gnd CMOSN L=0.18U W=0.54U
+Mpmos@9 vdd     COUNT_7B COUNT_7 vdd CMOSP L=0.18U W=1.08U
+
+* 5. XOR Block 1: D1 = C1 ^ C0 (2 CMOS Transmission Gates)
+Mnmos@10 C1  C0B D1 gnd CMOSN L=0.18U W=0.36U
+Mpmos@10 D1  C0  C1 vdd CMOSP L=0.18U W=0.72U
+Mnmos@11 C1B C0  D1 gnd CMOSN L=0.18U W=0.36U
+Mpmos@11 D1  C0B C1B vdd CMOSP L=0.18U W=0.72U
+
+* 6. XOR Block 2: D2 = C2 ^ C01 (2 CMOS Transmission Gates)
+Mnmos@12 C2  C01B D2 gnd CMOSN L=0.18U W=0.36U
+Mpmos@12 D2  C01  C2 vdd CMOSP L=0.18U W=0.72U
+Mnmos@13 C2B C01  D2 gnd CMOSN L=0.18U W=0.36U
+Mpmos@13 D2  C01B C2B vdd CMOSP L=0.18U W=0.72U
+
+.END

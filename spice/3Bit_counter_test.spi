@@ -1,0 +1,123 @@
+*** SPICE deck for 3-Bit Synchronous Binary Counter Characterization
+*** Cell under test: 3Bit_counter{sch}
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** Nominal Supply: 1.8V, Temperature: 27C
+
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** 1. D FLIP-FLOP SUBCIRCUIT ***
+.SUBCKT Memory-IC-Design__D_flipflop CLK D gnd Q vdd
+Mnmos@8 CLKB CLK  gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@8 vdd  CLK  CLKB vdd CMOSP L=0.18U W=0.72U
+Mnmos@9 CLK2 CLKB gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@9 vdd  CLKB CLK2 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@0 D     CLKB net@6 gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 net@6 CLK2 D     vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@2 net@22 net@6 gnd    gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd    net@6 net@22 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@3 net@14 net@22 gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@3 vdd    net@22 net@14 vdd CMOSP L=0.18U W=0.36U
+
+Mnmos@1 net@6  CLK2 net@14 gnd CMOSN L=0.18U W=0.27U
+Mpmos@1 net@14 CLKB net@6  vdd CMOSP L=0.18U W=0.54U
+
+Mnmos@7 net@22 CLK2 net@45 gnd CMOSN L=0.18U W=0.36U
+Mpmos@7 net@45 CLKB net@22 vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@5 Q   net@45 gnd gnd CMOSN L=0.18U W=0.54U
+Mpmos@5 vdd net@45 Q   vdd CMOSP L=0.18U W=1.08U
+
+Mnmos@6 net@48 Q   gnd    gnd CMOSN L=0.18U W=0.18U
+Mpmos@6 vdd    Q   net@48 vdd CMOSP L=0.18U W=0.36U
+
+Mnmos@4 net@45 CLKB net@48 gnd CMOSN L=0.18U W=0.27U
+Mpmos@4 net@48 CLK2 net@45 vdd CMOSP L=0.18U W=0.54U
+.ENDS Memory-IC-Design__D_flipflop
+
+*** 2. 3-BIT COUNTER NETLIST ***
+XD_flipfl@3 CLK C0B gnd C0 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@4 CLK D1  gnd C1 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@5 CLK D2  gnd C2 vdd Memory-IC-Design__D_flipflop
+
+* Complement Inverters
+Mnmos@0 C0B C0 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd C0 C0B vdd CMOSP L=0.18U W=0.72U
+Mnmos@1 C1B C1 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@1 vdd C1 C1B vdd CMOSP L=0.18U W=0.72U
+Mnmos@2 C2B C2 gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@2 vdd C2 C2B vdd CMOSP L=0.18U W=0.72U
+
+* AND2 Block: C01 = C0 & C1 (for D2 next-state carry)
+Mpmos@3 vdd    C0 C01B vdd CMOSP L=0.18U W=0.36U
+Mpmos@4 vdd    C1 C01B vdd CMOSP L=0.18U W=0.36U
+Mnmos@3 C01B   C0 net@m1 gnd CMOSN L=0.18U W=0.36U
+Mnmos@4 net@m1 C1 gnd    gnd CMOSN L=0.18U W=0.36U
+Mnmos@5 C01 C01B gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@5 vdd C01B C01 vdd CMOSP L=0.18U W=0.72U
+
+* Direct Path-Balanced AND3 Block (Terminal Count): COUNT_7 = C0 & C1 & C2
+Mpmos@6 vdd      C0 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mpmos@7 vdd      C1 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mpmos@8 vdd      C2 COUNT_7B vdd CMOSP L=0.18U W=0.36U
+Mnmos@6 COUNT_7B C0 net@m2   gnd CMOSN L=0.18U W=0.54U
+Mnmos@7 net@m2   C1 net@m3   gnd CMOSN L=0.18U W=0.54U
+Mnmos@8 net@m3   C2 gnd      gnd CMOSN L=0.18U W=0.54U
+Mnmos@9 COUNT_7 COUNT_7B gnd     gnd CMOSN L=0.18U W=0.54U
+Mpmos@9 vdd     COUNT_7B COUNT_7 vdd CMOSP L=0.18U W=1.08U
+
+* XOR Block 1: D1 = C1 ^ C0
+Mnmos@10 C1  C0B D1 gnd CMOSN L=0.18U W=0.36U
+Mpmos@10 D1  C0  C1 vdd CMOSP L=0.18U W=0.72U
+Mnmos@11 C1B C0  D1 gnd CMOSN L=0.18U W=0.36U
+Mpmos@11 D1  C0B C1B vdd CMOSP L=0.18U W=0.72U
+
+* XOR Block 2: D2 = C2 ^ C01
+Mnmos@12 C2  C01B D2 gnd CMOSN L=0.18U W=0.36U
+Mpmos@12 D2  C01  C2 vdd CMOSP L=0.18U W=0.72U
+Mnmos@13 C2B C01  D2 gnd CMOSN L=0.18U W=0.36U
+Mpmos@13 D2  C01B C2B vdd CMOSP L=0.18U W=0.72U
+
+*** 3. POWER SUPPLIES & LOADS ***
+VDDsrc vdd 0 DC 1.8
+VGND   gnd 0 DC 0
+Cload  COUNT_7 gnd 25f
+
+*** 4. INITIAL CONDITION (Start at Count = 000) ***
+.ic V(C0)=0 V(C1)=0 V(C2)=0
+
+*** 5. STIMULUS (100 MHz Clock, Period = 10ns) ***
+* Rising edges at: 5ns (1), 15ns (2), 25ns (3), 35ns (4), 45ns (5), 55ns (6), 65ns (7), 75ns (0), 85ns (1)
+VCLK CLK 0 PULSE(0 1.8 5n 50p 50p 4.95n 10n)
+
+.TRAN 10p 90n
+
+*** 6. AUTOMATED MEASUREMENTS ***
+* Verify zero combinational glitch at 011 -> 100 transition (t = 35ns)
+.MEAS TRAN V_spike_35n MAX V(COUNT_7) FROM=34n TO=37n
+
+* Verify COUNT_7 stays LOW at count 6 (t = 60ns)
+.MEAS TRAN V_count6_out FIND V(COUNT_7) AT=60n
+
+* Verify COUNT_7 goes HIGH (1.8V) at count 7 (t = 70ns, 8th bit cycle)
+.MEAS TRAN V_count7_out FIND V(COUNT_7) AT=70n
+.MEAS TRAN V_c2_at7 FIND V(C2) AT=70n
+.MEAS TRAN V_c1_at7 FIND V(C1) AT=70n
+.MEAS TRAN V_c0_at7 FIND V(C0) AT=70n
+
+* Verify COUNT_7 returns LOW (0V) on rollover back to count 0 (t = 80ns)
+.MEAS TRAN V_rollover0_out FIND V(COUNT_7) AT=80n
+
+* Propagation Delay from 7th CLK edge (t = 65ns) to COUNT_7 rising (50% VDD = 0.9V)
+.MEAS TRAN t_clk_to_count7_rise TRIG V(CLK) VAL=0.9 RISE=7 TARG V(COUNT_7) VAL=0.9 RISE=1
+
+* Propagation Delay from 8th CLK edge (t = 75ns) to COUNT_7 falling (50% VDD = 0.9V)
+.MEAS TRAN t_clk_to_count7_fall TRIG V(CLK) VAL=0.9 RISE=8 TARG V(COUNT_7) VAL=0.9 FALL=1
+
+* Dynamic Energy across a full 8-cycle Modulo-8 frame (0ns to 80ns)
+.MEAS TRAN E_8cycle_frame INTEG -I(VDDsrc)*V(vdd) FROM=0n TO=80n
+.MEAS TRAN P_avg_counter AVG -I(VDDsrc)*V(vdd) FROM=0n TO=80n
+
+.END

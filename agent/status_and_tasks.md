@@ -6,6 +6,8 @@
 - **Sense Amplifier:** Complete (`Sense_amp{sch}`, verified in SPICE).
 - **Write Driver:** Complete (`Write_driver{sch}`, verified in SPICE).
 - **D Flip-Flop:** Complete (`D_flipflop{sch}` sized and verified; testbench in `D_flipflop_test.spi` confirms 2-stage shift register cascading with sub-230ps delay).
+- **8-Bit Shift Register:** Complete (`8Bit_shiftreg{sch}` & `{ic}` created in `.jelib`).
+- **3-Bit Synchronous Counter:** Complete (`3Bit_counter{sch}` built in `.jelib` with custom transistor-level logic and net-name routing; verified in `3Bit_counter_test.spi`).
 - **1-Bit SRAM Slice:** Complete & verified (`1Bit_SRAM.spi`).
 - **16x16 Bitcell Matrix:** Schematic created (`256bit_SRAM.spi`, connected via Jython script `04_connect_sram_top.py`).
 - **4-to-16 Decoder Script:** Complete (`scripts/05_connect_decoder.py`, automates 20 NOT + 16 NAND gates with active-high `OUT0..15`).

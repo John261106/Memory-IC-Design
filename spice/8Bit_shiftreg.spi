@@ -1,0 +1,12 @@
+*** SPICE deck for cell 8Bit_shiftreg{ic} from library Memory-IC-Design
+*** Created on Sat Oct 31, 2026 22:49:14
+*** Last revised on Sat Oct 31, 2026 22:51:13
+*** Written on Sat Oct 31, 2026 23:03:27 by Electric VLSI Design System, version 9.08
+*** Layout tech: mocmos, foundry MOSIS
+*** UC SPICE *** , MIN_RESIST 4.0, MIN_CAPAC 0.1FF
+.options parhier=local
+* Model cards described in this file:
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+*** TOP LEVEL CELL: 8Bit_shiftreg{ic}
+.END

@@ -171,6 +171,17 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 11: 3-Bit Synchronous Binary Counter & Pipelined Shadow Register Control Architecture
+- **Date:** November 2026
+- **Context:** Designing the cycle counter (`3Bit_counter`) and control architecture to coordinate the 8-bit serial address shift register (`8Bit_shiftreg`), parallel shadow register, and precharge-assisted read/write cycles.
+- **Alternatives Considered:**
+  1. *Option B — Framed 9-Cycle Stalled Shift Register (No Shadow Register):* Requires gating the shift register clock or inserting 8 2:1 recirculation MUXes to freeze the address during the 9th execution cycle, introducing clock-gating skew hazards and stalling serial input throughput.
+  2. *Option A — Free-Running 8-Bit Shift Register + 8-Bit Shadow Register Driven by a 3-Bit Modulo-8 Counter:* The shift register runs continuously on `CLK` while a 3-bit synchronous binary counter (`C2, C1, C0`) tracks the 8 incoming serial bits ($000 \to 111$) and asserts `COUNT_7` ($C_2 \cdot C_1 \cdot C_0$) when the 8th bit arrives. Furthermore, precharge (`PCB = CLK`) operates in every cycle during $\text{CLK} = 0$ so both Read and Write are precharge-assisted.
+- **Decision:** Adopted **Option A with a custom transistor-level 3-Bit Synchronous Binary Counter (`3Bit_counter{sch}`)** comprising 3 `D_flipflop` instances, 3 complement inverters ($W_{\text{N}}=0.36\ \mu\text{m}, W_{\text{P}}=0.72\ \mu\text{m}$), 2 transmission-gate XOR blocks ($W_{\text{N}}=0.36\ \mu\text{m}, W_{\text{P}}=0.72\ \mu\text{m}$), 1 static CMOS AND2 block (`C01 = C0 & C1`), and a **direct path-balanced 3-input AND3 block (`NAND3(C0, C1, C2) + INV`)** for `COUNT_7`.
+- **Rationale:** Using a cascaded 2-input AND (`C01 & C2`) introduced a $251.2\text{ mV}$ static-0 combinational hazard glitch at the `011 -> 100` transition ($t = 35\text{ ns}$) because `C01` was delayed by two extra gate stages relative to `C2`. Replacing the terminal-count stage with a direct 3-input NAND (`NAND3`, $W_{\text{N}}=0.54\ \mu\text{m}, W_{\text{P}}=0.36\ \mu\text{m}$) matches input arrival times, suppressing the $35\text{ ns}$ spike from **$251.2\text{ mV}$ down to $0.99\text{ mV}$** while improving propagation delay to $t_{\text{clk}\to \text{COUNT\_7, rise}} = 338.2\text{ ps}$ and $t_{\text{clk}\to \text{COUNT\_7, fall}} = 275.8\text{ ps}$.
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -272,6 +283,11 @@ This section records every major design decision, the alternatives evaluated, an
 | **DFF Hold Stability Check** | Full rail retention | **1.800 V / 0.000 V** | — | Zero corruption when input D toggles while CLK is HIGH |
 | **DFF Dynamic Energy per Cycle ($E_{\text{cycle}}$)** | $< 300\text{ fJ}$ | **190.2 fJ** | — | Full clock cycle integration @ 100 MHz |
 | **DFF Dynamic Power ($P_{\text{avg}}$)** | $< 30\ \mu\text{W}$ | **19.02 µW** | — | Continuous switching @ 100 MHz |
+| **3-Bit Counter Terminal Count Rise ($t_{\text{clk}\to \text{COUNT\_7, rise}}$)** | $< 600\text{ ps}$ | **338.2 ps** | — | 7th clock edge to `COUNT_7` high (50% $V_{\text{DD}}$) |
+| **3-Bit Counter Terminal Count Fall ($t_{\text{clk}\to \text{COUNT\_7, fall}}$)** | $< 500\text{ ps}$ | **275.8 ps** | — | 8th clock edge rollover to `COUNT_7` low |
+| **3-Bit Counter Combinational Hazard (`011` $\to$ `100`)** | $< 50\text{ mV}$ | **0.99 mV** | — | Reduced from 251.2 mV via direct path-balanced `NAND3` |
+| **3-Bit Counter 8-Cycle Frame Energy ($E_{\text{frame}}$)** | $< 3.0\text{ pJ}$ | **1.962 pJ** | — | Full Modulo-8 sequence (`000` $\to$ `111` $\to$ `000`) |
+| **3-Bit Counter Average Power ($P_{\text{counter}}$)** | $< 40\ \mu\text{W}$ | **24.53 µW** | — | Operating @ 100 MHz |
 | **Read Power per Bit ($P_{\text{read}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Write Power per Bit ($P_{\text{write}}$)** | Report | Pending | — | Integrated $V_{\text{DD}} \times I_{\text{DD}}$ |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | Pending | — | CLK rising edge to valid DOUT |

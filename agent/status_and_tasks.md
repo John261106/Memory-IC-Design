@@ -8,13 +8,13 @@
 - **D Flip-Flop:** Complete (`D_flipflop{sch}` sized and verified; testbench in `D_flipflop_test.spi` confirms 2-stage shift register cascading with sub-230ps delay).
 - **8-Bit Shift Register:** Complete (`8Bit_shiftreg{sch}` & `{ic}` in `.jelib` exporting parallel outputs `Q0..Q7` directly to `CA0..CA3` and `RA0..RA3`; shadow register `8Bit_reg` eliminated per 8-cycle inverted-phase architecture).
 - **3-Bit Synchronous Counter:** Complete (`3Bit_counter{sch}` built in `.jelib` with custom transistor-level logic and net-name routing; verified in `3Bit_counter_test.spi`).
-- **Control Logic Unit:** Complete (`Control_logic{sch}` & `{ic}` updated in `.jelib` for 8-cycle inverted-phase operation: $\text{PCB}=\overline{\text{CLK}}$, $\text{WL\_EN}=\text{COUNT\_7}\cdot\overline{\text{CLK}}$, $\text{WRITE\_EN}=\overline{\text{CTRL}}\cdot\text{WL\_EN}$, $\text{READ\_EN}=\text{CTRL}\cdot\text{WL\_EN}$; verified in `Control_logic_test.spi`).
+- **Control Logic Unit:** Complete (`Control_logic{sch}` & `{ic}` updated in `.jelib` for 8-cycle inverted-phase operation: $\text{PCB}=\overline{\text{CLK}}$, $\text{WL\_EN}=\text{COUNT\_7}\cdot\overline{\text{CLK}}$, $\text{WRITE\_EN}=\overline{\text{CTRL}}\cdot\text{WL\_EN}$, $\text{READ\_EN}=\text{CTRL}\cdot\text{WL\_EN}$ with an 8-stage CMOS inverter delay line to eliminate Read '0' $0.7\text{ V}$ sense amp glitch; verified in `Top_test.spi` at $18.6\text{ mV}$ peak).
 - **Wordline Driver (`WL_driver`):** Complete (`WL_driver{sch}` & `{ic}` built in `.jelib`; verified in SPICE with $t_{\text{rise}} = 288.9\text{ ps}$ into full 50 fF wordline load and $V_{\text{OL}} \le 45\text{ nV}$).
-- **Top-Level 256-Bit SRAM Chip (`Top`):** Complete (`Top{sch}` & `Top{ic}` updated in `.jelib` without `8Bit_reg` or `Precharg@16`; verified end-to-end in `spice/Top.spi` and `spice/Top_test.spi` at $P_{\text{chip,avg}} = 164.86\ \mu\text{W}$).
+- **Top-Level 256-Bit SRAM Chip (`Top`):** Complete (`Top{sch}` & `Top{ic}` updated in `.jelib` without `8Bit_reg` or `Precharg@16`; verified end-to-end in `spice/Top.spi` and `spice/Top_test.spi` at $P_{\text{chip,avg}} = 165.9\ \mu\text{W}$).
 - **1-Bit SRAM Slice:** Complete & verified (`1Bit_SRAM.spi`).
 - **16x16 Bitcell Matrix:** Schematic created (`256bit_array{sch}` / `256bit_SRAM.spi`).
 - **4-to-16 Decoder:** Complete (`Decoder{sch}` & `{ic}` verified and integrated for both Row and Column decoding).
-- **Living Design Report:** Updated (`docs/design_report.md` tracking Decision Logs 1–14 and full-chip characterization metrics).
+- **Living Design Report:** Updated (`docs/design_report.md` tracking Decision Logs 1–15 and full-chip characterization metrics).
 
 ---
 

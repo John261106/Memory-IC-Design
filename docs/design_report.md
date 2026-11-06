@@ -216,6 +216,25 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 15: Elimination of Read '0' Output Glitch via 8-Stage Inverter Delay Line in Control Logic (`Control_logic{sch}`)
+- **Date:** November 2026
+- **Context:** During full-chip end-to-end verification (`Top_test.spi`), a transient voltage spike of **$\approx 0.70\text{ V}$ ($0.6992\text{ V}$)** was observed on `DOUT` at $t = 320.57\text{ ns}$ during Frame 4 (Cycle 32 Low Phase: Read '0' from Row 3, Col 12). Although `DOUT` properly settled back to $0.0\text{ V}$ by $t = 321.1\text{ ns}$, the transient peak exceeded the standard CMOS logic-low threshold ($V_{\text{IL}} = 0.3 \times 1.8\text{ V} = 0.54\text{ V}$), posing a significant false-logic switching concern for downstream digital logic.
+- **Root Cause Analysis:**
+  1. *Premature Sense Amplifier Activation:* In `Control_logic`, `READ_EN` was directly generated as $\text{READ\_EN} = \text{WL\_EN} \cdot \text{CTRL}$. Consequently, `READ_EN` reached $1.8\text{ V}$ by $t = 320.35\text{ ns}$. At this instant, the selected wordline (`WL3`) was only at $0.37\text{ V}$ (below the $V_{\text{tn}} \approx 0.5\text{ V}$ access threshold), and both bitlines were still sitting at the precharge rail ($V(DL) = V(DLB) = 1.79\text{ V}$, differential $\Delta V = 0\text{ V}$).
+  2. *Sense Amplifier Asymmetry Under Common-Mode Input:* The 2-stage OTA sense amplifier uses an active PMOS current mirror load. When tail NMOS `Mnmos@5` turns on while both inputs are at $1.8\text{ V}$, input NMOS `Mnmos@4` immediately pulls intermediate node `net@66` low toward ground. Diode-connected load `Mpmos@4` requires finite RC time to discharge `net@76` before mirror transistor `Mpmos@5` can turn on and source current. In the interim, node `net@66` dips below the inverter switching threshold ($V_{\text{M}} \approx 0.85\text{ V}$), turning ON output PMOS `Mpmos@6` and momentarily charging `DOUT` to $0.70\text{ V}$. Once $DLB$ discharged ($t \ge 320.57\text{ ns}$), `Mnmos@4` turned off and `net@66` was restored to $1.8\text{ V}$, pulling `DOUT` back to ground.
+- **Alternatives Considered:**
+  1. *Output Latch / Pass-Gate Gating:* Masks the glitch at the output pin, but requires significant silicon overhead (latch + separate strobe phase) while leaving internal nodes bouncing with wasted crowbar current.
+  2. *Voltage-Latch Sense Amplifier (VLSA) Redesign:* Eliminates static DC current, but requires a complete schematic/layout redesign and is *even more sensitive* to premature trigger (risking fatal metastability or wrong-state latching if fired before $\Delta V$ develops).
+  3. *Inverter Delay Chain on `READ_EN` in `Control_logic`:* Delays the sense amplifier strobe by $\sim 280\text{ ps}$, allowing the 6T cell to discharge the bitline and establish a strong differential ($\Delta V \approx 580\text{ mV}$) before `READ_EN` turns ON.
+- **Decision:** Adopted an **8-Stage CMOS Inverter Delay Line** (`nmos@d1..d8`, `pmos@d1..d8`) in `Control_logic{sch}`, cascading between the raw strobe (`ren_d0`) and the external export `READ_EN`.
+- **Rationale & Results:**
+  - Full-chip simulation (`Top_test.spi`) confirmed the spike dropped from **$0.6992\text{ V}$ to $0.0186\text{ V}$ ($18.6\text{ mV}$)** — a **97.3% reduction**, completely eliminating false-logic switching risk.
+  - Read '1' access time ($t_{\text{CQ}} = 723.2\text{ ps}$) easily satisfies the $< 1.0\text{ ns}$ target specification.
+  - Average chip power remains virtually unaffected at **$165.9\ \mu\text{W}$ @ 100 MHz**.
+  - Fully synchronized across [`spice/Top.spi`](file:///D:/Projects/Memory-IC-Design/spice/Top.spi), [`spice/Control_logic.spi`](file:///D:/Projects/Memory-IC-Design/spice/Control_logic.spi), and [`src/Memory-IC-Design.jelib`](file:///D:/Projects/Memory-IC-Design/src/Memory-IC-Design.jelib).
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell

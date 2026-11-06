@@ -54,7 +54,33 @@ Mpmos@9 vdd       WL_EN READ_ENB vdd CMOSP L=0.18U W=0.36U
 Mnmos@8 READ_ENB  CTRL  net@r1   gnd CMOSN L=0.18U W=0.36U
 Mnmos@9 net@r1    WL_EN gnd      gnd CMOSN L=0.18U W=0.36U
 
-Mnmos@10 READ_EN READ_ENB gnd     gnd CMOSN L=0.18U W=0.54U
-Mpmos@10 vdd     READ_ENB READ_EN vdd CMOSP L=0.18U W=1.08U
+* Strobe Generation: ren_d0 = WL_EN AND CTRL
+Mnmos@10 ren_d0   READ_ENB gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@10 vdd      READ_ENB ren_d0  vdd CMOSP L=0.18U W=0.72U
+
+* Delay line (8 inverters) to allow bitline differential voltage to develop before sensing
+Mnmos@d1 ren_d1   ren_d0   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d1 vdd      ren_d0   ren_d1  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d2 ren_d2   ren_d1   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d2 vdd      ren_d1   ren_d2  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d3 ren_d3   ren_d2   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d3 vdd      ren_d2   ren_d3  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d4 ren_d4   ren_d3   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d4 vdd      ren_d3   ren_d4  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d5 ren_d5   ren_d4   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d5 vdd      ren_d4   ren_d5  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d6 ren_d6   ren_d5   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d6 vdd      ren_d5   ren_d6  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d7 ren_d7   ren_d6   gnd     gnd CMOSN L=0.18U W=0.36U
+Mpmos@d7 vdd      ren_d6   ren_d7  vdd CMOSP L=0.18U W=0.72U
+
+Mnmos@d8 READ_EN  ren_d7   gnd     gnd CMOSN L=0.18U W=0.54U
+Mpmos@d8 vdd      ren_d7   READ_EN vdd CMOSP L=0.18U W=1.08U
 
 .END

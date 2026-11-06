@@ -84,9 +84,10 @@ Because only **1 external address pin (`ADDR_IN`)** is provided:
 ### 2.9 Central Multi-Strobe Timing Generator
 - **Cell:** `Control_logic`
 - **Inputs:** `CLK`, `CTRL` (1=Read, 0=Write), `COUNT_7`, `VDD`, `GND`.
-- **Outputs:** `PCB` (precharge bar), `CLK_SHADOW` (shadow address latch), `WL_EN` (wordline strobe), `WRITE_EN`, `READ_EN`.
+- **Outputs:** `PCB` (precharge bar), `WL_EN` (wordline strobe), `WRITE_EN`, `READ_EN`.
 - **Transistor Sizing:** Built with transistor-level CMOS gates ($W_n = 4\lambda, W_p = 8\lambda$ internal, $W_n = 6\lambda = 0.54\ \mu\text{m}, W_p = 12\lambda = 1.08\ \mu\text{m}$ output buffers).
-- **Performance:** $t_{\text{prop,write\_en}} = 149.9\text{ ps}, t_{\text{prop,read\_en}} = 147.9\text{ ps}, t_{\text{prop,clk\_shadow}} = 213.3\text{ ps}$.
+- **Sense Amp Delay Line:** Incorporates an 8-stage CMOS inverter delay line on the `READ_EN` strobe path ($\sim 280\text{ ps}$ delay) to allow bitline differential voltage ($\Delta V > 500\text{ mV}$) to develop before sense amp activation, eliminating the $0.7\text{ V}$ Read '0' transient spike on `DOUT` ($0.699\text{ V} \rightarrow 0.0186\text{ V}$, 97.3% reduction).
+- **Performance:** $t_{\text{prop,write\_en}} = 149.9\text{ ps}, t_{\text{prop,read\_en}} = 428.2\text{ ps}$; full-chip $t_{\text{CQ,read1}} = 723.2\text{ ps}$.
 
 ### 2.10 Serial-In Parallel-Out Address Register & Shadow Latch
 - **Cells:** `8Bit_shiftreg`, `8Bit_reg`

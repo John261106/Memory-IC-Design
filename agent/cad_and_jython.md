@@ -66,3 +66,73 @@ Export.newInstance(cell, port_inst, "PIN_NAME", PortCharacteristic.BIDIRECTIONAL
 - Inside Electric VLSI: `Tools -> Simulation (SPICE) -> Write SPICE Deck...`
 - Outputs `.spi` deck incorporating MOSIS submicron models and subcircuit declarations.
 - Verify simulation outputs in `spice/` directory.
+
+---
+
+## 6. SCMOS / `mocmos` DRC Rules & Safe Compact Layout Guidelines
+Discovered through Electric's built-in Quick DRC engine (`ALGO_SWEEP`):
+
+### Contact Primitive Sizing Rules
+| Primitive Node | Default / Required Size | DRC Rule Triggered if Sized Down |
+|---|---|---|
+| `Metal-1-N-Active-Con` | $17.0\lambda \times 17.0\lambda$ | Rule 6.2, 7.3 (`Minimum size error on Y axis ... LESS THAN -7 IN SIZE`) |
+| `Metal-1-P-Active-Con` | $17.0\lambda \times 17.0\lambda$ | Rule 6.2, 7.3 (`Minimum size error on Y axis ... LESS THAN -7 IN SIZE`) |
+| `Metal-1-N-Well-Con` | $17.0\lambda \times 17.0\lambda$ | Rule 6.2, 7.3 (`Minimum size error on Y axis ... LESS THAN -7 IN SIZE`) |
+| `Metal-1-P-Well-Con` | $17.0\lambda \times 17.0\lambda$ | Rule 6.2, 7.3 (`Minimum size error on Y axis ... LESS THAN -7 IN SIZE`) |
+| `Metal-1-Polysilicon-1-Con`| $5.0\lambda \times 5.0\lambda$ | Safe at $5.0\lambda \times 5.0\lambda$ or default |
+| `Metal-1-Pin` | $3.0\lambda \times 3.0\lambda$ | Safe at $3.0\lambda \times 3.0\lambda$ |
+
+### Placement Spacing & Notch Boundaries
+1. **Rule 4.4 Select Notch Spacing ($X_{\text{con}} \ge 13.0\lambda$):**
+   - Transistors in `Orientation.R` have active diffusion extending horizontally by $3.75\lambda$ from center.
+   - Active contacts placed at $|X| < 13.0\lambda$ cause their Select layer boundary to come within $1.5\lambda$ of the transistor channel edge, violating rule 4.4 (`Notch layer Select LESS THAN 2`).
+   - Hence, minimum contact horizontal offset is $X_{\text{con}} = 13.0\lambda$.
+
+2. **Rule 2.5 Well Tap Spacing ($Y_{\text{rail}} \ge 28.0\lambda$ for $Y_{\text{MOS}} = 16.0\lambda$):**
+   - Well tap contact `Metal-1-N-Well-Con` (N-Active) must be $\ge 4.0\lambda$ away from PMOS P-Active.
+   - For PMOS at $Y_P = 16.0\lambda$ (diffusion extends to $Y = 20.0\lambda$), VDD tap must be at $Y_{\text{VDD}} \ge 28.0\lambda$ to satisfy $28.0 - 17.0/2 = 19.5$ tap edge clearance against well boundary.
+
+3. **Optimal Validated Standard Inverter Dimensions (`Not{lay}`):**
+   - `X_CON = 13.0`, `Y_P = 16.0`, `Y_N = -16.0`
+   - `Y_VDD = 28.0`, `Y_GND = -28.0`, `X_EDGE = 22.0`
+   - Overall cell bounding box: Width = $44.0\lambda$ ($3.96\ \mu\text{m}$), Height = $56.0\lambda$ ($5.04\ \mu\text{m}$), Area = $2464\ \lambda^2$ (42.1% reduction vs original $56\lambda \times 76\lambda$).
+   - Electric Quick DRC: **0 Errors, 0 Warnings**. NCC/LVS: **100% Match**.
+
+---
+
+## 7. Headless Batch Execution & DRC Check in Jython
+When running scripts outside the interactive UI, GUI calls (such as progress dialogs) throw `NullPointerException`. Always use Electric batch mode with BeanShell launcher:
+
+```powershell
+java -jar "C:\Users\USER\OneDrive\Desktop\electricBinaryFull-9.08.jar" -batch -s scripts\run_script.bsh
+```
+
+Where `scripts/run_script.bsh` contains:
+```java
+org.python.util.PythonInterpreter pi = new org.python.util.PythonInterpreter();
+pi.execfile("scripts/07_layout_not_and_nand.py");
+System.exit(0);
+```
+
+### Direct Programmatic DRC Check via Reflection:
+```python
+from com.sun.electric.tool.drc import Quick, DRC
+from com.sun.electric.tool.user import ErrorLogger
+from com.sun.electric.database.geometry import GeometryHandler
+
+logger = ErrorLogger()
+prefs = DRC.DRCPreferences(False)
+mode = GeometryHandler.GHMode.ALGO_SWEEP
+
+m_chk = None
+for m in Quick.getDeclaredMethods():
+    if m.getName() == "checkDesignRules" and len(m.getParameterTypes()) == 9:
+        m_chk = m
+        m_chk.setAccessible(True)
+        break
+
+if m_chk is not None:
+    m_chk.invoke(None, [logger, cell, None, None, None, None, prefs, mode, False])
+    errors = logger.getNumErrors()
+    warnings = logger.getNumWarnings()
+```

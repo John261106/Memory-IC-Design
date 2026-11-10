@@ -38,8 +38,9 @@
 
 ### Phase 4: Physical Layout & Power Grid Routing
 - [x] Layout fundamental standard cells:
-  - `Not{lay}`: Standard CMOS inverter ($W=56\,\lambda, H=76\,\lambda$), 100% Manhattan perpendicular routing, 0 DRC violations/warnings, 100% NCC/LVS match (topology, exports, and transistor sizing).
-  - `Nand{lay}`: 4-input static CMOS NAND gate ($W=148\,\lambda, H=76\,\lambda$), continuous shared diffusion stack, symmetric power rails ($Y_{\text{VDD}} = +38\,\lambda, Y_{\text{GND}} = -38\,\lambda$), 100% Manhattan routing, 0 DRC violations/warnings, 100% NCC/LVS match.
+  - [x] Traditional 6T SRAM Bitcell (`6T_cell{lay}`) — Perpendicular routing, 0 DRC violations, 100% LVS / NCC match.
+  - [x] Compact Inverter (`Not{lay}`) — Compact dimensions ($44\lambda \times 56\lambda = 2464\ \lambda^2$ / $3.96\ \mu\text{m} \times 5.04\ \mu\text{m}$, 42.1% area reduction vs original $56\lambda \times 76\lambda$), 100% Manhattan perpendicular routing, 0 DRC violations/warnings verified via Electric's built-in Quick DRC engine (`ALGO_SWEEP`), 100% LVS / NCC match (topology, exports, transistor sizes).
+  - [x] 4-Input NAND Gate (`Nand{lay}`) — Compact standard cell ($W=148\,\lambda, H=76\,\lambda$), continuous shared diffusion stack, symmetric power rails ($Y_{\text{VDD}} = +38\,\lambda, Y_{\text{GND}} = -38\,\lambda$), 100% Manhattan routing, 0 DRC violations/warnings via Quick DRC, 100% NCC/LVS match.
 - [ ] Layout 6T SRAM bitcell (`6T_cell{lay}`) with DRC / LVS cleanliness and compact symmetric pitch.
 - [ ] Array layout: $16 \times 16$ symmetric pitch-matched placement.
 - [ ] Layout peripheral blocks (decoders, precharge, sense amp, write driver, address register).

@@ -9,20 +9,20 @@
 
 *** SUBCIRCUIT Memory-IC-Design__Nand FROM CELL Nand{sch}
 .SUBCKT Memory-IC-Design__Nand A B C D gnd OUT vdd
-Mnmos@0 OUT A net@1 gnd CMOSN L=0.18U W=0.18U
-Mnmos@1 net@1 B net@2 gnd CMOSN L=0.18U W=0.18U
-Mnmos@2 net@2 C net@16 gnd CMOSN L=0.18U W=0.18U
-Mnmos@3 net@16 D gnd gnd CMOSN L=0.18U W=0.18U
-Mpmos@0 vdd A OUT vdd CMOSP L=0.18U W=0.18U
-Mpmos@1 vdd B OUT vdd CMOSP L=0.18U W=0.18U
-Mpmos@2 vdd C OUT vdd CMOSP L=0.18U W=0.18U
-Mpmos@3 vdd D OUT vdd CMOSP L=0.18U W=0.18U
+Mnmos@0 OUT A net@1 gnd CMOSN L=0.18U W=0.36U
+Mnmos@1 net@1 B net@2 gnd CMOSN L=0.18U W=0.36U
+Mnmos@2 net@2 C net@16 gnd CMOSN L=0.18U W=0.36U
+Mnmos@3 net@16 D gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd A OUT vdd CMOSP L=0.18U W=0.36U
+Mpmos@1 vdd B OUT vdd CMOSP L=0.18U W=0.36U
+Mpmos@2 vdd C OUT vdd CMOSP L=0.18U W=0.36U
+Mpmos@3 vdd D OUT vdd CMOSP L=0.18U W=0.36U
 .ENDS Memory-IC-Design__Nand
 
 *** SUBCIRCUIT Memory-IC-Design__Not FROM CELL Not{sch}
 .SUBCKT Memory-IC-Design__Not gnd IN OUT vdd
-Mnmos@0 OUT IN gnd gnd CMOSN L=0.18U W=0.18U
-Mpmos@0 vdd IN OUT vdd CMOSP L=0.18U W=0.18U
+Mnmos@0 OUT IN gnd gnd CMOSN L=0.18U W=0.36U
+Mpmos@0 vdd IN OUT vdd CMOSP L=0.18U W=0.72U
 .ENDS Memory-IC-Design__Not
 
 *** TOP LEVEL CELL: Decoder{sch}

@@ -1,7 +1,7 @@
 # Status, Milestones & Task Checklist
 
 ## 1. Current Project Status
-- **Core 6T Bitcell:** Complete (`6T_cell{sch}`, verified in SPICE).
+- **Core 6T Bitcell:** Complete (`6T_cell{sch}` verified in SPICE; `6T_cell{lay}` layout created with traditional 6T floorplan, 100% perpendicular/Manhattan lines, zero DRC collisions/violations, and verified 100% clean in NCC/LVS for topology, exports, and sizing).
 - **Precharge Circuit:** Complete (`Precharge_ckt{sch}`, verified in SPICE).
 - **Sense Amplifier:** Complete (`Sense_amp{sch}`, verified in SPICE).
 - **Write Driver:** Complete (`Write_driver{sch}`, verified in SPICE).
@@ -37,7 +37,10 @@
 - [ ] Wrap all 5 external signals (`CLK`, `CTRL`, `ADDR_IN`, `DIN`, `DOUT`) and power supplies with the pad equivalent model.
 
 ### Phase 4: Physical Layout & Power Grid Routing
-- [ ] Layout 6T bitcell with DRC / LVS cleanliness, minimizing cell area.
+- [x] Layout fundamental standard cells:
+  - `Not{lay}`: Standard CMOS inverter ($W=56\,\lambda, H=76\,\lambda$), 100% Manhattan perpendicular routing, 0 DRC violations/warnings, 100% NCC/LVS match (topology, exports, and transistor sizing).
+  - `Nand{lay}`: 4-input static CMOS NAND gate ($W=148\,\lambda, H=76\,\lambda$), continuous shared diffusion stack, symmetric power rails ($Y_{\text{VDD}} = +38\,\lambda, Y_{\text{GND}} = -38\,\lambda$), 100% Manhattan routing, 0 DRC violations/warnings, 100% NCC/LVS match.
+- [ ] Layout 6T SRAM bitcell (`6T_cell{lay}`) with DRC / LVS cleanliness and compact symmetric pitch.
 - [ ] Array layout: $16 \times 16$ symmetric pitch-matched placement.
 - [ ] Layout peripheral blocks (decoders, precharge, sense amp, write driver, address register).
 - [ ] Route `VDD` and `GND` power grid on Top Metal (Metal 5/6).

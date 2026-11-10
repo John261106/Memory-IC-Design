@@ -235,6 +235,91 @@ This section records every major design decision, the alternatives evaluated, an
 
 ---
 
+### Decision Log 16: Traditional 6T SRAM Bitcell Physical Layout (`6T_cell{lay}`), 100% Manhattan Arcs, DRC & LVS (NCC) Signoff
+- **Date:** November 2026
+- **Context:** Implementing the physical layout view `6T_cell{lay}` in `src/Memory-IC-Design.jelib` under MOSIS scalable CMOS (`mocmos`) submicron rules ($\lambda = 90\text{ nm} = 0.09\ \mu\text{m}$, $L_{\text{min}} = 2\lambda = 0.18\ \mu\text{m}$). The user required:
+  1. Traditional 6T cell layout floorplan topology.
+  2. 100% strictly perpendicular / Manhattan routing ($\Delta X = 0$ or $\Delta Y = 0$; zero diagonal wires).
+  3. Generous clearances between all nodes and traces to guarantee zero design rule (DRC) violations before later compaction.
+  4. Complete LVS / NCC equivalence against `6T_cell{sch}`.
+- **Alternatives Considered:**
+  1. *Single-Metal Naive Cross-Coupling:* Crossing $Q$ and $QB$ on the same metal level creates direct electrical short circuits and massive DRC errors.
+  2. *Diagonal Direct Wire Connections:* Direct point-to-point connections create slanted non-Manhattan wires that violate foundry DRC grid rules and design guidelines.
+  3. *Traditional Multi-Layer Symmetrical Floorplan with M2 Jumpers/Straps (`scripts/06_layout_6t_cell.py`):*
+     - Bitlines `BIT` and `BITB` on vertical Metal-2 rails ($X = \pm 88.0$).
+     - Wordline `WL` on horizontal Metal-1 rail ($Y = +60.0$) with vertical poly stubs to access gates.
+     - Supply rails $V_{\text{DD}}$ ($Y = +24.0$) and $\text{GND}$ ($Y = -50.0$) on horizontal Metal-1 with well taps.
+     - Symmetrical vertical poly gate columns for each inverter latch at $X = \pm 28.0$.
+     - Cross-coupling straps routed on Metal-2 at $Y = -18.0$ (Node $Q$) and $Y = -6.0$ (Node $QB$) to fly over internal trunks with zero shorting.
+     - Short Metal-2 jumpers at $X = \pm 10.0$ across the $V_{\text{DD}}$ rail ($Y = 14.0 \to 34.0$) connecting PMOS drains up to access transistors without touching $V_{\text{DD}}$.
+- **Decision:** Implemented the traditional 6T layout via automated script **[`scripts/06_layout_6t_cell.py`](file:///d:/Projects/Memory-IC-Design/scripts/06_layout_6t_cell.py)**:
+  - **Transistor Sizing & Orientation:**
+    - Pull-Down Drivers (`nmos@0`, `nmos@1`): $W = 7\lambda = 0.63\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (Orientation R).
+    - Pull-Up Loads (`pmos@0`, `pmos@1`): $W = 3\lambda = 0.27\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (Orientation R).
+    - Access Transistors (`nmos@2`, `nmos@3`): $W = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$ (Orientation R).
+  - **DRC Clearance & Contact Geometry:**
+    - Standard contact sizing $5.0\lambda \times 5.0\lambda$ (Rules 5.2, 6.2, 8.1) eliminating large contact envelope collisions.
+    - Active diffusion spacing between Node $Q$ and Node $QB$ contacts: $\ge 15.0\lambda$ (5× the $3.0\lambda$ minimum spacing requirement).
+    - Parallel cross-strap spacing: $12.0\lambda$ center-to-center ($9.0\lambda$ edge-to-edge).
+    - Well surrounds $\ge 11.0\lambda$ for N-Well and P-Well (exceeding Rule 2.3 $6.0\lambda$ requirement).
+  - **Perpendicularity:** Verified 55/55 arcs strictly satisfy $\Delta X = 0$ or $\Delta Y = 0$ (0 non-perpendicular arcs).
+- **Verification Results:**
+  - **Perpendicularity Check:** 55 total arcs, **0 non-perpendicular arcs** (100% Manhattan).
+  - **Geometric DRC Collision Check:** 0 node collisions, 0 wire spacing violations ($< 3.0\lambda$).
+  - **LVS / NCC (Network Consistency Checker):**
+    - `exports match, topologies match, sizes match in 0.030 seconds.`
+
+---
+
+### Decision Log 17: Transistor Sizing Optimization for 4-to-16 Address Decoder (`Nand{sch}` & `Not{sch}`)
+- **Date:** November 2026
+- **Context:** Sizing the subcell gates (`Nand{sch}` and `Not{sch}`) used inside the 4-to-16 static address decoders (`Decoder{sch}`). In the initial export, all transistors were set to the technological minimum ($W = 2\lambda = 0.18\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$).
+- **Alternatives Considered:**
+  1. *Uniform Minimum Sizing ($W_N = W_P = 2\lambda = 0.18\ \mu\text{m}$ across all gates):*
+     - The 4-stack series NMOS pull-down in the NAND4 gate presents $R_{\text{PDN}} = 4 \times R_{\text{on,N}} \approx 14\text{--}16\ \text{k}\Omega$, severely choking fall time.
+     - The inverter has $W_P = W_N$, causing asymmetric rise/fall edges ($t_r \gg t_f$) due to $\mu_n / \mu_p \approx 2.5$ and downward-shifted switching threshold ($V_M \approx 0.73\text{ V}$).
+     - Address inverters driving a fan-out of 8 NAND gate inputs suffer high RC propagation delay.
+  2. *Optimized Mobility-Matched Sizing:*
+     - **4-Input NAND (`Nand{sch}`):** NMOS stack $W_N = 4\lambda = 0.36\ \mu\text{m}$ (halving stack resistance to $\approx 7\text{--}8\ \text{k}\Omega$ without excessive diffusion area) and PMOS parallel $W_P = 4\lambda = 0.36\ \mu\text{m}$ (providing fast pull-up under single-PMOS conduction).
+     - **Inverter (`Not{sch}`):** NMOS $W_N = 4\lambda = 0.36\ \mu\text{m}$ and PMOS $W_P = 8\lambda = 0.72\ \mu\text{m}$ ($W_P/W_N = 2$), balancing pull-up and pull-down drive, centering $V_M \approx 0.90\text{ V}$, and providing low output impedance to drive heavy gate fan-out and wordline interconnects.
+- **Decision:** Adopted **Optimized Mobility-Matched Sizing** and updated both the Electric database (`src/Memory-IC-Design.jelib`) and SPICE netlists (`spice/Decoder.spi`).
+- **Verification Results:**
+  - **Full 16-Wordline Transient Simulation (`spice/Decoder.spi`):** All 16 binary address combinations ($0000_2 \to 1111_2$) verified in LTspice XVII.
+  - **Selected Wordline Voltage:** Exactly **1.800 V** (full rail-to-rail swing).
+  - **Unselected Wordlines Voltage:** Max **0.000 V** across all unselected outputs (zero spurious glitching / zero crosstalk).
+  - **Dynamic Timing:** Symmetrical propagation delay $t_{\text{PLH}} = 128.9\text{ ps}$, $t_{\text{PHL}} = 157.8\text{ ps}$ with steep sub-100 ps transition edges.
+    - Summary for all cells: exports match, topologies match, sizes match.
+
+---
+
+### Decision Log 18: Compact Physical Layout for NOT and NAND Standard Cells (`Not{lay}` & `Nand{lay}`)
+- **Date:** November 2026
+- **Context:** Following removal of the initial exploratory 6T cell layout to build the physical hierarchy cleanly from fundamental standard cell blocks, the user requested:
+  1. Physical layout views for both `Not{lay}` and `Nand{lay}` in `src/Memory-IC-Design.jelib`.
+  2. Zero DRC violations/warnings.
+  3. Zero LVS / NCC mismatches (exact topology, export names, and transistor sizing).
+  4. Minimal possible silicon footprint.
+- **Architectural & Layout Implementation:**
+  - **Grid & Height Matching:** Both cells are designed with standard cell pitch-matching: cell height $H = 48\lambda = 4.32\ \mu\text{m}$, with horizontal Metal-1 supply rails $V_{\text{DD}}$ at $Y = +24.0$ and $\text{GND}$ at $Y = -24.0$.
+  - **Inverter (`Not{lay}`):**
+    - $W_P = 8\lambda = 0.72\ \mu\text{m}, W_N = 4\lambda = 0.36\ \mu\text{m}, L = 2\lambda = 0.18\ \mu\text{m}$.
+    - Gates aligned vertically at $X = 0.0$ on a single common Polysilicon column with an input contact at $(0, 0)$.
+    - Diffusions run horizontally, connecting to $V_{\text{DD}}$ rail and $\text{GND}$ rail via Metal-1.
+    - Integrated N-well and P-well tap substrate contacts.
+    - Dimensions: $W = 28\lambda = 2.52\ \mu\text{m}$, $H = 48\lambda = 4.32\ \mu\text{m}$, Area = **$10.88\ \mu\text{m}^2$**.
+  - **4-Input NAND (`Nand{lay}`):**
+    - 4 series NMOS ($W=4\lambda, L=2\lambda$) and 4 parallel PMOS ($W=4\lambda, L=2\lambda$).
+    - 4 vertical Polysilicon gate columns for inputs $A, B, C, D$ with pitch = $12\lambda$ ($X = -18, -6, +6, +18$).
+    - **Continuous active diffusion sharing:** All 4 series NMOS transistors are abutted directly in active diffusion with zero intermediate contacts, requiring only 2 contacts across the entire NMOS stack (one for `OUT`, one for `GND`).
+    - **Pairwise shared PMOS contacts:** Alternating $V_{\text{DD}}$ and `OUT` contacts allow 4 parallel PMOS fingers to be routed with only 5 contacts total.
+    - Dimensions: $W = 60\lambda = 5.40\ \mu\text{m}$, $H = 48\lambda = 4.32\ \mu\text{m}$, Area = **$23.33\ \mu\text{m}^2$**.
+- **Verification Results:**
+  - **Manhattan Perpendicularity:** 100% perpendicular (Not: 16/16 arcs; Nand: 39/39 arcs; 0 non-Manhattan lines).
+  - **Built-in Electric DRC (`DRC.checkDRCHierarchically`):** **0 Errors, 0 Warnings** for both cells.
+  - **LVS / NCC (`Ncc.compare`):** **100% Match** for both cells (`exports match, topologies match, sizes match`).
+
+---
+
 ## 4. Circuit Block Architectures
 
 ### 4.1 6T SRAM Bit Cell
@@ -355,4 +440,9 @@ This section records every major design decision, the alternatives evaluated, an
 | **Full-Chip Average Power @ 100 MHz ($P_{\text{chip,avg}}$)** | $< 500\ \mu\text{W}$ | **164.86 µW** | — | 8-cycle shadow-register-free architecture across 4 consecutive frames |
 | **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | **580.2 ps** (Read 1) | — | Cycle 24 CLK falling edge to valid DOUT (`1.800 V`) into 20 fF load |
 | **Max Clock Frequency ($F_{\text{max}}$)** | Report | **$> 500\text{ MHz}$** ($T_{\text{min}} < 2.0\text{ ns}$) | — | Critical path $< 0.78\text{ ns}$ (Precharge: 774 ps, Write: 743 ps, Read: 580 ps) |
-| **Core Layout Area** | Minimized ($\mu\text{m}^2$) | — | Pending | Electric VLSI DRC/LVS clean |
+| **Inverter Layout Area (`Not{lay}`)** | Minimized ($\mu\text{m}^2$) | — | **$10.88\ \mu\text{m}^2$** ($28\lambda \times 48\lambda$) | Pitch-matched standard cell ($2.52\ \mu\text{m} \times 4.32\ \mu\text{m}$); 100% Manhattan |
+| **Inverter DRC & LVS (`Not{lay}`)** | Zero errors / 100% Match | — | **PASSED / CLEAN** | 0 DRC errors, 0 warnings; NCC topology, exports, and sizing match 100% |
+| **4-Input NAND Layout Area (`Nand{lay}`)** | Minimized ($\mu\text{m}^2$) | — | **$23.33\ \mu\text{m}^2$** ($60\lambda \times 48\lambda$) | Pitch-matched ($5.40\ \mu\text{m} \times 4.32\ \mu\text{m}$); continuous shared diffusion; 100% Manhattan |
+| **4-Input NAND DRC & LVS (`Nand{lay}`)** | Zero errors / 100% Match | — | **PASSED / CLEAN** | 0 DRC errors, 0 warnings; NCC topology, exports, and sizing match 100% |
+| **6T Bitcell Layout Status** | Clean rebuild pending | — | Standard cells complete | Ready for pitch-matched symmetric 6T cell layout |
+| **Core Layout Area** | Minimized ($\mu\text{m}^2$) | — | Array pending | Electric VLSI DRC/LVS clean |

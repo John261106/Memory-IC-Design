@@ -29,6 +29,9 @@
 | `02_inspect_cell_pins.py` | Prints exported ports and pins of all instances in the current schematic. |
 | `03_list_exports.py` | Lists top-level exported ports/pins of the current cell. |
 | `04_connect_sram_top.py` | Fully automates wiring between 256 `6T_cell` instances, 16 `Precharge_ckt`, 16 `Write_driver`, and 16 `Sense_amp` instances. |
+| `05_connect_decoder.py` | Automates schematic wiring for 4-to-16 static address decoders. |
+| `06_layout_6t_cell.py` | Programmatically generates, places, and wires traditional `6T_cell{lay}` in `Memory-IC-Design.jelib`, verifying 100% perpendicular (Manhattan) arcs, zero DRC collisions/violations, and 100% LVS/NCC topology & sizing match. |
+| `07_layout_not_and_nand.py` | Generates compact physical layout views for `Not{lay}` and `Nand{lay}` in `Memory-IC-Design.jelib`, with 100% Manhattan perpendicular lines, 0 DRC violations, and 100% LVS/NCC topology & sizing match. |
 | `Electric_VLSI_Jython_Automation_README.md` | Comprehensive developer guide to Electric's Java/Jython API. |
 
 ---

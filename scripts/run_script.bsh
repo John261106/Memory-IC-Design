@@ -1,0 +1,3 @@
+org.python.util.PythonInterpreter pi = new org.python.util.PythonInterpreter();
+pi.execfile("scripts/07_layout_not_and_nand.py");
+System.exit(0);

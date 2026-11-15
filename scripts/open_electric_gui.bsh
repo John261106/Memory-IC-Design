@@ -1,0 +1,8 @@
+// BeanShell script to open 6T_cell{lay} in Electric VLSI GUI
+com.sun.electric.database.hierarchy.Library lib = com.sun.electric.database.hierarchy.Library.findLibrary("Memory-IC-Design");
+if (lib != null) {
+    com.sun.electric.database.hierarchy.Cell c = lib.findNodeProto("6T_cell{lay}");
+    if (c != null) {
+        com.sun.electric.tool.Job.getUserInterface().displayCell(c);
+    }
+}

@@ -435,11 +435,13 @@ This section records every major design decision, the alternatives evaluated, an
 | **Wordline Driver Rise Delay ($t_{\text{rise, wl}}$)** | $< 400\text{ ps}$ | **288.9 ps** | — | EN rising to WL rising (50% $V_{\text{DD}}$) into 50 fF load |
 | **Wordline Driver Fall Delay ($t_{\text{fall, wl}}$)** | $< 400\text{ ps}$ | **256.8 ps** | — | EN falling to WL falling (50% $V_{\text{DD}}$) into 50 fF load |
 | **Wordline Unselected Output Low Voltage ($V_{\text{OL}}$)** | $< 1\text{ mV}$ | **$< 45\text{ nV}$** | — | Solid GND hold; zero read disturb on unselected rows |
-| **Full-Chip Write `1` Flip Delay ($t_{\text{CLK\_fall}\to Q\text{, W1}}$)** | $< 1.0\text{ ns}$ | **730.9 ps** | — | Cycle 8 CLK falling edge to Cell(10,5) 90% flip (`0xA5`) |
-| **Full-Chip Write `0` Flip Delay ($t_{\text{CLK\_fall}\to Q\text{, W0}}$)** | $< 1.0\text{ ns}$ | **743.3 ps** | — | Cycle 16 CLK falling edge to Cell(3,12) 90% flip (`0x3C`) |
-| **Full-Chip Average Power @ 100 MHz ($P_{\text{chip,avg}}$)** | $< 500\ \mu\text{W}$ | **164.86 µW** | — | 8-cycle shadow-register-free architecture across 4 consecutive frames |
-| **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | **580.2 ps** (Read 1) | — | Cycle 24 CLK falling edge to valid DOUT (`1.800 V`) into 20 fF load |
-| **Max Clock Frequency ($F_{\text{max}}$)** | Report | **$> 500\text{ MHz}$** ($T_{\text{min}} < 2.0\text{ ns}$) | — | Critical path $< 0.78\text{ ns}$ (Precharge: 774 ps, Write: 743 ps, Read: 580 ps) |
+| **Full-Chip Write `1` Flip Delay ($t_{\text{CLK\_fall}\to Q\text{, W1}}$)** | $< 1.5\text{ ns}$ | **730.9 ps** | **1.115 ns** | Cycle 8 CLK falling edge to Cell(10,5) flip (`0xA5`) |
+| **Full-Chip Write `0` Flip Delay ($t_{\text{CLK\_fall}\to Q\text{, W0}}$)** | $< 1.5\text{ ns}$ | **743.3 ps** | **1.226 ns** | Cycle 16 CLK falling edge to Cell(3,12) flip (`0x3C`) |
+| **Full-Chip Average Power @ 100 MHz ($P_{\text{chip,avg}}$)** | $< 500\ \mu\text{W}$ | **164.86 µW** | **222.71 µW** | 8-cycle shadow-register-free architecture across 4 consecutive frames (with layout parasitics) |
+| **Read Access Delay ($t_{\text{CQ}}$)** | Minimized | **580.2 ps** (Read 1) | **862.5 ps** (Read 1) | Cycle 24 CLK falling edge to valid DOUT (`1.800 V`) into 20 fF load |
+| **Max Clock Frequency ($F_{\text{max}}$)** | Report | **$> 500\text{ MHz}$** ($T_{\text{min}} < 2.0\text{ ns}$) | **$> 400\text{ MHz}$** ($T_{\text{min}} \approx 2.45\text{ ns}$) | Critical path $< 1.23\text{ ns}$ per half-cycle |
+| **Top-Level Chip Dimensions & Area (`Top{lay}`)** | Minimized ($\text{mm}^2$) | — | **$0.03746\text{ mm}^2$** ($163.08\ \mu\text{m} \times 229.73\ \mu\text{m}$) | $1812.0\lambda \times 2552.5\lambda$; complete 256-bit SRAM IC with all peripherals |
+| **Top-Level DRC & LVS (`Top{lay}`)** | Zero errors / 100% Match | — | **PASSED / 100% CLEAN** | 0 DRC errors, 0 warnings (Quick & Hierarchical F5); 1,716/1,716 Manhattan; 100% NCC match with sizing |
 | **Inverter Layout Area (`Not{lay}`)** | Minimized ($\mu\text{m}^2$) | — | **$10.88\ \mu\text{m}^2$** ($28\lambda \times 48\lambda$) | Pitch-matched standard cell ($2.52\ \mu\text{m} \times 4.32\ \mu\text{m}$); 100% Manhattan |
 | **Inverter DRC & LVS (`Not{lay}`)** | Zero errors / 100% Match | — | **PASSED / CLEAN** | 0 DRC errors, 0 warnings; NCC topology, exports, and sizing match 100% |
 | **4-Input NAND Layout Area (`Nand{lay}`)** | Minimized ($\mu\text{m}^2$) | — | **$23.33\ \mu\text{m}^2$** ($60\lambda \times 48\lambda$) | Pitch-matched ($5.40\ \mu\text{m} \times 4.32\ \mu\text{m}$); continuous shared diffusion; 100% Manhattan |

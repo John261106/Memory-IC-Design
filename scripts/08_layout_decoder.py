@@ -8,15 +8,17 @@
 #   - 4 Input Inverters (Not@0..3) producing inverted address lines A0_B..A3_B
 #   - 16 4-Input NAND Gates (Nand@0..15) generating 16 active-low minterms
 #   - 16 Output Inverters (Not@4..19) generating active-high word selects OUT0..OUT15
-#   - 8-track vertical Metal-2 address bus (A0..A3 true and complementary lines)
-#   - Pitch-matched standard cell rows stacked at DY = 76.0 lambda
+#   - Split 8-track vertical Metal-2 address bus:
+#       Left of Nand:  A2 (-72), A2_B (-64), A3 (-56), A3_B (-48)
+#       Right of Nand: A0 (+46), A0_B (+54), A1 (+62), A1_B (+70)
+#   - Pitch-matched compacted standard cell rows stacked at DY = 72.0 lambda
 #   - Vertical Metal-2 VDD & GND straps with horizontal Metal-1 row rails
 #
 # Technology: mocmos (MOSIS CMOS, TSMC 0.18 um, lambda = 90 nm)
 #
 # Verification:
 #   1. Manhattan Routing: 100% perpendicular (horizontal and vertical arcs only)
-#   2. LVS / NCC: 100% match (topology, exports, transistor sizing)
+#   2. LVS / NCC: 100% match with checkSizes=True (topology, exports, sizing)
 #   3. DRC: 0 errors, 0 warnings (native Electric VLSI ALGO_SWEEP)
 # ==============================================================================
 
@@ -58,6 +60,13 @@ def clear_cell_contents(cell):
     for e in exp_kill:
         e.kill()
 
+    ait = cell.getArcs()
+    arc_kill = []
+    while ait.hasNext():
+        arc_kill.append(ait.next())
+    for a in arc_kill:
+        a.kill()
+
     nit = cell.getNodes()
     to_kill = []
     while nit.hasNext():
@@ -92,20 +101,22 @@ def build_decoder_layout(lib, ep, mocmos):
 
     DY = 72.0
     X_NAND = 0.0
-    X_NOT  = 88.0
+    X_NOT  = 100.0  # Compacted Not{lay} spans [-20,+20], so [80, 120]
 
-    # Address bus track X coordinates
-    # Group 3 (Bit 3, Input A @ -39.0): True @ -43.0, Comp @ -35.0
-    # Group 2 (Bit 2, Input B @ -13.0): True @ -17.0, Comp @  -9.0
-    # Group 1 (Bit 1, Input C @ +13.0): True @  +9.0, Comp @ +17.0
-    # Group 0 (Bit 0, Input D @ +39.0): True @ +39.0, Comp @ +31.0
-    tracks_true = [-43.0, -17.0,  9.0, 39.0]
-    tracks_comp = [-35.0,  -9.0, 17.0, 31.0]
+    # Split 8-track vertical Metal-2 address bus:
+    # Left of Nand [-40,+40]:
+    #   Bit 2 (B): True @ -72.0, Comp @ -64.0
+    #   Bit 3 (A): True @ -56.0, Comp @ -48.0
+    # Right of Nand [-40,+40], Left of Not [80,120]:
+    #   Bit 0 (D): True @ +46.0, Comp @ +54.0
+    #   Bit 1 (C): True @ +62.0, Comp @ +70.0
+    tracks_true = [-56.0, -72.0, 62.0, 46.0]  # [Bit3(A), Bit2(B), Bit1(C), Bit0(D)]
+    tracks_comp = [-48.0, -64.0, 70.0, 54.0]  # [Bit3(A), Bit2(B), Bit1(C), Bit0(D)]
 
-    # Power strap X coordinates (right of output inverters)
-    X_VDD_STRAP = 116.0
-    X_GND_STRAP = 124.0
-    X_OUT_PIN   = 130.0
+    # Power strap X coordinates (right of output inverters [80,120])
+    X_VDD_STRAP = 126.0
+    X_GND_STRAP = 134.0
+    X_OUT_PIN   = 140.0
 
     track_nodes = {
         "A3": [], "A3_B": [],
@@ -120,23 +131,23 @@ def build_decoder_layout(lib, ep, mocmos):
     # -------------------------------------------------------------------------
     for k in range(16):
         yk = k * DY
-        nand_k = NodeInst.makeInstance(nand_lay, ep, Point2D.Double(X_NAND, yk), 116.0, 52.0, cell, Orientation.IDENT, "Nand@%d" % k)
-        not_k  = NodeInst.makeInstance(not_lay,  ep, Point2D.Double(X_NOT,  yk),  42.0, 52.0, cell, Orientation.IDENT, "Not@%d" % (k + 4))
+        nand_k = NodeInst.makeInstance(nand_lay, ep, Point2D.Double(X_NAND, yk), 80.0, 69.0, cell, Orientation.IDENT, "Nand@%d" % k)
+        not_k  = NodeInst.makeInstance(not_lay,  ep, Point2D.Double(X_NOT,  yk), 40.0, 69.0, cell, Orientation.IDENT, "Not@%d" % (k + 4))
 
-        # Horizontal power & ground rail bridge between NAND and NOT
+        # Horizontal power & ground rail bridge between NAND and NOT (on Metal-1, passing under M2 address tracks)
         make_arc(m1_wire, ep, nand_k.findPortInst("VDD"), not_k.findPortInst("VDD"))
         make_arc(m1_wire, ep, nand_k.findPortInst("GND"), not_k.findPortInst("GND"))
 
-        # Connect Nand.OUT (at 58.0, yk + 7.0) to Not.IN (at 88.0, yk) via 2-segment Manhattan dogleg
+        # Connect Nand.OUT (36.0, yk+7.0) to Not.IN (93.0, yk) on Metal-1 via 2-segment Manhattan dogleg at X=75.0
         p_nand_out = nand_k.findPortInst("OUT")
         p_not_in   = not_k.findPortInst("IN")
-        p_mid1 = NodeInst.makeInstance(m1_pin, ep, Point2D.Double(63.0, yk + 7.0), 3.0, 3.0, cell, Orientation.IDENT, "p_mid1_%d" % k)
-        p_mid2 = NodeInst.makeInstance(m1_pin, ep, Point2D.Double(63.0, yk),       3.0, 3.0, cell, Orientation.IDENT, "p_mid2_%d" % k)
+        p_mid1 = NodeInst.makeInstance(m1_pin, ep, Point2D.Double(75.0, yk + 7.0), 3.0, 3.0, cell, Orientation.IDENT, "p_mid1_%d" % k)
+        p_mid2 = NodeInst.makeInstance(m1_pin, ep, Point2D.Double(75.0, yk),       3.0, 3.0, cell, Orientation.IDENT, "p_mid2_%d" % k)
         make_arc(m1_wire, ep, p_nand_out, p_mid1.getOnlyPortInst())
         make_arc(m1_wire, ep, p_mid1.getOnlyPortInst(), p_mid2.getOnlyPortInst())
         make_arc(m1_wire, ep, p_mid2.getOnlyPortInst(), p_not_in)
 
-        # Output pin and export OUTk
+        # Output pin and export OUTk (passes cleanly under VDD/GND M2 straps at Y = yk)
         p_out = NodeInst.makeInstance(m1_pin, ep, Point2D.Double(X_OUT_PIN, yk), 3.0, 3.0, cell, Orientation.IDENT, "p_out_%d" % k)
         make_arc(m1_wire, ep, not_k.findPortInst("OUT"), p_out.getOnlyPortInst())
         Export.newInst(cell, p_out.getOnlyPortInst(), "OUT%d" % k, PortCharacteristic.OUT)
@@ -156,100 +167,93 @@ def build_decoder_layout(lib, ep, mocmos):
         b1 = (k >> 1) & 1
         b0 = k & 1
 
-        # Input A (Bit 3, index 0)
+        # Input A (Bit 3, port @ -13.5, yk) -> M2 across Nand (-21.0) to -28.0, then M1 to inner tracks (-56 or -48)
         port_A = nand_k.findPortInst("A")
-        if b3 == 1:
-            v_a = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_true[0], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_a_%d" % k)
-            make_arc(m1_wire, ep, v_a.findPortInst("metal-1-metal-2"), port_A)
-            track_nodes["A3"].append(v_a.findPortInst("metal-1-metal-2"))
-        else:
-            v_a = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_comp[0], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_a_%d" % k)
-            make_arc(m1_wire, ep, v_a.findPortInst("metal-1-metal-2"), port_A)
-            track_nodes["A3_B"].append(v_a.findPortInst("metal-1-metal-2"))
+        net_A = "A3" if b3 == 1 else "A3_B"
+        tx_A = tracks_true[0] if b3 == 1 else tracks_comp[0]
+        va_in = NodeInst.makeInstance(via1, ep, Point2D.Double(-13.5, yk), 5.0, 5.0, cell, Orientation.IDENT, "va_in_%d" % k)
+        make_arc(m1_wire, ep, port_A, va_in.getOnlyPortInst())
+        va_br = NodeInst.makeInstance(via1, ep, Point2D.Double(-28.0, yk), 5.0, 5.0, cell, Orientation.IDENT, "va_br_%d" % k)
+        make_arc(m2_wire, ep, va_in.getOnlyPortInst(), va_br.getOnlyPortInst())
+        va_trk = NodeInst.makeInstance(via1, ep, Point2D.Double(tx_A, yk), 5.0, 5.0, cell, Orientation.IDENT, "va_trk_%d" % k)
+        make_arc(m1_wire, ep, va_br.getOnlyPortInst(), va_trk.getOnlyPortInst())
+        track_nodes[net_A].append(va_trk.getOnlyPortInst())
 
-        # Input B (Bit 2, index 1)
+        # Input B (Bit 2, port @ -4.5, yk) -> M2 up to channel yk+36, then M1 left across A3/A3_B to outer tracks (-72 or -64)
         port_B = nand_k.findPortInst("B")
-        if b2 == 1:
-            v_b = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_true[1], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_b_%d" % k)
-            make_arc(m1_wire, ep, v_b.findPortInst("metal-1-metal-2"), port_B)
-            track_nodes["A2"].append(v_b.findPortInst("metal-1-metal-2"))
-        else:
-            v_b = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_comp[1], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_b_%d" % k)
-            make_arc(m1_wire, ep, v_b.findPortInst("metal-1-metal-2"), port_B)
-            track_nodes["A2_B"].append(v_b.findPortInst("metal-1-metal-2"))
+        net_B = "A2" if b2 == 1 else "A2_B"
+        tx_B = tracks_true[1] if b2 == 1 else tracks_comp[1]
+        vb_in = NodeInst.makeInstance(via1, ep, Point2D.Double(-4.5, yk), 5.0, 5.0, cell, Orientation.IDENT, "vb_in_%d" % k)
+        make_arc(m1_wire, ep, port_B, vb_in.getOnlyPortInst())
+        vb_ch = NodeInst.makeInstance(via1, ep, Point2D.Double(-4.5, yk + 36.0), 5.0, 5.0, cell, Orientation.IDENT, "vb_ch_%d" % k)
+        make_arc(m2_wire, ep, vb_in.getOnlyPortInst(), vb_ch.getOnlyPortInst())
+        vb_trk = NodeInst.makeInstance(via1, ep, Point2D.Double(tx_B, yk + 36.0), 5.0, 5.0, cell, Orientation.IDENT, "vb_trk_%d" % k)
+        make_arc(m1_wire, ep, vb_ch.getOnlyPortInst(), vb_trk.getOnlyPortInst())
+        track_nodes[net_B].append(vb_trk.getOnlyPortInst())
 
-        # Input C (Bit 1, index 2)
+        # Input C (Bit 1, port @ +4.5, yk) -> M2 up to channel yk+36, then M1 right across A0/A0_B to outer tracks (+62 or +70)
         port_C = nand_k.findPortInst("C")
-        if b1 == 1:
-            v_c = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_true[2], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_c_%d" % k)
-            make_arc(m1_wire, ep, v_c.findPortInst("metal-1-metal-2"), port_C)
-            track_nodes["A1"].append(v_c.findPortInst("metal-1-metal-2"))
-        else:
-            v_c = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_comp[2], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_c_%d" % k)
-            make_arc(m1_wire, ep, v_c.findPortInst("metal-1-metal-2"), port_C)
-            track_nodes["A1_B"].append(v_c.findPortInst("metal-1-metal-2"))
+        net_C = "A1" if b1 == 1 else "A1_B"
+        tx_C = tracks_true[2] if b1 == 1 else tracks_comp[2]
+        vc_in = NodeInst.makeInstance(via1, ep, Point2D.Double(4.5, yk), 5.0, 5.0, cell, Orientation.IDENT, "vc_in_%d" % k)
+        make_arc(m1_wire, ep, port_C, vc_in.getOnlyPortInst())
+        vc_ch = NodeInst.makeInstance(via1, ep, Point2D.Double(4.5, yk + 36.0), 5.0, 5.0, cell, Orientation.IDENT, "vc_ch_%d" % k)
+        make_arc(m2_wire, ep, vc_in.getOnlyPortInst(), vc_ch.getOnlyPortInst())
+        vc_trk = NodeInst.makeInstance(via1, ep, Point2D.Double(tx_C, yk + 36.0), 5.0, 5.0, cell, Orientation.IDENT, "vc_trk_%d" % k)
+        make_arc(m1_wire, ep, vc_ch.getOnlyPortInst(), vc_trk.getOnlyPortInst())
+        track_nodes[net_C].append(vc_trk.getOnlyPortInst())
 
-        # Input D (Bit 0, index 3)
+        # Input D (Bit 0, port @ +13.5, yk) -> M1 directly right to inner tracks (+46 or +54)
         port_D = nand_k.findPortInst("D")
-        if b0 == 1:
-            v_d = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_true[3], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_d_%d" % k)
-            make_arc(m1_wire, ep, v_d.findPortInst("metal-1-metal-2"), port_D)
-            track_nodes["A0"].append(v_d.findPortInst("metal-1-metal-2"))
-        else:
-            v_d = NodeInst.makeInstance(via1, ep, Point2D.Double(tracks_comp[3], yk), 5.0, 5.0, cell, Orientation.IDENT, "v_d_%d" % k)
-            make_arc(m1_wire, ep, v_d.findPortInst("metal-1-metal-2"), port_D)
-            track_nodes["A0_B"].append(v_d.findPortInst("metal-1-metal-2"))
+        net_D = "A0" if b0 == 1 else "A0_B"
+        tx_D = tracks_true[3] if b0 == 1 else tracks_comp[3]
+        vd_trk = NodeInst.makeInstance(via1, ep, Point2D.Double(tx_D, yk), 5.0, 5.0, cell, Orientation.IDENT, "vd_trk_%d" % k)
+        make_arc(m1_wire, ep, port_D, vd_trk.getOnlyPortInst())
+        track_nodes[net_D].append(vd_trk.getOnlyPortInst())
 
     # -------------------------------------------------------------------------
-    # 2. Place 4 Input Inverters (Not@3, Not@2, Not@1, Not@0) in Rows 16..19
+    # 2. Place 4 Input Inverters (Not@3, Not@2, Not@1, Not@0) in Rows 16..19 (+12.0 lambda offset)
     # -------------------------------------------------------------------------
-    # Bit 3: Not@3 in Row 16, Orient IDENT: IN @ -43.0, OUT @ -30.0, Comp track @ -35.0
-    # Bit 2: Not@2 in Row 17, Orient IDENT: IN @ -17.0, OUT @  -4.0, Comp track @  -9.0
-    # Bit 1: Not@1 in Row 18, Orient IDENT: IN @   9.0, OUT @  22.0, Comp track @  17.0
-    # Bit 0: Not@0 in Row 19, Orient X:     IN @  39.0, OUT @  26.0, Comp track @  31.0
+    # Not{lay} IDENT: IN @ -7.0, OUT @ +4.5, VDD/GND @ +16.0
+    # Not{lay} X:     IN @ +7.0, OUT @ -4.5, VDD/GND @ -16.0
     input_inv_info = [
-        (3, "Not@3", 16, tracks_true[0], tracks_comp[0], "A3", "A3_B", Orientation.IDENT, tracks_true[0] + 13.0),
-        (2, "Not@2", 17, tracks_true[1], tracks_comp[1], "A2", "A2_B", Orientation.IDENT, tracks_true[1] + 13.0),
-        (1, "Not@1", 18, tracks_true[2], tracks_comp[2], "A1", "A1_B", Orientation.IDENT, tracks_true[2] + 13.0),
-        (0, "Not@0", 19, tracks_true[3], tracks_comp[3], "A0", "A0_B", Orientation.X,     tracks_true[3] - 13.0)
+        (3, "Not@3", 16, tracks_true[0], tracks_comp[0], "A3", "A3_B", Orientation.IDENT),
+        (2, "Not@2", 17, tracks_true[1], tracks_comp[1], "A2", "A2_B", Orientation.IDENT),
+        (1, "Not@1", 18, tracks_true[2], tracks_comp[2], "A1", "A1_B", Orientation.X),
+        (0, "Not@0", 19, tracks_true[3], tracks_comp[3], "A0", "A0_B", Orientation.X)
     ]
 
-    for bit, name, row_idx, x_pos, c_track_x, t_name, c_name, orient, x_out_pin in input_inv_info:
-        y_inv = row_idx * DY
-        inv_node = NodeInst.makeInstance(not_lay, ep, Point2D.Double(x_pos, y_inv), 42.0, 52.0, cell, orient, name)
+    for bit, name, row_idx, t_track_x, c_track_x, t_name, c_name, orient in input_inv_info:
+        y_inv = row_idx * DY + 12.0
+        # Place all 4 input inverters centered at X = 0.0
+        inv_node = NodeInst.makeInstance(not_lay, ep, Point2D.Double(0.0, y_inv), 40.0, 69.0, cell, orient, name)
 
-        # Via directly on inv.IN (at x_pos, y_inv)
-        v_in = NodeInst.makeInstance(via1, ep, Point2D.Double(x_pos, y_inv), 5.0, 5.0, cell, Orientation.IDENT, "v_in_%d" % bit)
-        make_arc(m1_wire, ep, v_in.findPortInst("metal-1-metal-2"), inv_node.findPortInst("IN"))
-        track_nodes[t_name].append(v_in.findPortInst("metal-1-metal-2"))
+        # True track tap on Metal-1 from inv.IN to t_track_x
+        v_in = NodeInst.makeInstance(via1, ep, Point2D.Double(t_track_x, y_inv), 5.0, 5.0, cell, Orientation.IDENT, "v_in_%d" % bit)
+        make_arc(m1_wire, ep, inv_node.findPortInst("IN"), v_in.getOnlyPortInst())
+        track_nodes[t_name].append(v_in.getOnlyPortInst())
+        Export.newInst(cell, v_in.getOnlyPortInst(), "A%d" % bit, PortCharacteristic.IN)
 
-        # Export Input A_bit on Metal-1
-        pin_in_x = (x_pos + 10.0) if orient == Orientation.X else (x_pos - 10.0)
-        pin_in = NodeInst.makeInstance(m1_pin, ep, Point2D.Double(pin_in_x, y_inv), 3.0, 3.0, cell, Orientation.IDENT, "pin_in_%d" % bit)
-        make_arc(m1_wire, ep, pin_in.getOnlyPortInst(), inv_node.findPortInst("IN"))
-        Export.newInst(cell, pin_in.getOnlyPortInst(), "A%d" % bit, PortCharacteristic.IN)
+        # Complementary track tap: drop from inv.OUT to channel y_inv - 36.0 on M2, then M1 to c_track_x
+        x_out_inv = 4.5 if orient == Orientation.IDENT else -4.5
+        v_out = NodeInst.makeInstance(via1, ep, Point2D.Double(x_out_inv, y_inv), 5.0, 5.0, cell, Orientation.IDENT, "v_out_%d" % bit)
+        make_arc(m1_wire, ep, inv_node.findPortInst("OUT"), v_out.getOnlyPortInst())
 
-        # Via directly on inv.OUT (at x_out_pin, y_inv)
-        v_out = NodeInst.makeInstance(via1, ep, Point2D.Double(x_out_pin, y_inv), 5.0, 5.0, cell, Orientation.IDENT, "v_out_%d" % bit)
-        make_arc(m1_wire, ep, inv_node.findPortInst("OUT"), v_out.findPortInst("metal-1-metal-2"))
-
-        # Drop down on Metal-2 into the channel at y_jog = y_inv - 36.0
         y_jog = y_inv - 36.0
-        p_jog1 = NodeInst.makeInstance(m2_pin, ep, Point2D.Double(x_out_pin, y_jog), 3.0, 3.0, cell, Orientation.IDENT, "pj1_%d" % bit)
-        p_jog2 = NodeInst.makeInstance(m2_pin, ep, Point2D.Double(c_track_x,  y_jog), 3.0, 3.0, cell, Orientation.IDENT, "pj2_%d" % bit)
+        v_jog1 = NodeInst.makeInstance(via1, ep, Point2D.Double(x_out_inv, y_jog), 5.0, 5.0, cell, Orientation.IDENT, "vjog1_%d" % bit)
+        v_jog2 = NodeInst.makeInstance(via1, ep, Point2D.Double(c_track_x, y_jog), 5.0, 5.0, cell, Orientation.IDENT, "vjog2_%d" % bit)
+        make_arc(m2_wire, ep, v_out.getOnlyPortInst(), v_jog1.getOnlyPortInst())
+        make_arc(m1_wire, ep, v_jog1.getOnlyPortInst(), v_jog2.getOnlyPortInst())
+        track_nodes[c_name].append(v_jog2.getOnlyPortInst())
 
-        make_arc(m2_wire, ep, v_out.findPortInst("metal-1-metal-2"), p_jog1.getOnlyPortInst())
-        make_arc(m2_wire, ep, p_jog1.getOnlyPortInst(), p_jog2.getOnlyPortInst())
-        track_nodes[c_name].append(p_jog2.getOnlyPortInst())
-
-        # Power strap connections for input inverters
+        # Power strap connections for input inverters (on Metal-1 to X_VDD_STRAP / X_GND_STRAP)
         v_inv_vdd = NodeInst.makeInstance(via1, ep, Point2D.Double(X_VDD_STRAP, y_inv + 26.0), 5.0, 5.0, cell, Orientation.IDENT, "v_inv_vdd_%d" % bit)
-        make_arc(m1_wire, ep, inv_node.findPortInst("VDD"), v_inv_vdd.findPortInst("metal-1-metal-2"))
-        track_nodes["VDD"].append(v_inv_vdd.findPortInst("metal-1-metal-2"))
+        make_arc(m1_wire, ep, inv_node.findPortInst("VDD"), v_inv_vdd.getOnlyPortInst())
+        track_nodes["VDD"].append(v_inv_vdd.getOnlyPortInst())
 
         v_inv_gnd = NodeInst.makeInstance(via1, ep, Point2D.Double(X_GND_STRAP, y_inv - 26.0), 5.0, 5.0, cell, Orientation.IDENT, "v_inv_gnd_%d" % bit)
-        make_arc(m1_wire, ep, inv_node.findPortInst("GND"), v_inv_gnd.findPortInst("metal-1-metal-2"))
-        track_nodes["GND"].append(v_inv_gnd.findPortInst("metal-1-metal-2"))
+        make_arc(m1_wire, ep, inv_node.findPortInst("GND"), v_inv_gnd.getOnlyPortInst())
+        track_nodes["GND"].append(v_inv_gnd.getOnlyPortInst())
 
     # -------------------------------------------------------------------------
     # 3. Chain All 8 Vertical Address Lines and 2 Power Straps on Metal-2
@@ -322,8 +326,12 @@ def verify_decoder(lib):
     n_warn = logger.getNumWarnings()
     if n_err > 0 or n_warn > 0:
         lit = logger.getLogs()
+        seen = set()
         while lit.hasNext():
-            print("DRC LOG:", lit.next().getMessage())
+            msg = lit.next().getMessageString()
+            if msg not in seen:
+                seen.add(msg)
+                print("DRC LOG:", msg)
         raise Exception("Quick DRC Check Failed: %d errors, %d warnings found!" % (n_err, n_warn))
     print("3. Quick DRC Check: PASS (0 errors, 0 warnings)")
 

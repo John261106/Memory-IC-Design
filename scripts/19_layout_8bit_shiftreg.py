@@ -116,9 +116,9 @@ def build_8bit_shiftreg_layout(lib, ep, mocmos, jelib_path):
     dff_insts = []
     vias_v = []
     vias_g = []
-    vias_clk = []
+    vias_clk_leaf = []
 
-    # 1. Instantiate 8 D Flip-Flops and power/clock grid
+    # 1. Instantiate 8 D Flip-Flops and power grid + leaf CLK taps
     for i in range(NUM_BITS):
         y_row = i * DY
         dff = NodeInst.makeInstance(dff_lay, ep, Point2D.Double(0.0, y_row), 287.0, 56.0, cell, Orientation.IDENT, "D_flipfl@%d" % i)
@@ -134,24 +134,54 @@ def build_8bit_shiftreg_layout(lib, ep, mocmos, jelib_path):
         vias_g.append(vg)
         make_manhattan_arc(m1_wire, ep, vg.getOnlyPortInst(), dff.findPortInst("GND"))
 
-        # CLK via at X = -30.0, Y = y_row
-        vclk = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-30.0, y_row), 5.0, 5.0, cell, Orientation.IDENT, "via_clk%d" % i)
-        vias_clk.append(vclk)
+        # Leaf CLK via at X = -56.0, Y = y_row (passes cleanly under VDD/GND M2 rails on M1)
+        vclk = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-56.0, y_row), 5.0, 5.0, cell, Orientation.IDENT, "via_clk_leaf%d" % i)
+        vias_clk_leaf.append(vclk)
         make_manhattan_arc(m1_wire, ep, vclk.getOnlyPortInst(), dff.findPortInst("CLK"))
 
         # Export Q for each bit
         Export.newInst(cell, dff.findPortInst("Q"), "Q%d" % i, PortCharacteristic.OUT)
 
-    # 2. Connect vertical Metal-2 straps
+    # 2. Connect vertical Metal-2 power straps
     for i in range(NUM_BITS - 1):
         make_manhattan_arc(m2_wire, ep, vias_v[i].getOnlyPortInst(), vias_v[i+1].getOnlyPortInst())
         make_manhattan_arc(m2_wire, ep, vias_g[i].getOnlyPortInst(), vias_g[i+1].getOnlyPortInst())
-        make_manhattan_arc(m2_wire, ep, vias_clk[i].getOnlyPortInst(), vias_clk[i+1].getOnlyPortInst())
 
-    # 3. Export global power and clock pins
+    # 3. Balanced 3-level binary H-Tree Clock Distribution (identical wire length & via count for all 8 flops)
+    # Level 3 (4 pairs at X = -56.0, bridged from Level 2 at X = -66.0)
+    vias_clk_l2 = []
+    for pair_idx in range(4):
+        y_pair = (2 * pair_idx + 0.5) * DY  # 43.0, 215.0, 387.0, 559.0
+        v_l3 = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-56.0, y_pair), 5.0, 5.0, cell, Orientation.IDENT, "via_clk_l3_%d" % pair_idx)
+        make_manhattan_arc(m2_wire, ep, v_l3.getOnlyPortInst(), vias_clk_leaf[2 * pair_idx].getOnlyPortInst())
+        make_manhattan_arc(m2_wire, ep, v_l3.getOnlyPortInst(), vias_clk_leaf[2 * pair_idx + 1].getOnlyPortInst())
+
+        v_l2 = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-66.0, y_pair), 5.0, 5.0, cell, Orientation.IDENT, "via_clk_l2_%d" % pair_idx)
+        make_manhattan_arc(m1_wire, ep, v_l2.getOnlyPortInst(), v_l3.getOnlyPortInst())
+        vias_clk_l2.append(v_l2)
+
+    # Level 2 (2 quads at X = -66.0, bridged from Level 1 at X = -76.0)
+    vias_clk_l1 = []
+    for quad_idx in range(2):
+        y_quad = (4 * quad_idx + 1.5) * DY  # 129.0, 473.0
+        v_q2 = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-66.0, y_quad), 5.0, 5.0, cell, Orientation.IDENT, "via_clk_q2_%d" % quad_idx)
+        make_manhattan_arc(m2_wire, ep, v_q2.getOnlyPortInst(), vias_clk_l2[2 * quad_idx].getOnlyPortInst())
+        make_manhattan_arc(m2_wire, ep, v_q2.getOnlyPortInst(), vias_clk_l2[2 * quad_idx + 1].getOnlyPortInst())
+
+        v_l1 = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-76.0, y_quad), 5.0, 5.0, cell, Orientation.IDENT, "via_clk_l1_%d" % quad_idx)
+        make_manhattan_arc(m1_wire, ep, v_l1.getOnlyPortInst(), v_q2.getOnlyPortInst())
+        vias_clk_l1.append(v_l1)
+
+    # Level 1 Root at X = -76.0, Y = 3.5 * DY = 301.0
+    y_root = 3.5 * DY
+    v_clk_root = NodeInst.makeInstance(m1_m2_con, ep, Point2D.Double(-76.0, y_root), 5.0, 5.0, cell, Orientation.IDENT, "via_clk_root")
+    make_manhattan_arc(m2_wire, ep, v_clk_root.getOnlyPortInst(), vias_clk_l1[0].getOnlyPortInst())
+    make_manhattan_arc(m2_wire, ep, v_clk_root.getOnlyPortInst(), vias_clk_l1[1].getOnlyPortInst())
+
+    # 4. Export global power and clock pins
     Export.newInst(cell, vias_v[0].getOnlyPortInst(), "VDD", PortCharacteristic.PWR)
     Export.newInst(cell, vias_g[0].getOnlyPortInst(), "GND", PortCharacteristic.GND)
-    Export.newInst(cell, vias_clk[0].getOnlyPortInst(), "CLK", PortCharacteristic.IN)
+    Export.newInst(cell, v_clk_root.getOnlyPortInst(), "CLK", PortCharacteristic.IN)
 
     # 4. Serial input D into D_flipfl@0
     Export.newInst(cell, dff_insts[0].findPortInst("D"), "D", PortCharacteristic.IN)

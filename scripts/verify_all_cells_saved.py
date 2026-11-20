@@ -26,8 +26,8 @@ def verify_saved_cells():
     edb.implementSettingChanges(batch)
 
     cells_to_verify = [
-        "Not", "Nand", "Precharge_ckt", "6T_cell", "D_flipflop",
-        "Sense_amp", "Write_driver", "TG_bitline", "WL_driver",
+        "Not", "Nand", "Decoder", "Precharge_ckt", "6T_cell", "256bit_array",
+        "D_flipflop", "Sense_amp", "Write_driver", "TG_bitline", "WL_driver",
         "Control_logic", "3Bit_counter", "8Bit_reg", "8Bit_shiftreg"
     ]
 
@@ -88,7 +88,7 @@ def verify_saved_cells():
             raise AssertionError("NCC comparison failed for %s" % name)
 
     print("\n" + "=" * 60)
-    print("ALL 13 CELLS (Not, Nand, Precharge_ckt, 6T_cell, D_flipflop, Sense_amp, Write_driver, TG_bitline, WL_driver, Control_logic, 3Bit_counter, 8Bit_reg, 8Bit_shiftreg) ARE 100% VERIFIED CLEAN IN JELIB!")
+    print("ALL 15 CELLS (Not, Nand, Decoder, Precharge_ckt, 6T_cell, 256bit_array, D_flipflop, Sense_amp, Write_driver, TG_bitline, WL_driver, Control_logic, 3Bit_counter, 8Bit_reg, 8Bit_shiftreg) ARE 100% VERIFIED CLEAN IN JELIB!")
     print("=" * 60)
 
 if __name__ == "__main__":

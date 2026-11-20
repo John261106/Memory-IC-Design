@@ -1,3 +1,3 @@
 org.python.util.PythonInterpreter pi = new org.python.util.PythonInterpreter();
-pi.execfile("scripts/verify_all_cells_saved.py");
+pi.execfile("scripts/21_layout_top.py");
 System.exit(0);

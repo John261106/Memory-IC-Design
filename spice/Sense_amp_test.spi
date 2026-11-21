@@ -33,46 +33,21 @@ CBLB BITB gnd 35f
 * Output load (representing output latch / pad input: 15fF)
 CLOAD SENSE gnd 15f
 
-*** 4. Test Stimulus ***
+*** 4. Differential Sweep Stimulus (dV = V(BIT) - V(BITB)) ***
+.PARAM dV = 0
+.STEP PARAM dV -150m 150m 10m
 
-* Case 1: Read '0' (0 to 5ns)
-* BIT discharges from 1.8V to 1.70V (100mV differential)
-* BITB stays at 1.80V
-* READ_EN strobes at t = 2.0ns
-VBIT  BIT  0 PWL(0n 1.8  0.5n 1.8  1.5n 1.70  5.0n 1.70  5.5n 1.8  6.5n 1.80  10.0n 1.80)
-VBITB BITB 0 PWL(0n 1.8  5.0n 1.8  5.5n 1.8   6.5n 1.70  10.0n 1.70)
+* Keeps both bitlines <= 1.8V while sweeping dV from -150mV to +150mV
+VBIT  BIT  0 PWL(0n 1.8  0.5n 1.8  1.0n {1.725 + dV/2}  5.0n {1.725 + dV/2})
+VBITB BITB 0 PWL(0n 1.8  0.5n 1.8  1.0n {1.725 - dV/2}  5.0n {1.725 - dV/2})
 
-* READ_EN Strobe Pulses:
-* - Strobe 1 (Read 0): 2.0ns to 4.5ns
-* - Strobe 2 (Read 1): 7.0ns to 9.5ns
-VREAD READ_EN 0 PWL(0n 0  1.98n 0  2.0n 1.8  4.5n 1.8  4.52n 0  6.98n 0  7.0n 1.8  9.5n 1.8  9.52n 0  10.0n 0)
+* Single READ_EN strobe from 2.0ns to 4.5ns
+VREAD READ_EN 0 PULSE(0 1.8 2.0n 20p 20p 2.5n 10n)
 
-*** 5. Automated Performance Measurements for Report ***
-
-* 1. Read '0' Differential at t = 2.0ns (must be 100mV)
-.MEAS TRAN V_diff_read0 PARAM = (V(BITB) - V(BIT)) AT=2.0n
-
-* 2. Sensing Delay for Read '0' (Time from READ_EN rising at 2.0ns to SENSE rising to 90% = 1.62V)
-.MEAS TRAN t_sense_read0 TRIG V(READ_EN) VAL=0.9 RISE=1 TARG V(SENSE) VAL=1.62 RISE=1
-
-* 3. Final SENSE Output Voltage for Read '0' at t = 4.0ns
-.MEAS TRAN V_SENSE_read0 FIND V(SENSE) AT=4.0n
-
-* 4. Read '1' Differential at t = 7.0ns (must be 100mV)
-.MEAS TRAN V_diff_read1 PARAM = (V(BIT) - V(BITB)) AT=7.0n
-
-* 5. Sensing Delay for Read '1' (Time from READ_EN rising at 7.0ns to SENSE falling to 10% = 0.18V)
-.MEAS TRAN t_sense_read1 TRIG V(READ_EN) VAL=0.9 RISE=2 TARG V(SENSE) VAL=0.18 FALL=1
-
-* 6. Final SENSE Output Voltage for Read '1' at t = 9.0ns
-.MEAS TRAN V_SENSE_read1 FIND V(SENSE) AT=9.0n
-
-* 7. Peak Power/Current drawn from VDD during sensing
-.MEAS TRAN I_peak_sense MAX -I(VDDsrc) FROM=2.0n TO=4.5n
-
-* 8. Energy consumed during one sensing operation
-.MEAS TRAN E_sense_op INTEG (-I(VDDsrc)*V(vdd)) FROM=2.0n TO=4.5n
+*** 5. Measurements ***
+.MEAS TRAN V_out_final FIND V(SENSE) AT=4.0n
+.MEAS TRAN t_sense TRIG V(READ_EN) VAL=0.9 RISE=1 TARG V(SENSE) VAL=1.62 RISE=1
 
 *** 6. Transient Simulation ***
-.TRAN 10p 10n
+.TRAN 10p 5n
 .END

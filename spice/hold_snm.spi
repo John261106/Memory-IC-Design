@@ -1,0 +1,12 @@
+*** 6T SRAM Cell Hold SNM DC Sweep
+.include D:\Projects\Memory-IC-Design\lib\tsmc018.lib
+
+Mnmos0 Q1 Q2 gnd gnd CMOSN L=0.18U W=0.63U
+Mpmos0 vdd Q2 Q1 vdd CMOSP L=0.18U W=0.27U
+
+VDDsrc vdd 0 DC 1.8
+VGND gnd 0 DC 0
+Vin Q2 0 DC 0.9
+
+.DC Vin 0 1.8 0.005
+.END

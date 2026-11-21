@@ -1,3 +1,3 @@
 org.python.util.PythonInterpreter pi = new org.python.util.PythonInterpreter();
-pi.execfile("scripts/21_layout_top.py");
+pi.execfile("scripts/export_pkg_scale90.py");
 System.exit(0);

@@ -12,10 +12,11 @@
 - **Control Logic Unit:** Complete (`Control_logic{sch}` & `{ic}` updated in `.jelib` for 8-cycle inverted-phase operation: $\text{PCB}=\overline{\text{CLK}}$, $\text{WL\_EN}=\text{COUNT\_7}\cdot\overline{\text{CLK}}$, $\text{WRITE\_EN}=\overline{\text{CTRL}}\cdot\text{WL\_EN}$, $\text{READ\_EN}=\text{CTRL}\cdot\text{WL\_EN}$ with an 8-stage CMOS inverter delay line to eliminate Read '0' $0.7\text{ V}$ sense amp glitch; verified in `Top_test.spi` at $18.6\text{ mV}$ peak).
 - **Wordline Driver (`WL_driver`):** Complete (`WL_driver{sch}` & `{ic}` built in `.jelib`; verified in SPICE with $t_{\text{rise}} = 288.9\text{ ps}$ into full 50 fF wordline load and $V_{\text{OL}} \le 45\text{ nV}$).
 - **Top-Level 256-Bit SRAM Chip (`Top`):** Complete (`Top{sch}` & `Top{ic}` updated in `.jelib` without `8Bit_reg` or `Precharg@16`; verified end-to-end in `spice/Top.spi` and `spice/Top_test.spi` at $P_{\text{chip,avg}} = 165.9\ \mu\text{W}$).
+- **Packaged SRAM IC (`Top_package`):** Complete (`Top_package{sch}` & `Top_package{lay}` integrating 2-stage bond wire RLC equivalent networks, multi-stage input buffers, size-32 fingered output buffers, and series $50\,\Omega$ PCB source termination; verified in `spice/Top_package_test.spi` with 0 DRC errors, 100% LVS match, and continuous operating power $203.85\ \mu\text{W}$).
 - **1-Bit SRAM Slice:** Complete & verified (`1Bit_SRAM.spi`).
 - **16x16 Bitcell Matrix:** Schematic created (`256bit_array{sch}` / `256bit_SRAM.spi`).
 - **4-to-16 Decoder:** Complete (`Decoder{sch}` & `{ic}` verified and integrated for both Row and Column decoding).
-- **Living Design Report:** Updated (`docs/design_report.md` tracking Decision Logs 1–15 and full-chip characterization metrics).
+- **Living Design Report:** Updated (`docs/design_report.md` tracking Decision Logs 1–19 and full-chip packaged characterization metrics).
 
 ---
 
@@ -34,8 +35,10 @@
 - [x] Synthesize/integrate Control (`CTRL` R/W) logic timing generator (`Control_logic`).
 
 ### Phase 3: Packaging & I/O Pad Integration
-- [ ] Create SPICE subcircuit / schematic block for Bond Wire + I/O Pad equivalent RLC network ($L_{\text{bond}} = 1.5\text{ nH}, R_{\text{bond}} = 0.1\,\Omega, C_{\text{pad}} = 0.8\text{ pF}$).
-- [ ] Wrap all 5 external signals (`CLK`, `CTRL`, `ADDR_IN`, `DIN`, `DOUT`) and power supplies with the pad equivalent model.
+- [x] Create SPICE subcircuit / schematic block for Bond Wire + I/O Pad equivalent RLC network ($L_{\text{tot}} = 4.5\text{ nH}$ [$2.5\text{ nH} + 2.0\text{ nH}$], $R_{\text{tot}} = 0.25\,\Omega$ [$0.10\,\Omega + 0.15\,\Omega$], $C_{\text{pad}} = 1.9\text{ pF}$ [$0.7\text{ pF} + 1.2\text{ pF}$]).
+- [x] Integrate multi-stage input buffers (`input_buffer`) on internal inputs (`CLK`, `CTRL`, `ADDR_IN`, `DIN`) and size-32 fingered output buffers (`output_buffer`) on `DOUT`.
+- [x] Wrap all 5 external signals (`CLK`, `CTRL`, `ADDR_IN`, `DIN`, `DOUT`) and power supplies (`VDD`, `GND`) in `Top_package{sch}` and `Top_package{lay}` (0 DRC errors, 100% LVS match).
+- [x] Add $50\,\Omega$ series source termination (`Rser=50`) on all 4 input stimuli (`VCLK`, `VADDR`, `VCTRL`, `VDIN`) in `spice/Top_package_test.spi`.
 
 ### Phase 4: Physical Layout & Power Grid Routing
 - [x] Layout fundamental standard cells:
@@ -129,3 +132,15 @@
 - [x] Measure read energy/power per bit ($E_{\text{read}} = 3.138\text{ pJ/bit}, P_{\text{read}} = 313.79\ \mu\text{W}$).
 - [x] Measure write energy/power per bit ($E_{\text{write}} = 2.738\text{ pJ/bit}, P_{\text{write}} = 273.83\ \mu\text{W}$).
 - [x] Measure critical path delay and calculate maximum clock frequency ($t_{\text{CQ}} = 862.5\text{ ps}$, $F_{\text{max}} > 400\text{ MHz}$).
+- [x] Full-Chip Packaged Simulation & Characterization (`spice/Top_package_test.spi` via LTspice XVIIx64):
+  - 100% Functional Verification with 2-stage package RLC and $50\,\Omega$ series source termination:
+    - Write '1' into Cell (10, 5): $Q = -0.0013\text{ V}, \bar{Q} = 1.7997\text{ V}$ ($t_{\text{write1}} = 1.02\text{ ns}$).
+    - Write '0' into Cell (3, 12): $Q = 1.7994\text{ V}, \bar{Q} = -0.0010\text{ V}$ ($t_{\text{write0}} = 1.02\text{ ns}$).
+    - Read '1' from Cell (10, 5): $V_{\text{DOUT\_PCB}} = 1.802\text{ V}$ (full-rail HIGH).
+    - Read '0' from Cell (3, 12): $V_{\text{DOUT\_PCB}} = -0.005\text{ V}$ (full-rail LOW).
+    - Half-select disturb immunity on (10, 4) and (9, 5): $1.7988\text{ V}$ (zero corruption).
+  - Standby Power: $P_{\text{leak}} = 23.86\,\mu\text{W}$ ($0 - 4.9\text{ ns}$).
+  - Active Write Power / Energy (5 ns window): $P_{\text{avg}} = 181.76\,\mu\text{W}, E_{\text{avg}} = 0.909\text{ pJ}$ ($P_{\text{peak}} = 3.69\text{ mW}$).
+  - Active Read Power / Energy (5 ns window): $P_{\text{avg}} = 248.08\,\mu\text{W}, E_{\text{avg}} = 1.241\text{ pJ}$ ($P_{\text{peak}} = 3.69\text{ mW}$).
+  - Full-Chip Continuous Average Operating Power: $P_{\text{chip,avg}} = \mathbf{203.85\,\mu\text{W}}$ ($0.204\text{ mW}$ over 32 clock cycles).
+  - Total Energy across 32 Clock Cycles: $E_{\text{total}} = \mathbf{65.23\text{ pJ}}$.

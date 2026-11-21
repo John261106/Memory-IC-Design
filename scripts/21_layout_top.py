@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-# scripts/test_top_generator.py
-# Clean Top layout without any DRC-Node exclusion boxes, using patched Electric jar
+# scripts/21_layout_top.py
+# Clean Top layout with input buffers and output buffer, 0 DRC errors, 100% NCC with size check
 
 import java.lang.Double
 from java.awt.geom import Point2D
+from java.util import ArrayList
 
 from com.sun.electric.technology import Technology
 from com.sun.electric.database.topology import NodeInst, ArcInst
@@ -20,7 +21,6 @@ from com.sun.electric.tool.ncc import Ncc, NccOptions
 from com.sun.electric.tool.drc import Quick, DRC
 from com.sun.electric.database.geometry import GeometryHandler
 from com.sun.electric.tool.user import ErrorLogger
-from java.util import ArrayList
 
 def make_manhattan_arc(arc_proto, ep, port1, port2, width=None):
     p1 = port1.getCenter()
@@ -81,26 +81,18 @@ class Router:
             5: mocmos.findNodeProto("Metal-5-Metal-6-Con"),
         }
 
-    def next_id(self):
-        self.uid += 1
-        return self.uid
-
     def pin(self, layer, x, y, name=None):
-        if name is None:
-            name = "top_pin_%d" % self.next_id()
         proto = self.pins[layer]
         dw = proto.getDefWidth()
         dh = proto.getDefHeight()
-        n = NodeInst.makeInstance(proto, self.ep, Point2D.Double(x, y), dw, dh, self.cell, Orientation.IDENT, name)
+        n = NodeInst.makeInstance(proto, self.ep, Point2D.Double(x, y), dw, dh, self.cell, Orientation.IDENT, None)
         return n.getOnlyPortInst()
 
     def via(self, low_layer, x, y, name=None):
-        if name is None:
-            name = "top_via_%d" % self.next_id()
         proto = self.vias[low_layer]
         dw = proto.getDefWidth()
         dh = proto.getDefHeight()
-        n = NodeInst.makeInstance(proto, self.ep, Point2D.Double(x, y), dw, dh, self.cell, Orientation.IDENT, name)
+        n = NodeInst.makeInstance(proto, self.ep, Point2D.Double(x, y), dw, dh, self.cell, Orientation.IDENT, None)
         return n.getOnlyPortInst()
 
     def via_stack(self, x, y, from_layer, to_layer, base_port=None):
@@ -151,18 +143,20 @@ def test_build(lib, ep, mocmos):
 
     rt = Router(cell, ep, mocmos)
 
-    p_arr  = lib.findNodeProto("256bit_array{lay}")
-    p_dec  = lib.findNodeProto("Decoder{lay}")
-    p_wld  = lib.findNodeProto("WL_driver{lay}")
-    p_pre  = lib.findNodeProto("Precharge_ckt{lay}")
-    p_tg   = lib.findNodeProto("TG_bitline{lay}")
-    p_sa   = lib.findNodeProto("Sense_amp{lay}")
-    p_wd   = lib.findNodeProto("Write_driver{lay}")
-    p_not  = lib.findNodeProto("Not{lay}")
-    p_dff  = lib.findNodeProto("D_flipflop{lay}")
-    p_sreg = lib.findNodeProto("8Bit_shiftreg{lay}")
-    p_cnt  = lib.findNodeProto("3Bit_counter{lay}")
-    p_ctrl = lib.findNodeProto("Control_logic{lay}")
+    p_arr   = lib.findNodeProto("256bit_array{lay}")
+    p_dec   = lib.findNodeProto("Decoder{lay}")
+    p_wld   = lib.findNodeProto("WL_driver{lay}")
+    p_pre   = lib.findNodeProto("Precharge_ckt{lay}")
+    p_tg    = lib.findNodeProto("TG_bitline{lay}")
+    p_sa    = lib.findNodeProto("Sense_amp{lay}")
+    p_wd    = lib.findNodeProto("Write_driver{lay}")
+    p_not   = lib.findNodeProto("Not{lay}")
+    p_dff   = lib.findNodeProto("D_flipflop{lay}")
+    p_sreg  = lib.findNodeProto("8Bit_shiftreg{lay}")
+    p_cnt   = lib.findNodeProto("3Bit_counter{lay}")
+    p_ctrl  = lib.findNodeProto("Control_logic{lay}")
+    p_inbuf = lib.findNodeProto("input_buffer{lay}")
+    p_outbuf= lib.findNodeProto("output_buffer{lay}")
 
     # 1. Macro Placements
     arr = NodeInst.makeInstance(p_arr, ep, Point2D.Double(0.0, 0.0), 800.0, 1280.0, cell, Orientation.IDENT, "256bit_a@0")
@@ -193,7 +187,6 @@ def test_build(lib, ep, mocmos):
     sa       = NodeInst.makeInstance(p_sa, ep, Point2D.Double(435.0, -520.0), 78.0, 73.0, cell, Orientation.IDENT, "Sense_am@0")
     wd       = NodeInst.makeInstance(p_wd, ep, Point2D.Double(535.0, -520.0), 94.0, 73.0, cell, Orientation.IDENT, "Write_dr@0")
 
-    # Move Not@0 and D_flipfl@0 clear of 3Bit_counter (cnt bounds: X=[-90, 410])
     not_gate = NodeInst.makeInstance(p_not, ep, Point2D.Double(445.0, -660.0), 40.0, 69.0, cell, Orientation.IDENT, "Not@0")
     dff      = NodeInst.makeInstance(p_dff, ep, Point2D.Double(620.0, -660.0), 308.5, 73.0, cell, Orientation.IDENT, "D_flipfl@0")
 
@@ -201,15 +194,20 @@ def test_build(lib, ep, mocmos):
     cnt  = NodeInst.makeInstance(p_cnt,  ep, Point2D.Double(-20.0,  -770.0), 500.0, 429.0, cell, Orientation.IDENT, "3Bit_cou@0")
     ctrl = NodeInst.makeInstance(p_ctrl, ep, Point2D.Double(0.0,    -960.0), 487.5, 73.0,  cell, Orientation.IDENT, "Control_@0")
 
+    # 5 Buffers
+    ib_addr = NodeInst.makeInstance(p_inbuf, ep, Point2D.Double(-550.0, -1240.0), 114.0, 73.0, cell, Orientation.IDENT, "in_buf_addr")
+    ib_clk  = NodeInst.makeInstance(p_inbuf, ep, Point2D.Double(-352.5, -1240.0), 114.0, 73.0, cell, Orientation.IDENT, "in_buf_clk")
+    ib_ctrl = NodeInst.makeInstance(p_inbuf, ep, Point2D.Double(-100.0, -1240.0), 114.0, 73.0, cell, Orientation.IDENT, "in_buf_ctrl")
+    ib_din  = NodeInst.makeInstance(p_inbuf, ep, Point2D.Double(150.0, -1240.0), 114.0, 73.0, cell, Orientation.IDENT, "in_buf_din")
+    ob_dout = NodeInst.makeInstance(p_outbuf, ep, Point2D.Double(1000.0, -664.0), 191.0, 101.0, cell, Orientation.IDENT, "out_buf_dout")
+
     # 2. Wordlines & Row Decoder
     wl_en_vias = []
     for r in range(16):
         make_manhattan_arc(rt.wires[1], ep, wlds[r].findPortInst("WL"), arr.findPortInst("WL%d" % r))
-        # WL_EN via stack at (-115, yr) on Metal-4
         v_en = rt.via_stack(-115.0, r * 81.0 - 24.0, 1, 4, wlds[r].findPortInst("EN"))
         wl_en_vias.append(v_en)
 
-        # Row Decoder OUT -> WL_driver IN
         y_src = r * 72.0
         y_dst = r * 81.0 - 24.0
         y_wld_in = y_dst - 21.0
@@ -219,12 +217,10 @@ def test_build(lib, ep, mocmos):
         p_in_wld = rt.via_stack(-96.0, y_wld_in, 1, 2, wlds[r].findPortInst("IN"))
 
         if abs(y_src - y_wld_in) < 0.001:
-            # Straight horizontal line on M2
             p_dec_m1 = rt.route_pts(1, p_dec_out, [(-290.0, y_src)])
             v_dec_m2 = rt.via_stack(-290.0, y_src, 1, 2, p_dec_m1)
             make_manhattan_arc(rt.wires[2], ep, v_dec_m2, p_in_wld)
         elif r == 14:
-            # Jog by +10.0 on M1 before via to clear r=13 destination wire at Y=1008.0
             y_jog = y_src + 10.0
             p_dec_m1 = rt.route_pts(1, p_dec_out, [(-290.0, y_src), (-290.0, y_jog)])
             v_dec_m2 = rt.via_stack(-290.0, y_jog, 1, 2, p_dec_m1)
@@ -297,7 +293,7 @@ def test_build(lib, ep, mocmos):
         dl_nodes.append(pd_bus)
         dlb_nodes.append(pdb_bus)
 
-    # Sense_amp@0 BIT: inside Sense amp on M4 to -480, step to M2 up to Y_DL (-330), then step back to M4!
+    # Sense_amp@0 BIT & BITB
     p_sa_bit   = rt.via_stack(447.0, -541.0, 1, 4, sa.findPortInst("BIT"))
     p_sa_b_j1  = rt.pin(4, 447.0, -480.0)
     make_manhattan_arc(rt.wires[4], ep, p_sa_bit, p_sa_b_j1)
@@ -306,7 +302,6 @@ def test_build(lib, ep, mocmos):
     make_manhattan_arc(rt.wires[2], ep, p_sa_m2_1, p_sa_m2_2)
     p_sa_dl    = rt.via_stack(447.0, Y_DL, 2, 4, p_sa_m2_2)
 
-    # Sense_amp@0 BITB: straight up on M4 to Y_DLB (-342.0)
     p_sa_bitb = rt.via_stack(456.0, -541.0, 1, 4, sa.findPortInst("BITB"))
     p_sa_dlb  = rt.pin(4, 456.0, Y_DLB)
     make_manhattan_arc(rt.wires[4], ep, p_sa_bitb, p_sa_dlb)
@@ -314,7 +309,7 @@ def test_build(lib, ep, mocmos):
     dl_nodes.append(p_sa_dl)
     dlb_nodes.append(p_sa_dlb)
 
-    # Write_dr@0 BIT: inside Write driver on M4 to -480, step to M2 up to Y_DL (-330), then step back to M4!
+    # Write_dr@0 BIT & BITB
     p_wd_bit   = rt.via_stack(540.5, -520.0, 1, 4, wd.findPortInst("BIT"))
     p_wd_b_j1  = rt.pin(4, 540.5, -480.0)
     make_manhattan_arc(rt.wires[4], ep, p_wd_bit, p_wd_b_j1)
@@ -323,7 +318,6 @@ def test_build(lib, ep, mocmos):
     make_manhattan_arc(rt.wires[2], ep, p_wd_m2_1, p_wd_m2_2)
     p_wd_dl    = rt.via_stack(540.5, Y_DL, 2, 4, p_wd_m2_2)
 
-    # Write_dr@0 BITB: straight up on M4 to Y_DLB (-342.0)
     p_wd_bitb = rt.via_stack(605.5, -520.0, 1, 4, wd.findPortInst("BITB"))
     p_wd_dlb  = rt.pin(4, 605.5, Y_DLB)
     make_manhattan_arc(rt.wires[4], ep, p_wd_bitb, p_wd_dlb)
@@ -338,7 +332,7 @@ def test_build(lib, ep, mocmos):
     for i in range(len(dlb_sorted) - 1):
         make_manhattan_arc(rt.wires[4], ep, dlb_sorted[i], dlb_sorted[i+1])
 
-    # 5. Column Decoder Outputs (COL0..15): Decoder@1.OUTc (-695, c*72) -> TG_bitli@c.EN
+    # 5. Column Decoder Outputs (COL0..15)
     for c in range(16):
         x_trk = -685.0 + c * 10.0
         y_src = c * 72.0
@@ -386,7 +380,7 @@ def test_build(lib, ep, mocmos):
     # 7. Control Signals
     poly_wire = mocmos.findArcProto("Polysilicon-1")
     m1_poly_con = mocmos.findNodeProto("Metal-1-Polysilicon-1-Con")
-    p_c7_poly = NodeInst.makeInstance(m1_poly_con, ep, Point2D.Double(115.0, -996.0), 5.0, 5.0, cell, Orientation.IDENT, "con_c7_poly")
+    p_c7_poly = NodeInst.makeInstance(m1_poly_con, ep, Point2D.Double(115.0, -996.0), 5.0, 5.0, cell, Orientation.IDENT, None)
     make_manhattan_arc(poly_wire, ep, ctrl.findPortInst("COUNT_7"), p_c7_poly.getOnlyPortInst())
     p_c7_src = rt.via_stack(203.5, -770.0, 1, 3, cnt.findPortInst("COUNT_7"))
     p_c7_dst = rt.via_stack(115.0, -996.0, 1, 3, p_c7_poly.getOnlyPortInst())
@@ -401,7 +395,7 @@ def test_build(lib, ep, mocmos):
     p_wen_dst = rt.via_stack(545.0, -541.0, 2, 3, wd.findPortInst("WRITE_EN"))
     rt.route_pts(3, p_wen_src, [(200.5, -895.0), (545.0, -895.0)], p_wen_dst)
 
-    # READ_EN: ctrl -> sa & not_gate
+    # READ_EN
     p_ren_src = rt.via_stack(449.5, -960.0, 1, 4, ctrl.findPortInst("READ_EN"))
     p_ren_dst = rt.via_stack(470.0, -541.0, 1, 4, sa.findPortInst("READ_EN"))
     p_ren_mid = rt.route_pts(4, p_ren_src, [(449.5, -880.0), (470.0, -880.0)])
@@ -411,12 +405,12 @@ def test_build(lib, ep, mocmos):
     p_not_in  = rt.via_stack(438.0, -660.0, 1, 4, not_gate.findPortInst("IN"))
     make_manhattan_arc(rt.wires[4], ep, p_not_in, p_ren_tap)
 
-    # READ_CLK: Not@0.OUT (449.5, -660.0) -> D_flipfl@0.CLK (606.0, -660.0) on Metal-2
+    # READ_CLK
     p_not_out = rt.via_stack(449.5, -660.0, 1, 2, not_gate.findPortInst("OUT"))
     p_dff_clk = rt.via_stack(606.0, -660.0, 1, 2, dff.findPortInst("CLK"))
     make_manhattan_arc(rt.wires[2], ep, p_not_out, p_dff_clk)
 
-    # SENSE_OUT: Sense_am@0.SENSE (490.5, -520.0) -> D_flipfl@0.D (675.5, -660.0) on Metal-3
+    # SENSE_OUT
     p_sa_sense = rt.via_stack(490.5, -520.0, 1, 3, sa.findPortInst("SENSE"))
     p_dff_d    = rt.via_stack(675.5, -660.0, 1, 3, dff.findPortInst("D"))
     rt.route_pts(3, p_sa_sense, [(490.5, -460.0), (675.5, -460.0)], p_dff_d)
@@ -458,7 +452,31 @@ def test_build(lib, ep, mocmos):
     p_clk_ctrl = rt.via_stack(0.0, -960.0, 1, 4, ctrl.findPortInst("CLK"))
     rt.route_pts(4, clk_root, [(-250.0, -1100.0), (108.5, -1100.0), (108.5, -1040.0), (0.0, -1040.0)], p_clk_ctrl)
 
-    # 9. Top-Metal Power Grid
+    # Connect in_buf_clk OUT to clk_root on Metal-4
+    p_ib_clk_out_m1 = ib_clk.findPortInst("OUT") # at (-250.0, -1243.5)
+    p_ib_clk_out_m4 = rt.via_stack(-250.0, -1243.5, 1, 4, p_ib_clk_out_m1)
+    make_manhattan_arc(rt.wires[4], ep, p_ib_clk_out_m4, clk_root)
+
+    # 9. Buffer Signal Routings:
+    # in_buf_addr.OUT (-447.5, -1243.5) -> sreg.D (-344.5, -860.0) on Metal-2
+    p_ib_addr_out = rt.via_stack(-447.5, -1243.5, 1, 2, ib_addr.findPortInst("OUT"))
+    p_sreg_d_m2 = rt.via_stack(-344.5, -860.0, 1, 2, sreg.findPortInst("D"))
+    rt.route_pts(2, p_ib_addr_out, [(-344.5, -1243.5)], p_sreg_d_m2)
+
+    # in_buf_ctrl.OUT (2.5, -1243.5) -> ctrl.CTRL (75.0, -960.0) on Metal-2
+    p_ib_ctrl_out = rt.via_stack(2.5, -1243.5, 1, 2, ib_ctrl.findPortInst("OUT"))
+    p_ctrl_ctrl_m2 = rt.via_stack(75.0, -960.0, 1, 2, ctrl.findPortInst("CTRL"))
+    rt.route_pts(2, p_ib_ctrl_out, [(75.0, -1243.5)], p_ctrl_ctrl_m2)
+
+    # in_buf_din.OUT (252.5, -1243.5) -> wd.DATA (556.0, -520.0) on Metal-2
+    p_ib_din_out = rt.via_stack(252.5, -1243.5, 1, 2, ib_din.findPortInst("OUT"))
+    p_wd_data_m2 = rt.via_stack(556.0, -520.0, 1, 2, wd.findPortInst("DATA"))
+    rt.route_pts(2, p_ib_din_out, [(930.0, -1243.5), (930.0, -480.0), (556.0, -480.0)], p_wd_data_m2)
+
+    # out_buf_dout.IN (991.5, -660.0) -> dff.Q (891.5, -660.0) straight on Metal-1
+    make_manhattan_arc(rt.wires[1], ep, dff.findPortInst("Q"), ob_dout.findPortInst("IN"))
+
+    # 10. Top-Metal Power Grid
     def strap_pwr(port, cur_layer, target_layer, trunk_x, trunk_y=None):
         px = port.getCenter().getX()
         py = port.getCenter().getY()
@@ -496,7 +514,6 @@ def test_build(lib, ep, mocmos):
     vdd_bot.append(strap_pwr(sa.findPortInst("VDD"), 1, 6, None, Y_VDD_B))
     vdd_bot.append(strap_pwr(wd.findPortInst("VDD"), 1, 6, None, Y_VDD_B))
 
-    # Precharge VDD: horizontal M1 distribution rails
     for i in range(7):
         c_cur = i * 2
         c_nxt = (i + 1) * 2
@@ -505,11 +522,8 @@ def test_build(lib, ep, mocmos):
         c_nxt_o = (i + 1) * 2 + 1
         make_manhattan_arc(rt.wires[1], ep, pres[c_cur_o].findPortInst("VDD"), pres[c_nxt_o].findPortInst("VDD"))
 
-    # Connect even row to global VDD trunk at X_VDD_R
     p_pre_e_end = rt.route_pts(1, pres[14].findPortInst("VDD"), [(X_VDD_R, -51.0)])
     p_pre_e_v6  = rt.via_stack(X_VDD_R, -51.0, 1, 6, p_pre_e_end)
-
-    # Connect odd row to global VDD trunk at X_VDD_R
     p_pre_o_end = rt.route_pts(1, pres[15].findPortInst("VDD"), [(X_VDD_R, -106.0)])
     p_pre_o_v6  = rt.via_stack(X_VDD_R, -106.0, 1, 6, p_pre_o_end)
 
@@ -518,7 +532,7 @@ def test_build(lib, ep, mocmos):
         p_tg_v = rt.route_pts(1, tgs[c].findPortInst("VDD"), [(c * 51.0 - 5.0, yc_tg + 28.0)])
         vdd_bot.append(strap_pwr(p_tg_v, 1, 6, None, Y_VDD_B))
 
-    # Connect Not@0 and D_flipfl@0 VDD together on Metal-1, drop M6 strap at X = 580.0
+    # Not & DFF VDD
     p_not_v1 = rt.route_pts(1, not_gate.findPortInst("VDD"), [(476.5, -634.0), (476.5, -632.0)])
     p_dff_v1 = dff.findPortInst("VDD")
     make_manhattan_arc(rt.wires[1], ep, p_not_v1, p_dff_v1)
@@ -527,13 +541,33 @@ def test_build(lib, ep, mocmos):
     make_manhattan_arc(rt.wires[6], ep, p_out_v6, p_out_v6_b, width=8.0)
     vdd_bot.append(p_out_v6_b)
 
+    # Input Buffers VDD (M3 straight up to Y_VDD_B, via stack M3 to M6)
+    for ib in [ib_addr, ib_clk, ib_ctrl, ib_din]:
+        pv = ib.findPortInst("VDD")
+        px = pv.getCenter().getX()
+        py = pv.getCenter().getY()
+        pv_top = rt.route_pts(3, pv, [(px, Y_VDD_B)])
+        pv_m6 = rt.via_stack(px, Y_VDD_B, 3, 6, pv_top)
+        vdd_bot.append(pv_m6)
+
+    # Output Buffer VDD (M1 at (1179.5, -614.0), drop M6 down to Y_VDD_B)
+    p_ob_vdd = ob_dout.findPortInst("VDD")
+    p_ob_v6 = rt.via_stack(1179.5, -614.0, 1, 6, p_ob_vdd)
+    p_ob_v6_b = rt.pin(6, 1179.5, Y_VDD_B)
+    make_manhattan_arc(rt.wires[6], ep, p_ob_v6, p_ob_v6_b, width=8.0)
+    vdd_bot.append(p_ob_v6_b)
+
     vdd_bl = rt.pin(6, X_VDD_L, Y_VDD_B)
-    vdd_br = rt.pin(6, X_VDD_R, Y_VDD_B)
+    vdd_br = rt.pin(6, 1179.5, Y_VDD_B)
     vdd_left.append(vdd_bl)
     vdd_bot.append(vdd_bl)
-    vdd_bot.append(vdd_br)
 
     p_sw_r = strap_pwr(arr.findPortInst("VDD"), 2, 6, X_VDD_R)
+    vdd_r_nodes = [rt.pin(6, X_VDD_R, Y_VDD_B), p_pre_o_v6, p_pre_e_v6, p_sw_r]
+    vdd_bot.append(vdd_r_nodes[0])
+    vdd_r_s = sorted(vdd_r_nodes, key=lambda p: p.getCenter().getY())
+    for i in range(len(vdd_r_s) - 1):
+        make_manhattan_arc(rt.wires[6], ep, vdd_r_s[i], vdd_r_s[i+1], width=8.0)
 
     vdd_left_s = sorted(vdd_left, key=lambda p: p.getCenter().getY())
     for i in range(len(vdd_left_s) - 1):
@@ -542,12 +576,7 @@ def test_build(lib, ep, mocmos):
     for i in range(len(vdd_bot_s) - 1):
         make_manhattan_arc(rt.wires[6], ep, vdd_bot_s[i], vdd_bot_s[i+1], width=8.0)
 
-    # Chain right VDD trunk from vdd_br up to p_sw_r through precharge vias
-    vdd_r_nodes = [vdd_br, p_pre_o_v6, p_pre_e_v6, p_sw_r]
-    vdd_r_s = sorted(vdd_r_nodes, key=lambda p: p.getCenter().getY())
-    for i in range(len(vdd_r_s) - 1):
-        make_manhattan_arc(rt.wires[6], ep, vdd_r_s[i], vdd_r_s[i+1], width=8.0)
-
+    # GND Grid
     gnd_left = []
     gnd_left.append(strap_pwr(arr.findPortInst("GND"), 2, 5, X_GND_L))
     gnd_left.append(strap_pwr(dec_row.findPortInst("GND"), 2, 5, X_GND_L))
@@ -568,7 +597,7 @@ def test_build(lib, ep, mocmos):
         p_tg_g = rt.route_pts(1, tgs[c].findPortInst("GND"), [(c * 51.0 - 3.0, yc_tg - 28.0)])
         gnd_bot.append(strap_pwr(p_tg_g, 1, 5, None, Y_GND_B))
 
-    # Connect Not@0 and D_flipflop@0 GND together on Metal-1, drop M5 at X = 590.0
+    # Not & DFF GND
     p_not_g1 = rt.route_pts(1, not_gate.findPortInst("GND"), [(476.5, -686.0), (476.5, -688.0)])
     p_dff_g1 = dff.findPortInst("GND")
     make_manhattan_arc(rt.wires[1], ep, p_not_g1, p_dff_g1)
@@ -576,6 +605,24 @@ def test_build(lib, ep, mocmos):
     p_out_g5_b = rt.pin(5, 590.0, Y_GND_B)
     make_manhattan_arc(rt.wires[5], ep, p_out_g5, p_out_g5_b, width=8.0)
     gnd_bot.append(p_out_g5_b)
+
+    # Input Buffers GND (M3 jog right to +11.0, straight up to Y_GND_B, via stack M3 to M5)
+    for ib in [ib_addr, ib_clk, ib_ctrl, ib_din]:
+        pg = ib.findPortInst("GND")
+        px = pg.getCenter().getX()
+        py = pg.getCenter().getY()
+        px_jog = px + 11.0
+        pg_j = rt.route_pts(3, pg, [(px_jog, py), (px_jog, Y_GND_B)])
+        pg_m5 = rt.via_stack(px_jog, Y_GND_B, 3, 5, pg_j)
+        gnd_bot.append(pg_m5)
+
+    # Output Buffer GND (M1 at (1179.5, -698.0), jog right to 1191.0, drop M5 down to Y_GND_B)
+    p_ob_gnd = ob_dout.findPortInst("GND")
+    p_ob_g1 = rt.route_pts(1, p_ob_gnd, [(1191.0, -698.0)])
+    p_ob_g5 = rt.via_stack(1191.0, -698.0, 1, 5, p_ob_g1)
+    p_ob_g5_b = rt.pin(5, 1191.0, Y_GND_B)
+    make_manhattan_arc(rt.wires[5], ep, p_ob_g5, p_ob_g5_b, width=8.0)
+    gnd_bot.append(p_ob_g5_b)
 
     gnd_bl = rt.pin(5, X_GND_L, Y_GND_B)
     gnd_left.append(gnd_bl)
@@ -587,18 +634,25 @@ def test_build(lib, ep, mocmos):
     for i in range(len(gnd_bot_s) - 1):
         make_manhattan_arc(rt.wires[5], ep, gnd_bot_s[i], gnd_bot_s[i+1], width=8.0)
 
-    # 10. Exports
-    Export.newInst(cell, clk_root, "CLK", PortCharacteristic.IN)
-    Export.newInst(cell, sreg.findPortInst("D"), "ADDR_IN", PortCharacteristic.IN)
-    Export.newInst(cell, ctrl.findPortInst("CTRL"), "CTRL", PortCharacteristic.IN)
-    Export.newInst(cell, wd.findPortInst("DATA"), "DIN", PortCharacteristic.IN)
-    Export.newInst(cell, dff.findPortInst("Q"), "DOUT", PortCharacteristic.OUT)
+    # 11. Exports
+    Export.newInst(cell, ib_clk.findPortInst("IN"), "CLK", PortCharacteristic.IN)
+    Export.newInst(cell, ib_addr.findPortInst("IN"), "ADDR_IN", PortCharacteristic.IN)
+    Export.newInst(cell, ib_ctrl.findPortInst("IN"), "CTRL", PortCharacteristic.IN)
+    Export.newInst(cell, ib_din.findPortInst("IN"), "DIN", PortCharacteristic.IN)
+    Export.newInst(cell, ob_dout.findPortInst("OUT"), "DOUT", PortCharacteristic.OUT)
     Export.newInst(cell, vdd_bl, "VDD", PortCharacteristic.PWR)
     Export.newInst(cell, gnd_bl, "GND", PortCharacteristic.GND)
+    Export.newInst(cell, p_sa_dl, "GBL", PortCharacteristic.BIDIR)
+    Export.newInst(cell, p_sa_dlb, "GBLB", PortCharacteristic.BIDIR)
 
-    # NO DRC-Node exclusion boxes! Completely clean physical layout!
+    # Ensure all nodes in Top{lay} have isUsernamed = False (no node name text!)
+    nit = cell.getNodes()
+    while nit.hasNext():
+        n = nit.next()
+        if n.isUsernamed():
+            n.setName("")
 
-    # 11. Verification
+    # 12. Verification
     total_arcs = 0
     non_m = 0
     ait = cell.getArcs()
@@ -638,10 +692,12 @@ def test_build(lib, ep, mocmos):
     res = Ncc.compare(sch, None, cell, None, opts)
     print("NCC result: match = %s" % res.match())
 
-    if logger.getNumErrors() == 0 and res.match():
-        print("Saving library to %s..." % jelib_path)
+    if logger.getNumErrors() == 0 and len(errs) == 0 and res.match():
+        print("PERFECT! Saving library to %s..." % jelib_path)
         Output.writeLibrary(lib, FileType.JELIB, False, False, False, 0)
         print("Successfully saved Top{lay} to %s" % jelib_path)
+    else:
+        print("Checks not all passing yet; not saving.")
 
 jelib_path = "D:/Projects/Memory-IC-Design/src/Memory-IC-Design.jelib"
 url = TextUtils.makeURLToFile(jelib_path)
@@ -653,9 +709,4 @@ batch = Setting.SettingChangeBatch()
 batch.add(mocmos.getScaleSetting(), java.lang.Double(90.0))
 edb.implementSettingChanges(batch)
 
-try:
-    test_build(lib, ep, mocmos)
-except:
-    import traceback
-    traceback.print_exc()
-
+test_build(lib, ep, mocmos)

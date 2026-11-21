@@ -1,0 +1,3 @@
+org.python.util.PythonInterpreter pi = new org.python.util.PythonInterpreter();
+pi.execfile("scripts/inspect_node_text.py");
+System.exit(0);

@@ -1,0 +1,27 @@
+*** 6T SRAM Cell SNM Measurement Deck
+.include D:/Projects/Memory-IC-Design/lib/tsmc018.lib
+
+* Hold half-cell
+Mnmos1 V2_hold V1 gnd gnd CMOSN L=0.18U W=0.63U
+Mpmos1 vdd     V1 V2_hold vdd CMOSP L=0.18U W=0.27U
+
+* Read half-cell (WL=1.8V, BIT=1.8V)
+Mnmos1_rd V2_read V1 gnd gnd CMOSN L=0.18U W=0.63U
+Mpmos1_rd vdd     V1 V2_read vdd CMOSP L=0.18U W=0.27U
+Mnmos_ax  V2_read vdd bit gnd CMOSN L=0.18U W=0.36U
+
+VDDsrc vdd 0 DC 1.8
+VGND gnd 0 DC 0
+Vbit bit 0 DC 1.8
+Vin V1 0 DC 0.9
+
+.DC Vin 0 1.8 0.001
+
+* Measurements for VTC trip points (Vm: Vout = Vin)
+.MEAS DC Vm_hold FIND V(V2_hold) WHEN V(V2_hold)=V(V1)
+.MEAS DC Vm_read FIND V(V2_read) WHEN V(V2_read)=V(V1)
+
+* Measurements for unity gain points (d(Vout)/d(Vin) = -1)
+.MEAS DC V_IL_hold DERIV V(V2_hold) WHEN V(V2_hold)=1.6
+.MEAS DC V_read_out_at_0 FIND V(V2_read) AT=0
+.END

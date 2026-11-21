@@ -33,22 +33,23 @@ The memory core interfaces with the outside world through strictly **five extern
 
 ## 3. Specifications Summary
 
-| Parameter | Specification | Notes / Description |
-|---|---|---|
-| **Array Architecture** | 16 rows × 16 columns | 2D rectangular array |
-| **Total Storage** | 256 bits (32 bytes) | Individually addressable bits |
-| **External Signal Count** | 5 signal pins | `CTRL` (R/W), `ADDR_IN`, `CLK`, `DIN`, `DOUT` |
-| **Supply Voltage** | 1.8 V | TSMC 0.18 µm standard CMOS |
-| **Bit Cell Type** | 6T SRAM Cell | Cross-coupled inverters + NMOS access gates |
-| **Addressing Mechanism** | 8-bit Serial / Sequential | Maps 1-bit input into 8-bit address ($2^8 = 256$ locations: 4-bit Row + 4-bit Column) |
-| **Row Decoder** | 4-to-16 Decoder | Selects 1 of 16 Word Lines (`WL[0:15]`) |
-| **Column Selection** | 16-to-1 MUX / Pass Gates | Controlled by 4-to-16 column decoder |
-| **Read Path** | Precharge + Differential Sense Amp | Bitline precharge to $V_{\text{DD}}$, high-speed latch sense amp |
-| **Write Path** | Tri-state Differential Write Driver | Drives `BIT` and `BITB` complementary lines |
-| **Packaging Model** | Bond wire + Pad RLC network | Series $L_{\text{bond}}$, $R_{\text{bond}}$, shunt $C_{\text{pad}}$ on all external pins |
-| **Clock Network** | Balanced Clock Tree | Low-skew distribution across array and peripheral blocks |
-| **Power Distribution** | Top-Metal Grid | Low-resistance power distribution grid on topmost metal |
-| **EDA Tools** | Electric VLSI 9.08 + SPICE (LTspice/ngspice) | Transistor schematic capture, DRC, physical layout, netlisting, simulation |
+| Parameter | Specification | Measured / Implementation Value | Notes / Description |
+|---|---|:---:|---|
+| **Array Architecture** | 16 rows × 16 columns | **16 × 16** | 2D rectangular array |
+| **Total Storage** | 256 bits (32 bytes) | **256 bits** | Individually addressable bits |
+| **External Signal Count** | 5 signal pins | **5 pins** | `CLK`, `CTRL` (R/W), `ADDR_IN`, `DIN`, `DOUT` (+ `VDD`, `GND`) |
+| **Supply Voltage** | 1.8 V nominal | **1.80 V** | TSMC 0.18 µm standard CMOS ($L_{\text{min}} = 0.18\,\mu\text{m}$, $\lambda = 90\text{ nm}$) |
+| **Operating Frequency** | 100 MHz target | **100 MHz** ($T = 10\text{ ns}$) | Maximum tested $> 125\text{ MHz}$ packaged ($> 400\text{ MHz}$ core limit) |
+| **Bit Cell Type** | 6T SRAM Cell | **Continuous Shared-Diffusion** | Sized for Read SNM $> 160\text{ mV}$, $CR = 1.75$, $PR = 1.33$ |
+| **Addressing Mechanism** | 8-bit Serial / Sequential | **8-Bit SIPO Shift Register** | Maps 1-bit input over 8 clock cycles ($A_7..A_4$ Row, $A_3..A_0$ Col) |
+| **Row Decoder** | 4-to-16 Decoder | **Static CMOS NAND4 + INV** | Active-high Word Line gating via `WL_driver` ($t_{\text{rise}} = 289\text{ ps}$) |
+| **Column Selection** | 16-to-1 MUX / Pass Gates | **16 CMOS Transmission Gates** | Mobility-matched $W_P=8\lambda, W_N=4\lambda$ with local inverters |
+| **Read Path** | Precharge + Sense Amp | **Current-Mirror OTA + DFF Latch** | Resolves $\Delta V \le 50 - 100\text{ mV}$ to rail-to-rail $1.8\text{ V}$ |
+| **Write Path** | Tri-state Write Driver | **Series NMOS Pull-Down Stacks** | Discharges 50 fF bitline in $< 450\text{ ps}$ down to $< 1\,\mu\text{V}$ |
+| **I/O Buffering** | Multi-stage in/out buffers | **Input Buffers + Size-32 Output Buffer** | Restores input slew; drives external $C_{\text{dout}} = 20\text{ fF}$ load |
+| **Packaging Model** | 2-Stage Bond Wire RLC | $L = 4.5\text{ nH}, R = 0.25\,\Omega, C_{\text{pad}} = 1.9\text{ pF}$ | 2-stage ladder on all 7 chip pins with $50\,\Omega$ PCB source termination |
+| **Silicon Area (`Top{lay}`)** | Minimum rectangular die | **$0.03746\text{ mm}^2$** | $163.08\,\mu\text{m} \times 229.73\,\mu\text{m}$ ($1812\lambda \times 2552.5\lambda$) |
+| **DRC / LVS Status** | Zero errors / 100% Match | **0 DRC Errors / 100% LVS Match** | 100% Manhattan geometry (0 diagonal arcs); full sizing match |
 
 ---
 
@@ -165,9 +166,37 @@ To represent real-world chip integration, each external pin (`CTRL`, `ADDR_IN`, 
 
 1. Full transistor-level schematic database in Electric VLSI (`Memory-IC-Design.jelib`).
 2. SPICE netlists for individual cells, 16x16 array, decoders, peripheral circuitry, and full top-level chip.
-3. Physical layout with DRC and LVS reports.
-4. Comprehensive characterization reports:
-   - Area breakdown ($\mu\text{m}^2$)
-   - Read & write power consumption per bit
-   - Maximum clock frequency ($F_{\text{max}}$)
-   - Waveforms under bond wire + I/O pad packaging parasitics.
+3. Physical layout with DRC and LVS reports (`Top{lay}`: 0 DRC errors, 0 warnings, 100% LVS match).
+4. Packaged chip integration (`Top_package{sch}`, `Top_package{lay}`) with bond wire RLC and I/O buffers.
+5. Comprehensive characterization reports:
+   - Area breakdown ($0.03746\text{ mm}^2$)
+   - Read & write power and energy consumption per bit
+   - Maximum operating frequency ($> 125\text{ MHz}$)
+   - Post-package waveforms with bond wire RLC parasitics and $50\,\Omega$ PCB source termination.
+
+---
+
+## 7. Final Measured Characterization Results (Packaged IC)
+
+The final design was characterized via complete post-package transient simulation in LTspice XVII (`spice/Top_package_test.spi`) over 4 consecutive 8-cycle frames ($340\text{ ns}$ transient window):
+
+| Metric | Symbol / Parameter | Value | Condition / Notes |
+|:---|:---|:---:|:---|
+| **Core Supply Voltage** | $V_{\text{DD}}$ | **1.80 V** | Nominal TSMC 0.18 µm CMOS |
+| **Clock Frequency** | $F_{\text{clk}}$ | **100 MHz** | Clock period $T = 10\text{ ns}$ |
+| **Standby / Leakage Power** | $P_{\text{leak}}$ | **23.86 µW** | Pre-clock static leakage ($0 - 4.9\text{ ns}$) |
+| **Active Write '1' Power / Energy** | $P_{\text{w1}} / E_{\text{w1}}$ | **187.43 µW / 0.937 pJ** | Cycle 8 ($80 - 85\text{ ns}$) write pulse into Cell (10, 5) |
+| **Active Write '0' Power / Energy** | $P_{\text{w0}} / E_{\text{w0}}$ | **176.09 µW / 0.880 pJ** | Cycle 16 ($160 - 165\text{ ns}$) write pulse into Cell (3, 12) |
+| **Average Active Write Power / Energy** | $P_{\text{w,avg}} / E_{\text{w,avg}}$ | **181.76 µW / 0.909 pJ** | 5 ns active window ($P_{\text{peak}} = 3.69\text{ mW}$) |
+| **Active Read '1' Power / Energy** | $P_{\text{r1}} / E_{\text{r1}}$ | **201.59 µW / 1.008 pJ** | Cycle 24 ($240 - 245\text{ ns}$) read & latch Cell (10, 5) |
+| **Active Read '0' Power / Energy** | $P_{\text{r0}} / E_{\text{r0}}$ | **294.56 µW / 1.473 pJ** | Cycle 32 ($320 - 325\text{ ns}$) read & latch Cell (3, 12) |
+| **Average Active Read Power / Energy** | $P_{\text{r,avg}} / E_{\text{r,avg}}$ | **248.08 µW / 1.241 pJ** | 5 ns active window ($P_{\text{peak}} = 3.69\text{ mW}$) |
+| **Continuous Full-Chip Average Power** | $P_{\text{chip,avg}}$ | **203.85 µW** | Continuous operating average ($5 - 325\text{ ns}$, 32 cycles) |
+| **Total Energy (32 Clock Cycles)** | $E_{\text{total}}$ | **65.23 pJ** | Cumulative $\int V_{\text{DD}} \cdot I_{\text{DD}} \, dt$ |
+| **Read Output Voltage HIGH** | $V_{\text{OH}}$ | **1.802 V** | Full-rail logic '1' at `DOUT_PCB` terminal |
+| **Read Output Voltage LOW** | $V_{\text{OL}}$ | **-0.005 V** ($\approx 0\text{ V}$) | Full-rail logic '0' at `DOUT_PCB` terminal |
+| **Write '1' Cell Flip Time** | $t_{\text{write1}}$ | **1.02 ns** | From Cycle 8 clock fall to Cell (10, 5) state flip |
+| **Write '0' Cell Flip Time** | $t_{\text{write0}}$ | **1.02 ns** | From Cycle 16 clock fall to Cell (3, 12) state flip |
+| **Half-Select Disturb Retention** | $V_{\text{disturb}}$ | **1.7988 V** | Cell (10, 4) & Cell (9, 5) full state retention |
+| **Physical Layout Area (`Top{lay}`)** | Silicon Footprint | **0.03746 mm²** | $163.08\,\mu\text{m} \times 229.73\,\mu\text{m}$ ($1812\lambda \times 2552.5\lambda$) |
+| **Layout Cleanliness** | DRC & NCC/LVS | **0 Errors, 100% Match** | 100% Manhattan geometry; zero DRC errors/warnings |

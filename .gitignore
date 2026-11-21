@@ -1,9 +1,8 @@
 *.raw
 *.op.raw
 *.log
-*.raw
-*.op.raw
-*.log
-*.raw
-*.log
 *.txt
+*.class
+*.spitemplate
+*.bak
+*.bak_*

@@ -1,0 +1,600 @@
+* First line is ignored
+
+*** SUBCIRCUIT Memory-IC-Design__D_flipflop FROM CELL Memory-IC-Design:D_flipflop{lay}
+.SUBCKT Memory-IC-Design__D_flipflop CLK D gnd Q vdd
+Mnmos@0 net@167 net@158 D gnd N L=0.4U W=0.8U
+Mnmos@1 net@167 net@163 net@170 gnd N L=0.4U W=0.6U
+Mnmos@2 net@179 net@167 gnd gnd N L=0.4U W=0.8U
+Mnmos@3 gnd net@179 net@170 gnd N L=0.4U W=0.6U
+Mnmos@4 net@183 net@158 net@186 gnd N L=0.4U W=0.6U
+Mnmos@5 Q net@183 gnd gnd N L=0.4U W=1.2U
+Mnmos@6 gnd Q net@186 gnd N L=0.4U W=0.6U
+Mnmos@7 net@183 net@163 net@179 gnd N L=0.4U W=0.8U
+Mnmos@8 gnd CLK net@158 gnd N L=0.4U W=0.8U
+Mnmos@9 net@163 net@158 gnd gnd N L=0.4U W=0.8U
+Mpmos@0 net@167 net@163 D vdd P L=0.4U W=1.6U
+Mpmos@1 net@167 net@158 net@170 vdd P L=0.4U W=1.2U
+Mpmos@2 net@179 net@167 vdd vdd P L=0.4U W=1.6U
+Mpmos@3 vdd net@179 net@170 vdd P L=0.4U W=0.8U
+Mpmos@4 net@183 net@163 net@186 vdd P L=0.4U W=1.2U
+Mpmos@5 Q net@183 vdd vdd P L=0.4U W=2.4U
+Mpmos@6 vdd Q net@186 vdd P L=0.4U W=0.8U
+Mpmos@7 net@183 net@158 net@179 vdd P L=0.4U W=1.6U
+Mpmos@8 vdd CLK net@158 vdd P L=0.4U W=1.6U
+Mpmos@9 net@163 net@158 vdd vdd P L=0.4U W=1.6U
+.ENDS Memory-IC-Design__D_flipflop
+
+*** SUBCIRCUIT Memory-IC-Design__3Bit_counter FROM CELL Memory-IC-Design:3Bit_counter{lay}
+.SUBCKT Memory-IC-Design__3Bit_counter CLK COUNT_7 gnd vdd
+XD_flipfl@3 CLK net@18 gnd net@112 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@4 CLK net@59 gnd net@58 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@5 CLK net@67 gnd net@66 vdd Memory-IC-Design__D_flipflop
+Mnmos@0 net@18 net@112 gnd gnd N L=0.4U W=0.8U
+Mnmos@1 net@22 net@58 gnd gnd N L=0.4U W=0.8U
+Mnmos@2 net@26 net@66 gnd gnd N L=0.4U W=0.8U
+Mnmos@3 net@32 net@112 net@30 gnd N L=0.4U W=0.8U
+Mnmos@4 gnd net@58 net@32 gnd N L=0.4U W=0.8U
+Mnmos@5 net@39 net@30 gnd gnd N L=0.4U W=0.8U
+Mnmos@6 net@45 net@112 net@43 gnd N L=0.4U W=1.2U
+Mnmos@7 net@49 net@58 net@45 gnd N L=0.4U W=1.2U
+Mnmos@8 gnd net@66 net@49 gnd N L=0.4U W=1.2U
+Mnmos@9 COUNT_7 net@43 gnd gnd N L=0.4U W=1.2U
+Mnmos@10 net@59 net@18 net@58 gnd N L=0.4U W=0.8U
+Mnmos@11 net@59 net@112 net@22 gnd N L=0.4U W=0.8U
+Mnmos@12 net@67 net@30 net@66 gnd N L=0.4U W=0.8U
+Mnmos@13 net@67 net@39 net@26 gnd N L=0.4U W=0.8U
+Mpmos@0 net@18 net@112 vdd vdd P L=0.4U W=1.6U
+Mpmos@1 net@22 net@58 vdd vdd P L=0.4U W=1.6U
+Mpmos@2 net@26 net@66 vdd vdd P L=0.4U W=1.6U
+Mpmos@3 net@30 net@112 vdd vdd P L=0.4U W=0.8U
+Mpmos@4 vdd net@58 net@30 vdd P L=0.4U W=0.8U
+Mpmos@5 net@39 net@30 vdd vdd P L=0.4U W=1.6U
+Mpmos@6 net@43 net@112 vdd vdd P L=0.4U W=0.8U
+Mpmos@7 net@43 net@58 vdd vdd P L=0.4U W=0.8U
+Mpmos@8 net@43 net@66 vdd vdd P L=0.4U W=0.8U
+Mpmos@9 COUNT_7 net@43 vdd vdd P L=0.4U W=2.4U
+Mpmos@10 net@59 net@112 net@58 vdd P L=0.4U W=1.6U
+Mpmos@11 net@59 net@18 net@22 vdd P L=0.4U W=1.6U
+Mpmos@12 net@67 net@39 net@66 vdd P L=0.4U W=1.6U
+Mpmos@13 net@67 net@30 net@26 vdd P L=0.4U W=1.6U
+.ENDS Memory-IC-Design__3Bit_counter
+
+*** SUBCIRCUIT Memory-IC-Design__8Bit_shiftreg FROM CELL Memory-IC-Design:8Bit_shiftreg{lay}
+.SUBCKT Memory-IC-Design__8Bit_shiftreg CLK D gnd Q0 Q1 Q2 Q3 Q4 Q5 Q6 Q7 vdd
+XD_flipfl@0 CLK D gnd Q0 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@1 CLK Q0 gnd Q1 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@2 CLK Q1 gnd Q2 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@3 CLK Q2 gnd Q3 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@4 CLK Q3 gnd Q4 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@5 CLK Q4 gnd Q5 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@6 CLK Q5 gnd Q6 vdd Memory-IC-Design__D_flipflop
+XD_flipfl@7 CLK Q6 gnd Q7 vdd Memory-IC-Design__D_flipflop
+.ENDS Memory-IC-Design__8Bit_shiftreg
+
+*** SUBCIRCUIT Memory-IC-Design__6T_cell FROM CELL Memory-IC-Design:6T_cell{lay}
+.SUBCKT Memory-IC-Design__6T_cell BIT BITB gnd vdd WL
+Mnmos@0 gnd net@207 net@203 gnd N L=0.4U W=1.4U
+Mnmos@1 net@207 net@203 gnd gnd N L=0.4U W=1.4U
+Mnmos@2 net@203 WL BIT gnd N L=0.4U W=0.8U
+Mnmos@3 BITB WL net@207 gnd N L=0.4U W=0.8U
+Mpmos@0 vdd net@207 net@203 vdd P L=0.4U W=0.6U
+Mpmos@1 net@207 net@203 vdd vdd P L=0.4U W=0.6U
+.ENDS Memory-IC-Design__6T_cell
+
+*** SUBCIRCUIT Memory-IC-Design__256bit_array FROM CELL Memory-IC-Design:256bit_array{lay}
+.SUBCKT Memory-IC-Design__256bit_array BL0 BL1 BL10 BL11 BL12 BL13 BL14 BL15 BL2 BL3 BL4 BL5 BL6 BL7 BL8 BL9 BLB0 BLB1 BLB10 BLB11 BLB12 BLB13 BLB14 BLB15 BLB2 BLB3 BLB4 BLB5 BLB6 BLB7 BLB8 BLB9 gnd vdd WL0 WL1 WL10 WL11 WL12 WL13 WL14 WL15 WL2 WL3 WL4 WL5 WL6 WL7 WL8 WL9
+X_6T_cell@0 BL0 BLB0 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@1 BL1 BLB1 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@2 BL2 BLB2 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@3 BL3 BLB3 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@4 BL4 BLB4 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@5 BL5 BLB5 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@6 BL6 BLB6 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@7 BL7 BLB7 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@8 BL8 BLB8 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@9 BL9 BLB9 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@10 BL10 BLB10 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@11 BL11 BLB11 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@12 BL12 BLB12 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@13 BL13 BLB13 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@14 BL14 BLB14 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@15 BL15 BLB15 gnd vdd WL0 Memory-IC-Design__6T_cell
+X_6T_cell@16 BL0 BLB0 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@17 BL1 BLB1 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@18 BL2 BLB2 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@19 BL3 BLB3 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@20 BL4 BLB4 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@21 BL5 BLB5 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@22 BL6 BLB6 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@23 BL7 BLB7 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@24 BL8 BLB8 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@25 BL9 BLB9 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@26 BL10 BLB10 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@27 BL11 BLB11 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@28 BL12 BLB12 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@29 BL13 BLB13 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@30 BL14 BLB14 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@31 BL15 BLB15 gnd vdd WL1 Memory-IC-Design__6T_cell
+X_6T_cell@32 BL0 BLB0 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@33 BL1 BLB1 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@34 BL2 BLB2 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@35 BL3 BLB3 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@36 BL4 BLB4 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@37 BL5 BLB5 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@38 BL6 BLB6 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@39 BL7 BLB7 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@40 BL8 BLB8 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@41 BL9 BLB9 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@42 BL10 BLB10 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@43 BL11 BLB11 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@44 BL12 BLB12 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@45 BL13 BLB13 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@46 BL14 BLB14 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@47 BL15 BLB15 gnd vdd WL2 Memory-IC-Design__6T_cell
+X_6T_cell@48 BL0 BLB0 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@49 BL1 BLB1 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@50 BL2 BLB2 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@51 BL3 BLB3 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@52 BL4 BLB4 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@53 BL5 BLB5 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@54 BL6 BLB6 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@55 BL7 BLB7 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@56 BL8 BLB8 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@57 BL9 BLB9 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@58 BL10 BLB10 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@59 BL11 BLB11 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@60 BL12 BLB12 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@61 BL13 BLB13 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@62 BL14 BLB14 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@63 BL15 BLB15 gnd vdd WL3 Memory-IC-Design__6T_cell
+X_6T_cell@64 BL0 BLB0 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@65 BL1 BLB1 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@66 BL2 BLB2 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@67 BL3 BLB3 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@68 BL4 BLB4 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@69 BL5 BLB5 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@70 BL6 BLB6 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@71 BL7 BLB7 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@72 BL8 BLB8 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@73 BL9 BLB9 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@74 BL10 BLB10 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@75 BL11 BLB11 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@76 BL12 BLB12 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@77 BL13 BLB13 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@78 BL14 BLB14 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@79 BL15 BLB15 gnd vdd WL4 Memory-IC-Design__6T_cell
+X_6T_cell@80 BL0 BLB0 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@81 BL1 BLB1 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@82 BL2 BLB2 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@83 BL3 BLB3 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@84 BL4 BLB4 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@85 BL5 BLB5 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@86 BL6 BLB6 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@87 BL7 BLB7 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@88 BL8 BLB8 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@89 BL9 BLB9 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@90 BL10 BLB10 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@91 BL11 BLB11 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@92 BL12 BLB12 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@93 BL13 BLB13 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@94 BL14 BLB14 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@95 BL15 BLB15 gnd vdd WL5 Memory-IC-Design__6T_cell
+X_6T_cell@96 BL0 BLB0 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@97 BL1 BLB1 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@98 BL2 BLB2 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@99 BL3 BLB3 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@100 BL4 BLB4 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@101 BL5 BLB5 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@102 BL6 BLB6 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@103 BL7 BLB7 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@104 BL8 BLB8 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@105 BL9 BLB9 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@106 BL10 BLB10 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@107 BL11 BLB11 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@108 BL12 BLB12 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@109 BL13 BLB13 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@110 BL14 BLB14 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@111 BL15 BLB15 gnd vdd WL6 Memory-IC-Design__6T_cell
+X_6T_cell@112 BL0 BLB0 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@113 BL1 BLB1 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@114 BL2 BLB2 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@115 BL3 BLB3 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@116 BL4 BLB4 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@117 BL5 BLB5 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@118 BL6 BLB6 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@119 BL7 BLB7 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@120 BL8 BLB8 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@121 BL9 BLB9 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@122 BL10 BLB10 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@123 BL11 BLB11 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@124 BL12 BLB12 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@125 BL13 BLB13 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@126 BL14 BLB14 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@127 BL15 BLB15 gnd vdd WL7 Memory-IC-Design__6T_cell
+X_6T_cell@128 BL0 BLB0 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@129 BL1 BLB1 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@130 BL2 BLB2 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@131 BL3 BLB3 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@132 BL4 BLB4 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@133 BL5 BLB5 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@134 BL6 BLB6 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@135 BL7 BLB7 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@136 BL8 BLB8 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@137 BL9 BLB9 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@138 BL10 BLB10 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@139 BL11 BLB11 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@140 BL12 BLB12 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@141 BL13 BLB13 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@142 BL14 BLB14 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@143 BL15 BLB15 gnd vdd WL8 Memory-IC-Design__6T_cell
+X_6T_cell@144 BL0 BLB0 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@145 BL1 BLB1 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@146 BL2 BLB2 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@147 BL3 BLB3 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@148 BL4 BLB4 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@149 BL5 BLB5 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@150 BL6 BLB6 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@151 BL7 BLB7 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@152 BL8 BLB8 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@153 BL9 BLB9 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@154 BL10 BLB10 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@155 BL11 BLB11 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@156 BL12 BLB12 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@157 BL13 BLB13 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@158 BL14 BLB14 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@159 BL15 BLB15 gnd vdd WL9 Memory-IC-Design__6T_cell
+X_6T_cell@160 BL0 BLB0 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@161 BL1 BLB1 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@162 BL2 BLB2 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@163 BL3 BLB3 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@164 BL4 BLB4 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@165 BL5 BLB5 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@166 BL6 BLB6 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@167 BL7 BLB7 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@168 BL8 BLB8 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@169 BL9 BLB9 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@170 BL10 BLB10 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@171 BL11 BLB11 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@172 BL12 BLB12 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@173 BL13 BLB13 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@174 BL14 BLB14 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@175 BL15 BLB15 gnd vdd WL10 Memory-IC-Design__6T_cell
+X_6T_cell@176 BL0 BLB0 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@177 BL1 BLB1 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@178 BL2 BLB2 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@179 BL3 BLB3 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@180 BL4 BLB4 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@181 BL5 BLB5 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@182 BL6 BLB6 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@183 BL7 BLB7 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@184 BL8 BLB8 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@185 BL9 BLB9 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@186 BL10 BLB10 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@187 BL11 BLB11 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@188 BL12 BLB12 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@189 BL13 BLB13 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@190 BL14 BLB14 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@191 BL15 BLB15 gnd vdd WL11 Memory-IC-Design__6T_cell
+X_6T_cell@192 BL0 BLB0 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@193 BL1 BLB1 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@194 BL2 BLB2 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@195 BL3 BLB3 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@196 BL4 BLB4 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@197 BL5 BLB5 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@198 BL6 BLB6 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@199 BL7 BLB7 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@200 BL8 BLB8 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@201 BL9 BLB9 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@202 BL10 BLB10 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@203 BL11 BLB11 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@204 BL12 BLB12 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@205 BL13 BLB13 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@206 BL14 BLB14 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@207 BL15 BLB15 gnd vdd WL12 Memory-IC-Design__6T_cell
+X_6T_cell@208 BL0 BLB0 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@209 BL1 BLB1 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@210 BL2 BLB2 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@211 BL3 BLB3 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@212 BL4 BLB4 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@213 BL5 BLB5 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@214 BL6 BLB6 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@215 BL7 BLB7 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@216 BL8 BLB8 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@217 BL9 BLB9 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@218 BL10 BLB10 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@219 BL11 BLB11 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@220 BL12 BLB12 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@221 BL13 BLB13 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@222 BL14 BLB14 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@223 BL15 BLB15 gnd vdd WL13 Memory-IC-Design__6T_cell
+X_6T_cell@224 BL0 BLB0 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@225 BL1 BLB1 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@226 BL2 BLB2 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@227 BL3 BLB3 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@228 BL4 BLB4 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@229 BL5 BLB5 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@230 BL6 BLB6 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@231 BL7 BLB7 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@232 BL8 BLB8 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@233 BL9 BLB9 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@234 BL10 BLB10 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@235 BL11 BLB11 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@236 BL12 BLB12 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@237 BL13 BLB13 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@238 BL14 BLB14 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@239 BL15 BLB15 gnd vdd WL14 Memory-IC-Design__6T_cell
+X_6T_cell@240 BL0 BLB0 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@241 BL1 BLB1 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@242 BL2 BLB2 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@243 BL3 BLB3 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@244 BL4 BLB4 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@245 BL5 BLB5 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@246 BL6 BLB6 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@247 BL7 BLB7 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@248 BL8 BLB8 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@249 BL9 BLB9 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@250 BL10 BLB10 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@251 BL11 BLB11 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@252 BL12 BLB12 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@253 BL13 BLB13 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@254 BL14 BLB14 gnd vdd WL15 Memory-IC-Design__6T_cell
+X_6T_cell@255 BL15 BLB15 gnd vdd WL15 Memory-IC-Design__6T_cell
+.ENDS Memory-IC-Design__256bit_array
+
+*** SUBCIRCUIT Memory-IC-Design__Control_logic FROM CELL Memory-IC-Design:Control_logic{lay}
+.SUBCKT Memory-IC-Design__Control_logic CLK COUNT_7 CTRL gnd PCB READ_EN vdd WL_EN WRITE_EN
+Mnmos@0 net@1 CLK gnd gnd N L=0.4U W=0.8U
+Mnmos@2 net@5 net@1 gnd gnd N L=0.4U W=0.8U
+Mnmos@3 PCB net@5 gnd gnd N L=0.4U W=1.2U
+Mnmos@4 net@13 CTRL gnd gnd N L=0.4U W=0.8U
+Mnmos@5 net@30 net@13 net@31 gnd N L=0.4U W=0.8U
+Mnmos@6 net@31 WL_EN gnd gnd N L=0.4U W=0.8U
+Mnmos@7 WRITE_EN net@30 gnd gnd N L=0.4U W=1.2U
+Mnmos@8 net@42 CTRL net@43 gnd N L=0.4U W=0.8U
+Mnmos@9 net@43 WL_EN gnd gnd N L=0.4U W=0.8U
+Mnmos@10 net@49 net@42 gnd gnd N L=0.4U W=0.8U
+Mnmos@11 net@18 COUNT_7 net@19 gnd N L=0.4U W=0.8U
+Mnmos@12 net@19 net@1 gnd gnd N L=0.4U W=0.8U
+Mnmos@13 WL_EN net@18 gnd gnd N L=0.4U W=1.2U
+Mnmos@14 net@53 net@49 gnd gnd N L=0.4U W=0.8U
+Mnmos@15 net@57 net@53 gnd gnd N L=0.4U W=0.8U
+Mnmos@16 net@61 net@57 gnd gnd N L=0.4U W=0.8U
+Mnmos@17 net@65 net@61 gnd gnd N L=0.4U W=0.8U
+Mnmos@18 net@69 net@65 gnd gnd N L=0.4U W=0.8U
+Mnmos@19 net@73 net@69 gnd gnd N L=0.4U W=0.8U
+Mnmos@20 net@77 net@73 gnd gnd N L=0.4U W=0.8U
+Mnmos@21 READ_EN net@77 gnd gnd N L=0.4U W=1.2U
+Mpmos@0 net@1 CLK vdd vdd P L=0.4U W=1.6U
+Mpmos@2 net@5 net@1 vdd vdd P L=0.4U W=1.6U
+Mpmos@3 PCB net@5 vdd vdd P L=0.4U W=2.4U
+Mpmos@4 net@13 CTRL vdd vdd P L=0.4U W=1.6U
+Mpmos@5 vdd net@13 net@30 vdd P L=0.4U W=0.8U
+Mpmos@6 net@30 WL_EN vdd vdd P L=0.4U W=0.8U
+Mpmos@7 WRITE_EN net@30 vdd vdd P L=0.4U W=2.4U
+Mpmos@8 vdd CTRL net@42 vdd P L=0.4U W=0.8U
+Mpmos@9 net@42 WL_EN vdd vdd P L=0.4U W=0.8U
+Mpmos@10 net@49 net@42 vdd vdd P L=0.4U W=1.6U
+Mpmos@11 vdd COUNT_7 net@18 vdd P L=0.4U W=0.8U
+Mpmos@12 net@18 net@1 vdd vdd P L=0.4U W=0.8U
+Mpmos@13 WL_EN net@18 vdd vdd P L=0.4U W=2.4U
+Mpmos@14 net@53 net@49 vdd vdd P L=0.4U W=1.6U
+Mpmos@15 net@57 net@53 vdd vdd P L=0.4U W=1.6U
+Mpmos@16 net@61 net@57 vdd vdd P L=0.4U W=1.6U
+Mpmos@17 net@65 net@61 vdd vdd P L=0.4U W=1.6U
+Mpmos@18 net@69 net@65 vdd vdd P L=0.4U W=1.6U
+Mpmos@19 net@73 net@69 vdd vdd P L=0.4U W=1.6U
+Mpmos@20 net@77 net@73 vdd vdd P L=0.4U W=1.6U
+Mpmos@21 READ_EN net@77 vdd vdd P L=0.4U W=2.4U
+.ENDS Memory-IC-Design__Control_logic
+
+*** SUBCIRCUIT Memory-IC-Design__Nand FROM CELL Memory-IC-Design:Nand{lay}
+.SUBCKT Memory-IC-Design__Nand A B C D gnd OUT vdd
+Mnmos@0 net@91 A OUT gnd N L=0.4U W=0.8U
+Mnmos@1 net@93 B net@91 gnd N L=0.4U W=0.8U
+Mnmos@2 net@95 C net@93 gnd N L=0.4U W=0.8U
+Mnmos@3 gnd D net@95 gnd N L=0.4U W=0.8U
+Mpmos@0 OUT A vdd vdd P L=0.4U W=0.8U
+Mpmos@1 vdd B OUT vdd P L=0.4U W=0.8U
+Mpmos@2 OUT C vdd vdd P L=0.4U W=0.8U
+Mpmos@3 vdd D OUT vdd P L=0.4U W=0.8U
+.ENDS Memory-IC-Design__Nand
+
+*** SUBCIRCUIT Memory-IC-Design__Not FROM CELL Memory-IC-Design:Not{lay}
+.SUBCKT Memory-IC-Design__Not gnd IN OUT vdd
+Mnmos@0 OUT IN gnd gnd N L=0.4U W=0.8U
+Mpmos@0 OUT IN vdd vdd P L=0.4U W=1.6U
+.ENDS Memory-IC-Design__Not
+
+*** SUBCIRCUIT Memory-IC-Design__Decoder FROM CELL Memory-IC-Design:Decoder{lay}
+.SUBCKT Memory-IC-Design__Decoder A0 A1 A2 A3 gnd OUT0 OUT1 OUT10 OUT11 OUT12 OUT13 OUT14 OUT15 OUT2 OUT3 OUT4 OUT5 OUT6 OUT7 OUT8 OUT9 vdd
+XNand@0 net@652 net@655 net@658 net@661 gnd net@646 vdd Memory-IC-Design__Nand
+XNand@1 net@652 net@655 net@658 A0 gnd net@664 vdd Memory-IC-Design__Nand
+XNand@2 net@652 net@655 A1 net@661 gnd net@682 vdd Memory-IC-Design__Nand
+XNand@3 net@652 net@655 A1 A0 gnd net@700 vdd Memory-IC-Design__Nand
+XNand@4 net@652 A2 net@658 net@661 gnd net@718 vdd Memory-IC-Design__Nand
+XNand@5 net@652 A2 net@658 A0 gnd net@736 vdd Memory-IC-Design__Nand
+XNand@6 net@652 A2 A1 net@661 gnd net@754 vdd Memory-IC-Design__Nand
+XNand@7 net@652 A2 A1 A0 gnd net@772 vdd Memory-IC-Design__Nand
+XNand@8 A3 net@655 net@658 net@661 gnd net@790 vdd Memory-IC-Design__Nand
+XNand@9 A3 net@655 net@658 A0 gnd net@808 vdd Memory-IC-Design__Nand
+XNand@10 A3 net@655 A1 net@661 gnd net@826 vdd Memory-IC-Design__Nand
+XNand@11 A3 net@655 A1 A0 gnd net@844 vdd Memory-IC-Design__Nand
+XNand@12 A3 A2 net@658 net@661 gnd net@862 vdd Memory-IC-Design__Nand
+XNand@13 A3 A2 net@658 A0 gnd net@880 vdd Memory-IC-Design__Nand
+XNand@14 A3 A2 A1 net@661 gnd net@898 vdd Memory-IC-Design__Nand
+XNand@15 A3 A2 A1 A0 gnd net@916 vdd Memory-IC-Design__Nand
+XNot@0 gnd A0 net@661 vdd Memory-IC-Design__Not
+XNot@1 gnd A1 net@658 vdd Memory-IC-Design__Not
+XNot@2 gnd A2 net@655 vdd Memory-IC-Design__Not
+XNot@3 gnd A3 net@652 vdd Memory-IC-Design__Not
+XNot@4 gnd net@646 OUT0 vdd Memory-IC-Design__Not
+XNot@5 gnd net@664 OUT1 vdd Memory-IC-Design__Not
+XNot@6 gnd net@682 OUT2 vdd Memory-IC-Design__Not
+XNot@7 gnd net@700 OUT3 vdd Memory-IC-Design__Not
+XNot@8 gnd net@718 OUT4 vdd Memory-IC-Design__Not
+XNot@9 gnd net@736 OUT5 vdd Memory-IC-Design__Not
+XNot@10 gnd net@754 OUT6 vdd Memory-IC-Design__Not
+XNot@11 gnd net@772 OUT7 vdd Memory-IC-Design__Not
+XNot@12 gnd net@790 OUT8 vdd Memory-IC-Design__Not
+XNot@13 gnd net@808 OUT9 vdd Memory-IC-Design__Not
+XNot@14 gnd net@826 OUT10 vdd Memory-IC-Design__Not
+XNot@15 gnd net@844 OUT11 vdd Memory-IC-Design__Not
+XNot@16 gnd net@862 OUT12 vdd Memory-IC-Design__Not
+XNot@17 gnd net@880 OUT13 vdd Memory-IC-Design__Not
+XNot@18 gnd net@898 OUT14 vdd Memory-IC-Design__Not
+XNot@19 gnd net@916 OUT15 vdd Memory-IC-Design__Not
+.ENDS Memory-IC-Design__Decoder
+
+*** SUBCIRCUIT Memory-IC-Design__Precharge_ckt FROM CELL Memory-IC-Design:Precharge_ckt{lay}
+.SUBCKT Memory-IC-Design__Precharge_ckt BIT BITB PCB vdd
+Mpmos@0 BIT PCB vdd vdd P L=0.4U W=0.8U
+Mpmos@1 vdd PCB BITB vdd P L=0.4U W=0.8U
+Mpmos@2 BITB PCB BIT vdd P L=0.4U W=0.6U
+.ENDS Memory-IC-Design__Precharge_ckt
+
+*** SUBCIRCUIT Memory-IC-Design__Sense_amp FROM CELL Memory-IC-Design:Sense_amp{lay}
+.SUBCKT Memory-IC-Design__Sense_amp BIT BITB gnd READ_EN SENSE vdd
+Mnmos@3 net@58 BIT net@54 gnd N L=0.4U W=0.8U
+Mnmos@4 net@60 BITB net@58 gnd N L=0.4U W=0.8U
+Mnmos@5 gnd READ_EN net@58 gnd N L=0.4U W=0.8U
+Mnmos@6 SENSE net@60 gnd gnd N L=0.4U W=0.6U
+Mpmos@4 vdd net@54 net@54 vdd P L=0.4U W=0.8U
+Mpmos@5 net@60 net@54 vdd vdd P L=0.4U W=0.8U
+Mpmos@6 SENSE net@60 vdd vdd P L=0.4U W=0.8U
+.ENDS Memory-IC-Design__Sense_amp
+
+*** SUBCIRCUIT Memory-IC-Design__TG_bitline FROM CELL Memory-IC-Design:TG_bitline{lay}
+.SUBCKT Memory-IC-Design__TG_bitline BIT_D BIT_U BITB_D BITB_U EN gnd vdd
+Mnmos@0 BIT_D EN BIT_U gnd N L=0.4U W=0.8U
+Mnmos@1 BITB_D EN BITB_U gnd N L=0.4U W=0.8U
+Mnmos@2 net@5 EN gnd gnd N L=0.4U W=0.6U
+Mpmos@0 BIT_D net@5 BIT_U vdd P L=0.4U W=1.6U
+Mpmos@1 BITB_D net@5 BITB_U vdd P L=0.4U W=1.6U
+Mpmos@3 net@5 EN vdd vdd P L=0.4U W=0.6U
+.ENDS Memory-IC-Design__TG_bitline
+
+*** SUBCIRCUIT Memory-IC-Design__WL_driver FROM CELL Memory-IC-Design:WL_driver{lay}
+.SUBCKT Memory-IC-Design__WL_driver EN gnd IN vdd WL
+Mnmos@0 net@1 IN net@5 gnd N L=0.4U W=0.8U
+Mnmos@1 net@5 EN gnd gnd N L=0.4U W=0.8U
+Mnmos@2 WL net@1 gnd gnd N L=0.4U W=0.8U
+Mpmos@0 vdd IN net@1 vdd P L=0.4U W=0.8U
+Mpmos@1 net@1 EN vdd vdd P L=0.4U W=0.8U
+Mpmos@2 WL net@1 vdd vdd P L=0.4U W=1.6U
+.ENDS Memory-IC-Design__WL_driver
+
+*** SUBCIRCUIT Memory-IC-Design__Write_driver FROM CELL Memory-IC-Design:Write_driver{lay}
+.SUBCKT Memory-IC-Design__Write_driver BIT BITB DATA gnd vdd WRITE_EN
+Mnmos@0 net@1 WRITE_EN BIT gnd N L=0.4U W=1.2U
+Mnmos@4 gnd DATA net@1 gnd N L=0.4U W=1.2U
+Mnmos@5 BITB WRITE_EN net@9 gnd N L=0.4U W=1.2U
+Mnmos@6 net@9 net@5 gnd gnd N L=0.4U W=1.2U
+Mnmos@7 net@5 DATA gnd gnd N L=0.4U W=0.6U
+Mpmos@2 net@5 DATA vdd vdd P L=0.4U W=0.8U
+.ENDS Memory-IC-Design__Write_driver
+
+*** SUBCIRCUIT Memory-IC-Design__input_buffer FROM CELL Memory-IC-Design:input_buffer{lay}
+.SUBCKT Memory-IC-Design__input_buffer gnd IN OUT vdd
+Mnmos@5 net@71 IN gnd gnd CMOSN L=0.4U W=0.6U
+Mnmos@6 net@82 net@71 gnd gnd CMOSN L=0.4U W=0.8U
+Mnmos@7 gnd net@82 net@93 gnd CMOSN L=0.4U W=1.6U
+Mnmos@8 OUT net@93 gnd gnd CMOSN L=0.4U W=1.6U
+Mnmos@9 gnd net@93 OUT gnd CMOSN L=0.4U W=1.6U
+Mpmos@5 net@71 IN vdd vdd CMOSP L=0.4U W=0.8U
+Mpmos@6 net@82 net@71 vdd vdd CMOSP L=0.4U W=1.6U
+Mpmos@7 vdd net@82 net@93 vdd CMOSP L=0.4U W=3.2U
+Mpmos@8 OUT net@93 vdd vdd CMOSP L=0.4U W=3.2U
+Mpmos@9 vdd net@93 OUT vdd CMOSP L=0.4U W=3.2U
+.ENDS Memory-IC-Design__input_buffer
+
+*** SUBCIRCUIT Memory-IC-Design__output_buffer FROM CELL Memory-IC-Design:output_buffer{lay}
+.SUBCKT Memory-IC-Design__output_buffer gnd IN OUT vdd
+Mnmos@20 net@279 IN gnd gnd CMOSN L=0.4U W=0.6U
+Mnmos@21 net@290 net@279 gnd gnd CMOSN L=0.4U W=0.8U
+Mnmos@22 net@302 net@290 gnd gnd CMOSN L=0.4U W=1.6U
+Mnmos@23 gnd net@302 net@313 gnd CMOSN L=0.4U W=3.2U
+Mnmos@24 net@316 net@313 gnd gnd CMOSN L=0.4U W=3.2U
+Mnmos@25 gnd net@313 net@316 gnd CMOSN L=0.4U W=3.2U
+Mnmos@26 OUT net@316 gnd gnd CMOSN L=0.4U W=3.2U
+Mnmos@27 gnd net@316 OUT gnd CMOSN L=0.4U W=3.2U
+Mnmos@28 OUT net@316 gnd gnd CMOSN L=0.4U W=3.2U
+Mnmos@29 gnd net@316 OUT gnd CMOSN L=0.4U W=3.2U
+Mpmos@20 net@279 IN vdd vdd CMOSP L=0.4U W=0.8U
+Mpmos@21 net@290 net@279 vdd vdd CMOSP L=0.4U W=1.6U
+Mpmos@22 net@302 net@290 vdd vdd CMOSP L=0.4U W=3.2U
+Mpmos@23 vdd net@302 net@313 vdd CMOSP L=0.4U W=6.4U
+Mpmos@24 net@316 net@313 vdd vdd CMOSP L=0.4U W=6.4U
+Mpmos@25 vdd net@313 net@316 vdd CMOSP L=0.4U W=6.4U
+Mpmos@26 OUT net@316 vdd vdd CMOSP L=0.4U W=6.4U
+Mpmos@27 vdd net@316 OUT vdd CMOSP L=0.4U W=6.4U
+Mpmos@28 OUT net@316 vdd vdd CMOSP L=0.4U W=6.4U
+Mpmos@29 vdd net@316 OUT vdd CMOSP L=0.4U W=6.4U
+.ENDS Memory-IC-Design__output_buffer
+
+*** SUBCIRCUIT Top FROM CELL Memory-IC-Design:Top{lay}
+.SUBCKT Top ADDR_IN CLK CTRL DIN DOUT GBL GBLB gnd vdd
+X_3Bit_cou@0 net@26707 net@26571 gnd vdd Memory-IC-Design__3Bit_counter
+X_8Bit_shi@0 net@26707 net@26731 gnd net@26543 net@26550 net@26557 net@26564 net@26513 net@26520 net@26528 net@26536 vdd Memory-IC-Design__8Bit_shiftreg
+X_256bit_a@0 net@25845 net@25867 net@26065 net@26087 net@26109 net@26131 net@26153 net@26175 net@25889 net@25911 net@25933 net@25955 net@25977 net@25999 net@26021 net@26043 net@25856 net@25878 net@26076 net@26098 net@26120 net@26142 net@26164 net@26186 net@25900 net@25922 net@25944 net@25966 net@25988 net@26010 net@26032 net@26054 gnd vdd net@25641 net@25653 net@25757 net@25769 net@25781 net@25793 net@25805 net@25818 net@25665 net@25677 net@25689 net@25701 net@25709 net@25721 net@25733 net@25745 
++Memory-IC-Design__256bit_array
+XControl_@0 net@26707 net@26571 net@26735 gnd net@26617 net@26593 vdd net@25642 net@26587 Memory-IC-Design__Control_logic
+XD_flipfl@0 net@26607 net@26610 gnd net@26745 vdd Memory-IC-Design__D_flipflop
+XDecoder@0 net@26513 net@26520 net@26528 net@26536 gnd net@25645 net@25657 net@25761 net@25773 net@25785 net@25797 net@25809 net@25822 net@25669 net@25681 net@25693 net@25705 net@25713 net@25725 net@25737 net@25749 vdd Memory-IC-Design__Decoder
+XDecoder@1 net@26543 net@26550 net@26557 net@26564 gnd net@26433 net@26438 net@26483 net@26488 net@26493 net@26498 net@26503 net@26508 net@26443 net@26448 net@26453 net@26458 net@26463 net@26468 net@26473 net@26478 vdd Memory-IC-Design__Decoder
+XNot@0 gnd net@26593 net@26607 vdd Memory-IC-Design__Not
+XPrecharg@0 net@25845 net@25856 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@1 net@25867 net@25878 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@2 net@25889 net@25900 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@3 net@25911 net@25922 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@4 net@25933 net@25944 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@5 net@25955 net@25966 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@6 net@25977 net@25988 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@7 net@25999 net@26010 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@8 net@26021 net@26032 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@9 net@26043 net@26054 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@10 net@26065 net@26076 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@11 net@26087 net@26098 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@12 net@26109 net@26120 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@13 net@26131 net@26142 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@14 net@26153 net@26164 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XPrecharg@15 net@26175 net@26186 net@26617 vdd Memory-IC-Design__Precharge_ckt
+XSense_am@0 GBL GBLB gnd net@26593 net@26610 vdd Memory-IC-Design__Sense_amp
+XTG_bitli@0 GBL net@25845 GBLB net@25856 net@26433 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@1 GBL net@25867 GBLB net@25878 net@26438 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@2 GBL net@25889 GBLB net@25900 net@26443 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@3 GBL net@25911 GBLB net@25922 net@26448 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@4 GBL net@25933 GBLB net@25944 net@26453 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@5 GBL net@25955 GBLB net@25966 net@26458 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@6 GBL net@25977 GBLB net@25988 net@26463 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@7 GBL net@25999 GBLB net@26010 net@26468 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@8 GBL net@26021 GBLB net@26032 net@26473 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@9 GBL net@26043 GBLB net@26054 net@26478 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@10 GBL net@26065 GBLB net@26076 net@26483 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@11 GBL net@26087 GBLB net@26098 net@26488 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@12 GBL net@26109 GBLB net@26120 net@26493 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@13 GBL net@26131 GBLB net@26142 net@26498 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@14 GBL net@26153 GBLB net@26164 net@26503 gnd vdd Memory-IC-Design__TG_bitline
+XTG_bitli@15 GBL net@26175 GBLB net@26186 net@26508 gnd vdd Memory-IC-Design__TG_bitline
+XWL_drive@0 net@25642 gnd net@25645 vdd net@25641 Memory-IC-Design__WL_driver
+XWL_drive@1 net@25642 gnd net@25657 vdd net@25653 Memory-IC-Design__WL_driver
+XWL_drive@2 net@25642 gnd net@25669 vdd net@25665 Memory-IC-Design__WL_driver
+XWL_drive@3 net@25642 gnd net@25681 vdd net@25677 Memory-IC-Design__WL_driver
+XWL_drive@4 net@25642 gnd net@25693 vdd net@25689 Memory-IC-Design__WL_driver
+XWL_drive@5 net@25642 gnd net@25705 vdd net@25701 Memory-IC-Design__WL_driver
+XWL_drive@6 net@25642 gnd net@25713 vdd net@25709 Memory-IC-Design__WL_driver
+XWL_drive@7 net@25642 gnd net@25725 vdd net@25721 Memory-IC-Design__WL_driver
+XWL_drive@8 net@25642 gnd net@25737 vdd net@25733 Memory-IC-Design__WL_driver
+XWL_drive@9 net@25642 gnd net@25749 vdd net@25745 Memory-IC-Design__WL_driver
+XWL_drive@10 net@25642 gnd net@25761 vdd net@25757 Memory-IC-Design__WL_driver
+XWL_drive@11 net@25642 gnd net@25773 vdd net@25769 Memory-IC-Design__WL_driver
+XWL_drive@12 net@25642 gnd net@25785 vdd net@25781 Memory-IC-Design__WL_driver
+XWL_drive@13 net@25642 gnd net@25797 vdd net@25793 Memory-IC-Design__WL_driver
+XWL_drive@14 net@25642 gnd net@25809 vdd net@25805 Memory-IC-Design__WL_driver
+XWL_drive@15 net@25642 gnd net@25822 vdd net@25818 Memory-IC-Design__WL_driver
+XWrite_dr@0 GBL GBLB net@26739 gnd vdd net@26587 Memory-IC-Design__Write_driver
+Xinput_bu@4 gnd ADDR_IN net@26731 vdd Memory-IC-Design__input_buffer
+Xinput_bu@5 gnd CLK net@26707 vdd Memory-IC-Design__input_buffer
+Xinput_bu@6 gnd CTRL net@26735 vdd Memory-IC-Design__input_buffer
+Xinput_bu@7 gnd DIN net@26739 vdd Memory-IC-Design__input_buffer
+Xoutput_b@1 gnd net@26745 DOUT vdd Memory-IC-Design__output_buffer
+.ENDS Top

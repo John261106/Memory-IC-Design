@@ -1,0 +1,37 @@
+*** 6T SRAM Cell Static Noise Margin (SNM) Butterfly Curve & DC VTC
+*** Technology: TSMC 0.18um CMOS, VDD = 1.8V
+*** File: spice/6T_SNM_butterfly.spi
+***      and you can change the quantity to V(Vout_hold) to swap axes!
+
+.include D:/Projects/Memory-IC-Design/lib/tsmc018.lib
+
+VDDsrc vdd 0 DC 1.8
+VGND   gnd 0 DC 0
+Vbit   bit 0 DC 1.8
+
+* Sweep input voltage Vin from 0V to 1.8V
+Vin vin 0 DC 0.9
+
+*** 1. HOLD STATE (WL = 0V) ***
+* Half-cell inverter: Vin -> Vout_hold
+Mnmos_h Vout_hold vin gnd gnd CMOSN L=0.18U W=0.63U
+Mpmos_h vdd       vin Vout_hold vdd CMOSP L=0.18U W=0.27U
+
+*** 2. READ STATE (WL = 1.8V, Bitlines Precharged to 1.8V) ***
+* Half-cell inverter with active access transistor: Vin -> Vout_read
+Mnmos_r Vout_read vin gnd gnd CMOSN L=0.18U W=0.63U
+Mpmos_r vdd       vin Vout_read vdd CMOSP L=0.18U W=0.27U
+Mnmos_a Vout_read vdd bit gnd CMOSN L=0.18U W=0.36U
+
+
+.DC Vin 0 1.8 0.001
+
+
+.MEAS DC Vm_hold FIND V(Vout_hold) WHEN V(Vout_hold)=V(vin)
+.MEAS DC Vm_read FIND V(Vout_read) WHEN V(Vout_read)=V(vin)
+.MEAS DC V_read_bump FIND V(Vout_read) AT=1.8
+.MEAS DC V_IL_hold WHEN D(V(Vout_hold)) = -1 FALL=1
+.MEAS DC V_IH_hold WHEN D(V(Vout_hold)) = -1 RISE=1
+.MEAS DC V_IL_read WHEN D(V(Vout_read)) = -1 FALL=1
+.MEAS DC V_IH_read WHEN D(V(Vout_read)) = -1 RISE=1
+.END

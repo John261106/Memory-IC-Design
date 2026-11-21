@@ -176,14 +176,7 @@ Standard cell implementation ($287\lambda \times 56\lambda$) featuring 20 transi
 
 To accurately reflect real-world silicon packaging, all 5 external signal pins and the 2 power rails are packaged through an equivalent **2-stage RLC ladder network** representing bond wire parasitics and pad capacitance:
 
-```
-PCB_TRACE o----/\/\/\----+----llll----+----/\/\/\----+----llll----+----o CIRCUIT (Die Pad)
-              R1=0.10   |   L1=2.5n  |    R0=0.15   |   L0=2.0n  |
-                        =            =              =            =
-                  C1=700f      C0=1.2p        C1=700f      C0=1.2p
-                        |            |              |            |
-PCB_GND   o-------------+------------+--------------+------------+
-```
+![Package Equivalent Circuit](./images/package_sch.png)
 
 * **Bond Wire Inductance:** $L_{\text{total}} = 4.5\text{ nH}$ ($2.5\text{ nH} + 2.0\text{ nH}$)
 * **Bond Wire Series Resistance:** $R_{\text{total}} = 0.25\,\Omega$ ($0.10\,\Omega + 0.15\,\Omega$)
@@ -275,10 +268,11 @@ The table below summarizes the comprehensive post-package simulation parameters 
 Memory-IC-Design/
 ├── images/                      # Schematic and physical layout PNG captures
 │   ├── 6tcell_sch.png / 6tcell_lay.png
-│   ├── precharge_schpng.png / precharge_lay.png
+│   ├── precharge_sch.png / precharge_lay.png
 │   ├── writedriver_sch.png / writedriver_lay.png
 │   ├── senseamp_sch.png / senseamp_lay.png
 │   ├── dflipflop_sch.png / dflipflop_lay.png
+│   ├── package_sch.png
 │   └── top_lay.png
 ├── lib/
 │   └── tsmc018.lib              # TSMC 0.18 µm BSIM3 MOS SPICE models
